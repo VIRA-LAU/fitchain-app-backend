@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  dev-db:
+    image: mysql:latest
+    ports:
+      - 3305:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_DATABASE: nest
+    networks:
+      - fitchain
+  test-db:
+    image: mysql:8.0
+    ports:
+      - 3304:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_DATABASE: nest
+    networks:
+      - fitchain
+networks:
+    fitchain:
