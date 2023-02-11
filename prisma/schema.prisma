@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Player {
+model User {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -21,8 +21,8 @@ model Player {
 
   firstName String
   lastName String
-  gender String
-  
+
+  gender String?
   height Int?
   weight Int?
   age Int?
@@ -37,7 +37,7 @@ model Player {
 
   joinRequestsSent          RequestToJoin[]
 
-  playerStatistics         HasStatistics[]
+  userStatistics         HasStatistics[]
 
   games Game[]
 
@@ -60,7 +60,7 @@ model Game {
   gameInvitation InvitesFriend[]
 
   court  Court    @relation(fields: [courtId],references: [id],onDelete: Cascade,onUpdate: Cascade)
-  admin Player    @relation(fields: [adminId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  admin  User    @relation(fields: [adminId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 }
 
 model InvitesFriend {
@@ -69,16 +69,16 @@ model InvitesFriend {
   updatedAt DateTime @updatedAt
 
 
-  playerId Int
+  userId Int
   friendId Int
   gameId Int
   status invitationApproval @default(PENDING)
 
-  player Player @relation(name:"sender",fields: [playerId], references: [id], onDelete: Cascade)
-  friend Player @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade)
+  user User @relation(name:"sender",fields: [userId], references: [id], onDelete: Cascade)
+  friend User @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade)
   game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 
-  @@unique([playerId, friendId, gameId])
+  @@unique([userId, friendId, gameId])
 
 }
 
@@ -87,14 +87,14 @@ model AddsFriend {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  playerId Int
+  userId Int
   friendId Int
   status invitationApproval @default(PENDING)
 
-  player Player @relation(name:"sender",fields: [playerId], references: [id], onDelete: Cascade)
-  friend Player @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade)
+  user User @relation(name:"sender",fields: [userId], references: [id], onDelete: Cascade)
+  friend User @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade)
 
-  @@unique([playerId, friendId])
+  @@unique([userId, friendId])
 
 }
 
@@ -103,14 +103,14 @@ model RequestToJoin {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  playerId Int
+  userId Int
   gameId Int
   status invitationApproval @default(PENDING)
 
-  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 
-  @@unique([playerId, gameId])
+  @@unique([userId, gameId])
 
 }
 
@@ -120,13 +120,13 @@ model HasStatistics {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  playerId Int
+  userId Int
   gameId Int
 
-  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 
-  @@unique([playerId, gameId])
+  @@unique([userId, gameId])
 
 }
 

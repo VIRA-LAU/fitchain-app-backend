@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import {players} from './dummydata/players';
+import {users} from './dummydata/users';
 import {games} from './dummydata/games';
 import {courts} from './dummydata/courts';
 import {branches} from './dummydata/branches';
@@ -8,10 +8,10 @@ import {venues} from './dummydata/venues';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create players
-  for (const playerData of players) {
-    await prisma.player.create({
-      data: playerData,
+  // Create users
+  for (const user of users) {
+    await prisma.user.create({
+      data: user,
     });
   }
 

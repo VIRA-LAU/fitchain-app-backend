@@ -1,4 +1,4 @@
-export const players = [
+export const users = [
   {
     email: "khaled.jalloul@hotmail.com",
     phoneNumber: "+96103760943",

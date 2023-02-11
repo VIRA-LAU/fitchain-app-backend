@@ -34,6 +34,9 @@ describe('App e2e', () => {
   describe('Auth', () => {
     const dto :AuthDto = {
       email:'saraalarab2000@gmail.com',
+      phoneNumber:"03027609",
+      firstName:"Sara",
+      lastName:"Al Arab",
       password:'123'
     }
     describe('Signup', () =>{

@@ -1,17 +1,11 @@
-/*
-  Warnings:
-
-  - You are about to drop the `users` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "invitationApproval" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
--- DropTable
-DROP TABLE "users";
+-- CreateEnum
+CREATE TYPE "gameStatus" AS ENUM ('ACTIVE', 'CANCELLED', 'PENDING');
 
 -- CreateTable
-CREATE TABLE "Player" (
+CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -20,14 +14,14 @@ CREATE TABLE "Player" (
     "hash" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
-    "gender" TEXT NOT NULL,
+    "gender" TEXT,
     "height" INTEGER,
     "weight" INTEGER,
     "age" INTEGER,
     "nationality" TEXT,
     "position" TEXT,
 
-    CONSTRAINT "Player_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -36,23 +30,13 @@ CREATE TABLE "Game" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "courtId" INTEGER NOT NULL,
-    "gameDate" TIMESTAMP(3) NOT NULL,
-    "winnerTeam" INTEGER NOT NULL,
+    "adminId" INTEGER NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL,
+    "winnerTeam" TEXT,
     "highlights" TEXT[],
+    "status" "gameStatus" NOT NULL DEFAULT 'PENDING',
 
     CONSTRAINT "Game_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "CreateGame" (
-    "id" SERIAL NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "playerId" INTEGER NOT NULL,
-    "gameId" INTEGER NOT NULL,
-    "status" "invitationApproval" NOT NULL DEFAULT 'PENDING',
-
-    CONSTRAINT "CreateGame_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -60,7 +44,7 @@ CREATE TABLE "InvitesFriend" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "playerId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
     "friendId" INTEGER NOT NULL,
     "gameId" INTEGER NOT NULL,
     "status" "invitationApproval" NOT NULL DEFAULT 'PENDING',
@@ -73,7 +57,7 @@ CREATE TABLE "AddsFriend" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "playerId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
     "friendId" INTEGER NOT NULL,
     "status" "invitationApproval" NOT NULL DEFAULT 'PENDING',
 
@@ -85,7 +69,7 @@ CREATE TABLE "RequestToJoin" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "playerId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
     "gameId" INTEGER NOT NULL,
     "status" "invitationApproval" NOT NULL DEFAULT 'PENDING',
 
@@ -97,7 +81,7 @@ CREATE TABLE "HasStatistics" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "playerId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
     "gameId" INTEGER NOT NULL,
 
     CONSTRAINT "HasStatistics_pkey" PRIMARY KEY ("id")
@@ -132,32 +116,29 @@ CREATE TABLE "Venue" (
     "managerfirstName" TEXT,
     "managerLastName" TEXT,
     "managerEmail" TEXT NOT NULL,
-    "managerPhoneNumber" INTEGER NOT NULL,
+    "managerPhoneNumber" TEXT NOT NULL,
     "photoDirectoryURL" TEXT,
 
     CONSTRAINT "Venue_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Player_email_key" ON "Player"("email");
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Player_phoneNumber_key" ON "Player"("phoneNumber");
+CREATE UNIQUE INDEX "User_phoneNumber_key" ON "User"("phoneNumber");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "CreateGame_playerId_gameId_key" ON "CreateGame"("playerId", "gameId");
+CREATE UNIQUE INDEX "InvitesFriend_userId_friendId_gameId_key" ON "InvitesFriend"("userId", "friendId", "gameId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "InvitesFriend_playerId_friendId_gameId_key" ON "InvitesFriend"("playerId", "friendId", "gameId");
+CREATE UNIQUE INDEX "AddsFriend_userId_friendId_key" ON "AddsFriend"("userId", "friendId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "AddsFriend_playerId_friendId_key" ON "AddsFriend"("playerId", "friendId");
+CREATE UNIQUE INDEX "RequestToJoin_userId_gameId_key" ON "RequestToJoin"("userId", "gameId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "RequestToJoin_playerId_gameId_key" ON "RequestToJoin"("playerId", "gameId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "HasStatistics_playerId_gameId_key" ON "HasStatistics"("playerId", "gameId");
+CREATE UNIQUE INDEX "HasStatistics_userId_gameId_key" ON "HasStatistics"("userId", "gameId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Venue_managerEmail_key" ON "Venue"("managerEmail");
@@ -169,34 +150,31 @@ CREATE UNIQUE INDEX "Venue_managerPhoneNumber_key" ON "Venue"("managerPhoneNumbe
 ALTER TABLE "Game" ADD CONSTRAINT "Game_courtId_fkey" FOREIGN KEY ("courtId") REFERENCES "Court"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CreateGame" ADD CONSTRAINT "CreateGame_playerId_fkey" FOREIGN KEY ("playerId") REFERENCES "Player"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Game" ADD CONSTRAINT "Game_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CreateGame" ADD CONSTRAINT "CreateGame_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "Game"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "InvitesFriend" ADD CONSTRAINT "InvitesFriend_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "InvitesFriend" ADD CONSTRAINT "InvitesFriend_playerId_fkey" FOREIGN KEY ("playerId") REFERENCES "Player"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "InvitesFriend" ADD CONSTRAINT "InvitesFriend_friendId_fkey" FOREIGN KEY ("friendId") REFERENCES "Player"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "InvitesFriend" ADD CONSTRAINT "InvitesFriend_friendId_fkey" FOREIGN KEY ("friendId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "InvitesFriend" ADD CONSTRAINT "InvitesFriend_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "Game"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AddsFriend" ADD CONSTRAINT "AddsFriend_playerId_fkey" FOREIGN KEY ("playerId") REFERENCES "Player"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AddsFriend" ADD CONSTRAINT "AddsFriend_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AddsFriend" ADD CONSTRAINT "AddsFriend_friendId_fkey" FOREIGN KEY ("friendId") REFERENCES "Player"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AddsFriend" ADD CONSTRAINT "AddsFriend_friendId_fkey" FOREIGN KEY ("friendId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RequestToJoin" ADD CONSTRAINT "RequestToJoin_playerId_fkey" FOREIGN KEY ("playerId") REFERENCES "Player"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "RequestToJoin" ADD CONSTRAINT "RequestToJoin_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "RequestToJoin" ADD CONSTRAINT "RequestToJoin_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "Game"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "HasStatistics" ADD CONSTRAINT "HasStatistics_playerId_fkey" FOREIGN KEY ("playerId") REFERENCES "Player"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "HasStatistics" ADD CONSTRAINT "HasStatistics_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "HasStatistics" ADD CONSTRAINT "HasStatistics_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "Game"("id") ON DELETE CASCADE ON UPDATE CASCADE;
