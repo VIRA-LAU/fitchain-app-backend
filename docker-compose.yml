@@ -1,21 +1,23 @@
 version: '3.8'
 services:
   dev-db:
-    image: mysql:latest
+    image: postgres:13
     ports:
-      - 3305:3306
+      - 5434:5432
     environment:
-      MYSQL_ROOT_PASSWORD: 123
-      MYSQL_DATABASE: nest
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: nest
     networks:
       - fitchain
   test-db:
-    image: mysql:8.0
+    image: postgres:13
     ports:
-      - 3304:3306
+      - 5435:5432
     environment:
-      MYSQL_ROOT_PASSWORD: 123
-      MYSQL_DATABASE: nest
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: nest
     networks:
       - fitchain
 networks:

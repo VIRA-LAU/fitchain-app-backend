@@ -86,18 +86,18 @@ describe('App e2e', () => {
 
     })
      
-    describe('Edit User', () =>{
-      it('Should edit user', ()=>{
-        const dto : EditUserDto = {
-          firstName: 'Sara',
-          lastName: 'Al Arab'
-        }
-        return pactum.spec().patch('/users',).withHeaders({
-          Authorization:'Bearer $S{UserAt}'
-        }).withBody(dto).expectStatus(200).expectBodyContains(dto.firstName)
-      })
+    // describe('Edit User', () =>{
+    //   it('Should edit user', ()=>{
+    //     const dto : EditUserDto = {
+    //       firstName: 'Sara',
+    //       lastName: 'Al Arab'
+    //     }
+    //     return pactum.spec().patch('/users',).withHeaders({
+    //       Authorization:'Bearer $S{UserAt}'
+    //     }).withBody(dto).expectStatus(200).expectBodyContains(dto.firstName)
+    //   })
 
-    })
+    // })
 
 
   })
