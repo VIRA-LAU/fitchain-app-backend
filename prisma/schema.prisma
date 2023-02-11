@@ -10,17 +10,176 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Player {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   email String @unique
+  phoneNumber String @unique
   hash String
 
-  firstName String?
-  lastName String?
+  firstName String
+  lastName String
+  gender String
+  
+  height Int?
+  weight Int?
+  age Int?
+  nationality String?
+  position String?
 
-  @@map("users")
+  invitationsSent           InvitesFriend[]  @relation("sender")
+  invitationsReceived       InvitesFriend[]  @relation("receiver")
 
+  friendRequestsSent        AddsFriend[]  @relation("sender")
+  friendRequestsReceived    AddsFriend[]  @relation("receiver")
+
+  joinRequestsSent          RequestToJoin[]
+
+  playerStatistics         HasStatistics[]
+
+  games Game[]
+
+}
+
+model Game {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courtId Int
+  adminId Int
+  date DateTime
+  winnerTeam String?
+  highlights String[]
+  status gameStatus @default(PENDING)
+
+  gamestatistics HasStatistics[]
+  gameRequests  RequestToJoin[]
+  gameInvitation InvitesFriend[]
+
+  court  Court    @relation(fields: [courtId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  admin Player    @relation(fields: [adminId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+}
+
+model InvitesFriend {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  playerId Int
+  friendId Int
+  gameId Int
+  status invitationApproval @default(PENDING)
+
+  player Player @relation(name:"sender",fields: [playerId], references: [id], onDelete: Cascade)
+  friend Player @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade)
+  game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+
+  @@unique([playerId, friendId, gameId])
+
+}
+
+model AddsFriend {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  playerId Int
+  friendId Int
+  status invitationApproval @default(PENDING)
+
+  player Player @relation(name:"sender",fields: [playerId], references: [id], onDelete: Cascade)
+  friend Player @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, friendId])
+
+}
+
+model RequestToJoin {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  playerId Int
+  gameId Int
+  status invitationApproval @default(PENDING)
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+
+  @@unique([playerId, gameId])
+
+}
+
+
+model HasStatistics {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  playerId Int
+  gameId Int
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+
+  @@unique([playerId, gameId])
+
+}
+
+
+
+model Court {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  courtType String
+  nbOfPlayers Int
+  branchId Int
+
+  games   Game[]
+  branch  Branch  @relation(fields: [branchId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+
+
+
+
+}
+
+model Branch {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  location String
+  venueId Int
+  courts Court[]
+  venue  Venue    @relation(fields: [venueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+
+
+}
+
+model Venue {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  name String
+  managerfirstName String?
+  managerLastName String?
+  managerEmail String @unique
+  managerPhoneNumber String @unique
+  photoDirectoryURL String?
+  branches Branch[]
+
+
+}
+
+enum invitationApproval {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum gameStatus {
+  ACTIVE
+  CANCELLED
+  PENDING
 }
