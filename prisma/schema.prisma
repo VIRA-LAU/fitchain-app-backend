@@ -16,11 +16,11 @@ model User {
   updatedAt DateTime @updatedAt
 
   email String @unique
-  phoneNumber String @unique
+  phoneNumber String? @unique
   hash String
 
-  firstName String
-  lastName String
+  firstName String?
+  lastName String?
 
   gender String?
   height Int?
