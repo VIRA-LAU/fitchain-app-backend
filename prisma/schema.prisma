@@ -29,11 +29,11 @@ model User {
   nationality String?
   position String?
 
-  invitationsSent           InvitesFriend[]  @relation("sender")
-  invitationsReceived       InvitesFriend[]  @relation("receiver")
+  invitationsSent           InviteToGame[]  @relation("sender")
+  invitationsReceived       InviteToGame[]  @relation("receiver")
 
-  friendRequestsSent        AddsFriend[]  @relation("sender")
-  friendRequestsReceived    AddsFriend[]  @relation("receiver")
+  friendRequestsSent        AddFriend[]  @relation("sender")
+  friendRequestsReceived    AddFriend[]  @relation("receiver")
 
   joinRequestsSent          RequestToJoin[]
 
@@ -57,13 +57,13 @@ model Game {
 
   gamestatistics HasStatistics[]
   gameRequests  RequestToJoin[]
-  gameInvitation InvitesFriend[]
+  gameInvitation InviteToGame[]
 
   court  Court    @relation(fields: [courtId],references: [id],onDelete: Cascade,onUpdate: Cascade)
   admin  User    @relation(fields: [adminId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 }
 
-model InvitesFriend {
+model InviteToGame {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -82,7 +82,7 @@ model InvitesFriend {
 
 }
 
-model AddsFriend {
+model AddFriend {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
