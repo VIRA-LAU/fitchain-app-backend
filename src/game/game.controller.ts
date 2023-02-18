@@ -22,6 +22,7 @@ export class GameController {
 
     @Post("bookings")
     createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){
+        console.log("create booking")
         return this.gameService.createBooking(userId,dto)
     }
 

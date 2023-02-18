@@ -4,6 +4,8 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { AppModule } from '../src/app.module'
 import * as pactum from 'pactum';
 import { AuthSigninDto, AuthSignupDto } from '../src/auth/dto';
+import { createBookingDto, editBookingDto } from 'src/game/dto';
+import { gameStatus } from '@prisma/client';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -123,74 +125,77 @@ describe('App e2e', () => {
   describe('Bookings', () =>{
 
     describe('get empty bookings', () =>{
-      it('Should get bookmarks', ()=>{
+      it('Should get bookings', ()=>{
         return pactum.spec().get('/games/bookings',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).expectBody([])
+        }).expectStatus(200).expectBody([]).inspect()
+
       })
+
 
     }) 
 
-    // describe('create bookmark', () =>{
-    //   const dto : CreateBookmarkDto = {
-    //     title:'First Bookmark',
-    //     link:'https://www.youtube.com/watch?v=GHTA143_b-s'
+    describe('create booking', () =>{
+      const dto : createBookingDto = {
+        courtId:1,
+        date:new Date('2019-05-14T11:01:58.135Z')
 
-    //   }
-    //   it('Should create bookmark', ()=>{
-    //     return pactum.spec().post('/bookmarks',).withHeaders({
-    //       Authorization:'Bearer $S{UserAt}'
-    //     }).withBody(dto).expectStatus(201).stores('bookmarkId','id')
-    //   })
+      }
 
-    // })
-    // describe('get bookmarks', () =>{
-    //   it('Should get bookmarks', ()=>{
-    //     return pactum.spec().get('/bookmarks',).withHeaders({
-    //       Authorization:'Bearer $S{UserAt}'
-    //     }).expectStatus(200).expectJsonLength(1)
-    //   })
+      it('Should create booking', ()=>{
+        return pactum.spec().post('/games/bookings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(201).stores('bookingId','id')
+      })
 
+    })
 
-    // })
-    // describe('get bookmark by id', () =>{
-    //   it('Should get bookmark by Id', ()=>{
-    //     return pactum.spec().get('/bookmarks/{id}',).withPathParams('id','$S{bookmarkId}').withHeaders({
-    //       Authorization:'Bearer $S{UserAt}'
-    //     }).expectStatus(200).expectBodyContains('$S{bookmarkId}')
-    //   })
+    describe('edit booking by id', () =>{
+      const dto : editBookingDto = {
+        status: gameStatus.APPROVED
+      }
+      it('Should edit booking by Id', ()=>{
+        return pactum.spec().patch('/games/bookings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(200)
+      })
 
-    // })
-    // describe('edit bookmark by id', () =>{
-    //   const dto : EditBookmarkDto = {
-    //     description:  'nestJS crash course'
-    //   }
-    //   it('Should edit bookmark by Id', ()=>{
-    //     return pactum.spec().patch('/bookmarks/{id}',).withPathParams('id','$S{bookmarkId}').withHeaders({
-    //       Authorization:'Bearer $S{UserAt}'
-    //     }).withBody(dto).expectStatus(200)
-    //   })
+    })
 
-    // })
-    // describe('delete bookmark by id', () =>{
-    //   it('Should delete bookmark by Id', ()=>{
-    //     return pactum.spec().delete('/bookmarks/{id}',).withPathParams('id','$S{bookmarkId}').withHeaders({
-    //       Authorization:'Bearer $S{UserAt}'
-    //     }).expectStatus(204)
-    //   })
-
-    //   it('Should get bookmarks', ()=>{
-    //     return pactum.spec().get('/bookmarks',).withHeaders({
-    //       Authorization:'Bearer $S{UserAt}'
-    //     }).expectStatus(200).expectJsonLength(0)
-    //   })
-
-    // })
+    describe('get bookings', () =>{
+      it('Should get bookings', ()=>{
+        return pactum.spec().get('/games/bookings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(1).inspect()
+      })
 
 
+    })
+    describe('get booking by id', () =>{
+      it('Should get booking by Id', ()=>{
+        return pactum.spec().get('/games/bookings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBodyContains('$S{bookingId}')
+      })
+
+    })
+
+    describe('delete booking by id', () =>{
+      it('Should delete booking by Id', ()=>{
+        return pactum.spec().delete('/games/bookings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(204)
+      })
+
+      it('Should get bookings', ()=>{
+        return pactum.spec().get('/games/bookings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(0)
+      })
+
+    })
 
   })
 
 
- 
 })

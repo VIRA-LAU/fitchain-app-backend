@@ -12,7 +12,7 @@ export class GameService {
         return this.prisma.game.findMany({
             where:{
                 adminId: userId,
-                status: "ACCEPTED" as gameStatus
+                status: gameStatus.APPROVED
             }
         })
     }
