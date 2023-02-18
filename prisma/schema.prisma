@@ -179,7 +179,9 @@ enum invitationApproval {
 }
 
 enum gameStatus {
+  PENDING
+  APPROVED
+  REJECTED
   ACTIVE
   CANCELLED
-  PENDING
 }
