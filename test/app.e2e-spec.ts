@@ -7,6 +7,7 @@ import { AuthSigninDto, AuthSignupDto } from '../src/auth/dto';
 import { createBookingDto, editBookingDto } from 'src/game/dto';
 import { gameStatus } from '@prisma/client';
 
+
 describe('App e2e', () => {
   let app: INestApplication;
   let prisma: PrismaService;
