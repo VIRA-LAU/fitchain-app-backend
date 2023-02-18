@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { gameStatus } from '@prisma/client';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { createBookingDto } from './dto/create-booking.dto';
 import { editBookingDto } from './dto/edit-booking.dto';
 

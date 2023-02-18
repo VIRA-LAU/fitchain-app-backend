@@ -3,8 +3,7 @@ import {Test} from '@nestjs/testing'
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AppModule } from '../src/app.module'
 import * as pactum from 'pactum';
-import { AuthDto } from '../src/auth/dto';
-import { EditUserDto } from 'src/user/dto';
+import { AuthSigninDto, AuthSignupDto } from '../src/auth/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -32,20 +31,36 @@ describe('App e2e', () => {
   })
 
   describe('Auth', () => {
-    const dto :AuthDto = {
+    const dto_signup :AuthSignupDto = {
       email:'saraalarab2000@gmail.com',
       phoneNumber:"03027609",
       firstName:"Sara",
       lastName:"Al Arab",
       password:'123'
     }
+    const dto_signin :AuthSigninDto = {
+      email:'saraalarab2000@gmail.com',
+      password:'123'
+    }
     describe('Signup', () =>{
       it('Should throw error if email is empty ', ()=>{
-        return pactum.spec().post('/auth/signup',).withBody({password: dto.password}).expectStatus(400)
+        return pactum.spec().post('/auth/signup',).withBody({password: dto_signup.password, phoneNumber: dto_signup.phoneNumber, firstName: dto_signup.firstName, lastName: dto_signup.lastName}).expectStatus(400)
       })
 
       it('Should throw error if password is empty ', ()=>{
-        return pactum.spec().post('/auth/signup',).withBody({email: dto.email}).expectStatus(400)
+        return pactum.spec().post('/auth/signup',).withBody({email: dto_signup.email, phoneNumber: dto_signup.phoneNumber, firstName: dto_signup.firstName, lastName: dto_signup.lastName}).expectStatus(400)
+      })
+
+      it('Should throw error if phoneNumber is empty ', ()=>{
+        return pactum.spec().post('/auth/signup',).withBody({email: dto_signup.email,password: dto_signup.password, firstName: dto_signup.firstName, lastName: dto_signup.lastName}).expectStatus(400)
+      })
+
+      it('Should throw error if firstName is empty ', ()=>{
+        return pactum.spec().post('/auth/signup',).withBody({email: dto_signup.email,password: dto_signup.password, phoneNumber: dto_signup.phoneNumber,  lastName: dto_signup.lastName}).expectStatus(400)
+      })
+
+      it('Should throw error if lastName is empty ', ()=>{
+        return pactum.spec().post('/auth/signup',).withBody({email: dto_signup.email,password: dto_signup.password, phoneNumber: dto_signup.phoneNumber,  firstName: dto_signup.firstName}).expectStatus(400)
       })
 
       it('Should throw error if body is empty ', ()=>{
@@ -53,18 +68,18 @@ describe('App e2e', () => {
       })
 
       it('Should signup', ()=>{
-        return pactum.spec().post('/auth/signup',).withBody(dto).expectStatus(201)
+        return pactum.spec().post('/auth/signup',).withBody(dto_signup).expectStatus(201)
       })
     })
 
     describe('Signin', () =>{
 
       it('Should throw error if email is empty ', ()=>{
-        return pactum.spec().post('/auth/signin',).withBody({password: dto.password}).expectStatus(400)
+        return pactum.spec().post('/auth/signin',).withBody({password: dto_signin.password}).expectStatus(400)
       })
 
       it('Should throw error if password is empty ', ()=>{
-        return pactum.spec().post('/auth/signin',).withBody({email: dto.email}).expectStatus(400)
+        return pactum.spec().post('/auth/signin',).withBody({email: dto_signin.email}).expectStatus(400)
       })
 
       it('Should throw error if body is empty ', ()=>{
@@ -72,7 +87,7 @@ describe('App e2e', () => {
       })
 
       it('Should signin', ()=>{
-        return pactum.spec().post('/auth/signin',).withBody(dto).expectStatus(200).stores('UserAt','access_token')
+        return pactum.spec().post('/auth/signin',).withBody(dto_signin).expectStatus(200).stores('UserAt','access_token')
       })
 
     })
@@ -104,5 +119,78 @@ describe('App e2e', () => {
 
 
   })
+
+  describe('Bookings', () =>{
+
+    describe('get empty bookings', () =>{
+      it('Should get bookmarks', ()=>{
+        return pactum.spec().get('/games/bookings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBody([])
+      })
+
+    }) 
+
+    // describe('create bookmark', () =>{
+    //   const dto : CreateBookmarkDto = {
+    //     title:'First Bookmark',
+    //     link:'https://www.youtube.com/watch?v=GHTA143_b-s'
+
+    //   }
+    //   it('Should create bookmark', ()=>{
+    //     return pactum.spec().post('/bookmarks',).withHeaders({
+    //       Authorization:'Bearer $S{UserAt}'
+    //     }).withBody(dto).expectStatus(201).stores('bookmarkId','id')
+    //   })
+
+    // })
+    // describe('get bookmarks', () =>{
+    //   it('Should get bookmarks', ()=>{
+    //     return pactum.spec().get('/bookmarks',).withHeaders({
+    //       Authorization:'Bearer $S{UserAt}'
+    //     }).expectStatus(200).expectJsonLength(1)
+    //   })
+
+
+    // })
+    // describe('get bookmark by id', () =>{
+    //   it('Should get bookmark by Id', ()=>{
+    //     return pactum.spec().get('/bookmarks/{id}',).withPathParams('id','$S{bookmarkId}').withHeaders({
+    //       Authorization:'Bearer $S{UserAt}'
+    //     }).expectStatus(200).expectBodyContains('$S{bookmarkId}')
+    //   })
+
+    // })
+    // describe('edit bookmark by id', () =>{
+    //   const dto : EditBookmarkDto = {
+    //     description:  'nestJS crash course'
+    //   }
+    //   it('Should edit bookmark by Id', ()=>{
+    //     return pactum.spec().patch('/bookmarks/{id}',).withPathParams('id','$S{bookmarkId}').withHeaders({
+    //       Authorization:'Bearer $S{UserAt}'
+    //     }).withBody(dto).expectStatus(200)
+    //   })
+
+    // })
+    // describe('delete bookmark by id', () =>{
+    //   it('Should delete bookmark by Id', ()=>{
+    //     return pactum.spec().delete('/bookmarks/{id}',).withPathParams('id','$S{bookmarkId}').withHeaders({
+    //       Authorization:'Bearer $S{UserAt}'
+    //     }).expectStatus(204)
+    //   })
+
+    //   it('Should get bookmarks', ()=>{
+    //     return pactum.spec().get('/bookmarks',).withHeaders({
+    //       Authorization:'Bearer $S{UserAt}'
+    //     }).expectStatus(200).expectJsonLength(0)
+    //   })
+
+    // })
+
+
+
+  })
+
+
  
 })
