@@ -15,25 +15,25 @@ export class GameController {
         return this.gameService.getBookings(userId)
     }
 
-    @Get(':id')
+    @Get('bookings/:id')
     getBookingById(@GetUser('id') userId: number,  @Param('id', ParseIntPipe) bookingId:number ){
         return this.gameService.getBookingById(userId, bookingId)
     }
 
-    @Post()
-    createBookmark(@GetUser('id') userId:number, @Body() dto:createBookingDto){
+    @Post("bookings")
+    createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){
         return this.gameService.createBooking(userId,dto)
     }
 
-    @Patch(':id')
-    editBookmarkById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) bookmarkId: number,@Body() dto:editBookingDto){
-        return this.gameService.editBookingById(userId,bookmarkId,dto)
+    @Patch('bookings/:id')
+    editBookingById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) bookingId: number,@Body() dto:editBookingDto){
+        return this.gameService.editBookingById(userId,bookingId,dto)
     }
 
     @HttpCode(HttpStatus.NO_CONTENT)
-    @Delete(':id')
-    deleteBookmarkById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) bookmarkId:number){
-        return this.gameService.deleteBookingById(userId,bookmarkId)
+    @Delete('bookings/:id')
+    deleteBookingById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) bookingId:number){
+        return this.gameService.deleteBookingById(userId,bookingId)
         
     }
 

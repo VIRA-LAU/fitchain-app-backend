@@ -1,3 +1,4 @@
+import { gameStatus } from "@prisma/client"
 import { IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
 
 export class editBookingDto{
@@ -13,5 +14,8 @@ export class editBookingDto{
     @IsDate() 
     @IsOptional( )
     date?:Date
+
+    @IsOptional( )
+    status?: gameStatus
 
 }
