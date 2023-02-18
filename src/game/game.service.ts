@@ -13,7 +13,8 @@ export class GameService {
             where:{
                 adminId: userId,
                 status: gameStatus.APPROVED
-            }
+            },
+            take:7
         })
     }
 
