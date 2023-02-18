@@ -15,9 +15,8 @@ export class EditInvitationDto{
     @IsNotEmpty()
     gameId: number
 
-    @IsNotEmpty()
     @IsOptional()
-    status: invitationApproval;
+    status?: invitationApproval;
 
     
 }
