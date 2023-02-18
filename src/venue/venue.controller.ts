@@ -1,5 +1,4 @@
 import { Controller, Get } from '@nestjs/common';
-import { GetVenues } from 'src/auth/decorator';
 import { VenueService } from './venue.service';
 
 @Controller('venues')

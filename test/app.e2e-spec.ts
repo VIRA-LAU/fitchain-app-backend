@@ -4,7 +4,6 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { AppModule } from '../src/app.module'
 import * as pactum from 'pactum';
 import { AuthSigninDto, AuthSignupDto } from '../src/auth/dto';
-import { EditUserDto } from 'src/user/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
