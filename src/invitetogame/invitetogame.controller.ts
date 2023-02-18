@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
-import { GetUser } from 'src/auth/decorator';
-import { JwtGaurd } from 'src/auth/gaurd';
+import { GetUser } from '../auth/decorator';
+import { JwtGaurd } from '../auth/gaurd';
 import { CreateInvitationDto } from './dto';
 import { EditInvitationDto } from './dto/edit-invitation.dto';
 import { InvitetogameService } from './invitetogame.service';
