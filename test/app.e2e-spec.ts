@@ -4,6 +4,7 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { AppModule } from '../src/app.module'
 import * as pactum from 'pactum';
 import { AuthSigninDto, AuthSignupDto } from '../src/auth/dto';
+import { EditVenueDto } from 'src/venue/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -113,6 +114,42 @@ describe('App e2e', () => {
     //     return pactum.spec().patch('/users',).withHeaders({
     //       Authorization:'Bearer $S{UserAt}'
     //     }).withBody(dto).expectStatus(200).expectBodyContains(dto.firstName)
+    //   })
+
+    // })
+
+
+  })
+
+  describe('Venue', () => {
+
+    describe('Get venues', () =>{
+      it('Should get venues', ()=>{
+      return pactum.spec().get('/venues',).withHeaders({
+        Authorization:'Bearer $S{UserAt}'
+      }).expectStatus(200)
+    })
+
+    })
+
+    // describe('Get venue by id', () =>{
+    //   it('Should get venue by id', ()=>{
+    //     return pactum.spec().get('/venues/{id}',).withPathParams('id','1').withHeaders({
+    //       Authorization:'Bearer $S{UserAt}'
+    //     }).expectStatus(200)
+    //   })
+
+    // })
+     
+    // describe('Edit Venue', () =>{
+    //   it('Should edit venue', ()=>{
+    //     const dto : EditVenueDto = {
+    //       managerFirstName: 'Sara',
+    //       managerLastName: 'Al Arab'
+    //     }
+    //     return pactum.spec().patch('/venues',).withHeaders({
+    //       Authorization:'Bearer $S{UserAt}'
+    //     }).withBody(dto).expectStatus(200).expectBodyContains(dto.managerFirstName)
     //   })
 
     // })

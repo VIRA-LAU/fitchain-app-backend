@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 
- export const GetVenues = createParamDecorator(
+ export const GetVenue = createParamDecorator(
     ( data: string | undefined, ctx: ExecutionContext)=>{
         const request = ctx.switchToHttp().getRequest();
         if(data){
