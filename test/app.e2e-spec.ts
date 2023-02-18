@@ -3,7 +3,7 @@ import {Test} from '@nestjs/testing'
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AppModule } from '../src/app.module'
 import * as pactum from 'pactum';
-import { AuthDto } from '../src/auth/dto';
+import { AuthSigninDto, AuthSignupDto } from '../src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
 
 describe('App e2e', () => {
@@ -32,20 +32,36 @@ describe('App e2e', () => {
   })
 
   describe('Auth', () => {
-    const dto :AuthDto = {
+    const dto_signup :AuthSignupDto = {
       email:'saraalarab2000@gmail.com',
       phoneNumber:"03027609",
       firstName:"Sara",
       lastName:"Al Arab",
       password:'123'
     }
+    const dto_signin :AuthSigninDto = {
+      email:'saraalarab2000@gmail.com',
+      password:'123'
+    }
     describe('Signup', () =>{
       it('Should throw error if email is empty ', ()=>{
-        return pactum.spec().post('/auth/signup',).withBody({password: dto.password}).expectStatus(400)
+        return pactum.spec().post('/auth/signup',).withBody({password: dto_signup.password, phoneNumber: dto_signup.phoneNumber, firstName: dto_signup.firstName, lastName: dto_signup.lastName}).expectStatus(400)
       })
 
       it('Should throw error if password is empty ', ()=>{
-        return pactum.spec().post('/auth/signup',).withBody({email: dto.email}).expectStatus(400)
+        return pactum.spec().post('/auth/signup',).withBody({email: dto_signup.email, phoneNumber: dto_signup.phoneNumber, firstName: dto_signup.firstName, lastName: dto_signup.lastName}).expectStatus(400)
+      })
+
+      it('Should throw error if phoneNumber is empty ', ()=>{
+        return pactum.spec().post('/auth/signup',).withBody({email: dto_signup.email,password: dto_signup.password, firstName: dto_signup.firstName, lastName: dto_signup.lastName}).expectStatus(400)
+      })
+
+      it('Should throw error if firstName is empty ', ()=>{
+        return pactum.spec().post('/auth/signup',).withBody({email: dto_signup.email,password: dto_signup.password, phoneNumber: dto_signup.phoneNumber,  lastName: dto_signup.lastName}).expectStatus(400)
+      })
+
+      it('Should throw error if lastName is empty ', ()=>{
+        return pactum.spec().post('/auth/signup',).withBody({email: dto_signup.email,password: dto_signup.password, phoneNumber: dto_signup.phoneNumber,  firstName: dto_signup.firstName}).expectStatus(400)
       })
 
       it('Should throw error if body is empty ', ()=>{
@@ -53,18 +69,18 @@ describe('App e2e', () => {
       })
 
       it('Should signup', ()=>{
-        return pactum.spec().post('/auth/signup',).withBody(dto).expectStatus(201)
+        return pactum.spec().post('/auth/signup',).withBody(dto_signup).expectStatus(201)
       })
     })
 
     describe('Signin', () =>{
 
       it('Should throw error if email is empty ', ()=>{
-        return pactum.spec().post('/auth/signin',).withBody({password: dto.password}).expectStatus(400)
+        return pactum.spec().post('/auth/signin',).withBody({password: dto_signin.password}).expectStatus(400)
       })
 
       it('Should throw error if password is empty ', ()=>{
-        return pactum.spec().post('/auth/signin',).withBody({email: dto.email}).expectStatus(400)
+        return pactum.spec().post('/auth/signin',).withBody({email: dto_signin.email}).expectStatus(400)
       })
 
       it('Should throw error if body is empty ', ()=>{
@@ -72,7 +88,7 @@ describe('App e2e', () => {
       })
 
       it('Should signin', ()=>{
-        return pactum.spec().post('/auth/signin',).withBody(dto).expectStatus(200).stores('UserAt','access_token')
+        return pactum.spec().post('/auth/signin',).withBody(dto_signin).expectStatus(200).stores('UserAt','access_token')
       })
 
     })
