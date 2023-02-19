@@ -127,7 +127,7 @@ describe('App e2e', () => {
       it('Should get venues', ()=>{
       return pactum.spec().get('/venues',).withHeaders({
         Authorization:'Bearer $S{UserAt}'
-      }).expectStatus(200)
+      }).expectStatus(200).inspect()
     })
 
     })

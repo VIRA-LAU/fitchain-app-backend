@@ -7,9 +7,25 @@ export class VenueService {
     constructor(private prisma: PrismaService){}
 
     async getVenues(){
-        const venues = await this.prisma.venue.findMany()
 
-        return venues;
+    const venuesWithBranches = await this.prisma.venue.findMany({
+        select:{
+            id: true,
+            name: true,
+            managerEmail: true,
+            managerPhoneNumber: true,
+            managerFirstName: true,
+            managerLastName: true,
+            branches:{
+                select:{
+                    id:true
+                }
+            }
+        }
+       
+    });
+
+            return venuesWithBranches;
     }
 
     async getVenueById(venueId: number){

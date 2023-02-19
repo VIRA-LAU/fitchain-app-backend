@@ -53,12 +53,24 @@ model Venue {
   managerEmail String @unique
   managerPhoneNumber String @unique
   hash  String @unique
+  
 
   managerFirstName String?
   managerLastName String?
-  
-  photoDirectoryURL String?
   branches Branch[]
+
+
+}
+
+model Branch {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  location String
+  venueId Int
+  photoDirectoryURL String?
+  rating Int?
+  courts Court[]
+  venue  Venue    @relation(fields: [venueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 
 
 }
@@ -167,16 +179,7 @@ model Court {
 
 }
 
-model Branch {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  location String
-  venueId Int
-  courts Court[]
-  venue  Venue    @relation(fields: [venueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 
-
-}
 
 
 
