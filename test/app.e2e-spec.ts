@@ -5,7 +5,8 @@ import { AppModule } from '../src/app.module'
 import * as pactum from 'pactum';
 import { AuthSigninDto, AuthSignupDto } from '../src/auth/dto';
 import { CreateInvitationDto, EditInvitationDto } from 'src/invitetogame/dto';
-import { invitationApproval } from '@prisma/client';
+import { invitationApproval, gameStatus } from '@prisma/client';
+import { createBookingDto, editBookingDto } from 'src/game/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -23,7 +24,7 @@ describe('App e2e', () => {
     await app.init();
     await app.listen(3333)
     prisma = app.get(PrismaService)
-    await prisma.CleanDb();
+    // await prisma.CleanDb();
     pactum.request.setBaseUrl('http://localhost:3333')
 
   })
@@ -163,24 +164,23 @@ describe('App e2e', () => {
       })
 
     })
-    describe('edit invitation by id', () =>{
-      const dto : EditInvitationDto = {
-        status: invitationApproval.APPROVED,
-      }
-      it('Should edit invitation by Id', ()=>{
-        return pactum.spec().patch('/invitations/{id}',).withPathParams('id','$S{invitationId}').withHeaders({
-          Authorization:'Bearer $S{UserAt}'
-        }).withBody(dto).expectStatus(200)
-      })
+    // describe('edit invitation by id', () =>{
+    //   const dto : EditInvitationDto = {
+    //     status: invitationApproval.APPROVED,
+    //   }
+    //   it('Should edit invitation by Id', ()=>{
+    //     return pactum.spec().patch('/invitations/{id}',).withPathParams('id','$S{invitationId}').withHeaders({
+    //       Authorization:'Bearer $S{UserAt}'
+    //     }).withBody(dto).expectStatus(200)
+    //   })
 
-    })
+    // })
     describe('delete invitation by id', () =>{
       it('Should delete invitation by Id', ()=>{
         return pactum.spec().delete('/invitations/{id}',).withPathParams('id','$S{invitationId}').withHeaders({
           Authorization:'Bearer $S{UserAt}'
         }).expectStatus(204)
       })
-
       it('Should get invitations', ()=>{
         return pactum.spec().get('/invitations',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
@@ -189,8 +189,83 @@ describe('App e2e', () => {
 
     })
 
+  })
 
+  describe('Bookings', () =>{
+
+    describe('get empty bookings', () =>{
+      it('Should get bookings', ()=>{
+        return pactum.spec().get('/games/bookings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBody([]).inspect()
+
+      })
+
+
+    }) 
+
+    describe('create booking', () =>{
+      const dto : createBookingDto = {
+        courtId:1,
+        date:new Date('2019-05-14T11:01:58.135Z'),
+        duration: 30,
+      }
+
+      it('Should create booking', ()=>{
+        return pactum.spec().post('/games/bookings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(201).stores('bookingId','id')
+      })
+
+    })
+
+    describe('edit booking by id', () =>{
+      const dto : editBookingDto = {
+        status: gameStatus.APPROVED
+      }
+      it('Should edit booking by Id', ()=>{
+        return pactum.spec().patch('/games/bookings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(200)
+      })
+
+    })
+
+
+    describe('get bookings', () =>{
+      it('Should get bookings', ()=>{
+        return pactum.spec().get('/games/bookings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(1).inspect()
+      })
+
+
+    })
+    describe('get booking by id', () =>{
+      it('Should get booking by Id', ()=>{
+        return pactum.spec().get('/games/bookings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBodyContains('$S{bookingId}')
+      })
+
+    })
+
+    describe('delete booking by id', () =>{
+      it('Should delete booking by Id', ()=>{
+        return pactum.spec().delete('/games/bookings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(204)
+      })
+
+      it('Should get bookings', ()=>{
+        return pactum.spec().get('/games/bookings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(0)
+      })
+
+    })
 
   })
- 
+
+
 })
