@@ -139,8 +139,8 @@ describe('App e2e', () => {
     describe('create booking', () =>{
       const dto : createBookingDto = {
         courtId:1,
-        date:new Date('2019-05-14T11:01:58.135Z')
-
+        date:new Date('2019-05-14T11:01:58.135Z'),
+        duration: 30,
       }
 
       it('Should create booking', ()=>{
@@ -162,6 +162,7 @@ describe('App e2e', () => {
       })
 
     })
+
 
     describe('get bookings', () =>{
       it('Should get bookings', ()=>{

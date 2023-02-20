@@ -10,4 +10,8 @@ export class createBookingDto{
     @IsNotEmpty()
     date:Date
 
+    @IsNumber()
+    @IsNotEmpty()
+    duration:number
+
 }

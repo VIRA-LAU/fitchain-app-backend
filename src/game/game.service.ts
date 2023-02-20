@@ -14,7 +14,27 @@ export class GameService {
                 adminId: userId,
                 status: gameStatus.APPROVED
             },
-            take:7
+            select:{
+                date:true,
+                duration:true,
+                type: true,
+                court: {
+                    select:{
+                        branch:{
+                            select:{
+                                location: true,
+                                venue:{
+                                    select:{
+                                        name:true
+                                    }
+                                }
+                                
+                            }
+                            
+                        }
+                    }
+                }
+            }
         })
     }
 
