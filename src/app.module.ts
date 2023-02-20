@@ -7,9 +7,9 @@ import { InvitetogameModule } from './invitetogame/invitetogame.module';
 import { GameModule } from './game/game.module';
 import { VenueModule } from './venue/venue.module';
 import { BranchModule } from './branch/branch.module';
-
+import { CourtModule } from './court/court.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal:true}),AuthModule, UserModule, PrismaModule, InvitetogameModule, GameModule, VenueModule, BranchModule],
+  imports: [ConfigModule.forRoot({isGlobal:true}),AuthModule, UserModule, PrismaModule, InvitetogameModule, GameModule, VenueModule, BranchModule, CourtModule],
 })
 export class AppModule {}
