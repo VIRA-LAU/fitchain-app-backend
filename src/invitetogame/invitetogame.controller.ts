@@ -6,7 +6,7 @@ import { EditInvitationDto } from './dto/edit-invitation.dto';
 import { InvitetogameService } from './invitetogame.service';
 
 @UseGuards(JwtGaurd)
-@Controller('invitetogame')
+@Controller('invitations')
 export class InvitetogameController {
     constructor(private invitetogameService: InvitetogameService){}
 

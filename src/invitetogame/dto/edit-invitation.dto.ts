@@ -5,15 +5,11 @@ export class EditInvitationDto{
   
     @IsNumber()
     @IsNotEmpty()
-    userId: number
+    friendId?: number
 
     @IsNumber()
     @IsNotEmpty()
-    friendId: number
-
-    @IsNumber()
-    @IsNotEmpty()
-    gameId: number
+    gameId?: number
 
     @IsOptional()
     status?: invitationApproval;
