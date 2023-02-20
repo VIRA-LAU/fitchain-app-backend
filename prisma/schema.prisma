@@ -68,7 +68,7 @@ model Branch {
   location String
   venueId Int
   photoDirectoryURL String?
-  rating Int?
+  rating Int @default(0)
   courts Court[]
   venue  Venue    @relation(fields: [venueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 

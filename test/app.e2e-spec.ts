@@ -181,7 +181,7 @@ describe('App e2e', () => {
       it('Should get invitations', ()=>{
         return pactum.spec().get('/invitations',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).expectJsonLength(1).inspect()
+        }).expectStatus(200).expectJsonLength(1)
       })
 
 
@@ -228,7 +228,7 @@ describe('App e2e', () => {
       it('Should get bookings', ()=>{
         return pactum.spec().get('/games/bookings',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).expectBody([]).inspect()
+        }).expectStatus(200).expectBody([])
 
       })
 
@@ -267,7 +267,7 @@ describe('App e2e', () => {
       it('Should get bookings', ()=>{
         return pactum.spec().get('/games/bookings',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).expectJsonLength(1).inspect()
+        }).expectStatus(200).expectJsonLength(1)
       })
 
 
@@ -299,6 +299,7 @@ describe('App e2e', () => {
   })
 
 
+
   describe('Venue', () => {
 
     describe('Get venues', () =>{
@@ -309,6 +310,7 @@ describe('App e2e', () => {
     })
 
     })
+    
 
     // describe('Get venue by id', () =>{
     //   it('Should get venue by id', ()=>{

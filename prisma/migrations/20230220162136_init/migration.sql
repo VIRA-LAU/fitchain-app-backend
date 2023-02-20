@@ -49,6 +49,7 @@ CREATE TABLE "Branch" (
     "location" TEXT NOT NULL,
     "venueId" INTEGER NOT NULL,
     "photoDirectoryURL" TEXT,
+    "rating" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "Branch_pkey" PRIMARY KEY ("id")
 );

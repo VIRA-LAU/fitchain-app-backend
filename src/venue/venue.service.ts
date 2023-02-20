@@ -10,15 +10,11 @@ export class VenueService {
 
     const venuesWithBranches = await this.prisma.venue.findMany({
         select:{
-            id: true,
             name: true,
-            managerEmail: true,
-            managerPhoneNumber: true,
-            managerFirstName: true,
-            managerLastName: true,
             branches:{
                 select:{
-                    id:true
+                    location:true,
+                    rating:true,
                 }
             }
         }
