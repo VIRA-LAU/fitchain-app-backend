@@ -1,7 +1,6 @@
 export const games = 
   [
     {
-      id: 1,
       adminId: 1,
       date: "2022-06-15T10:00:00.000Z",
       courtId: 1,
@@ -11,7 +10,6 @@ export const games =
       updatedAt: "2022-06-01T12:00:00.000Z"
     },
     {
-      id: 2,
       adminId: 2,
       date: "2022-06-20T14:00:00.000Z",
       courtId: 2,

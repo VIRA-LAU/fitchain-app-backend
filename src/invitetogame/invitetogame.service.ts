@@ -11,6 +11,30 @@ export class InvitetogameService {
         return this.prisma.inviteToGame.findMany({
             where:{
                 userId
+            },
+            select:{
+                friend:{
+                    select:{
+                        firstName:true,
+                        lastName:true,
+                    }
+                },
+                game:{
+                    select:{
+                        type:true,
+                        date:true,
+                        duration: true,
+                        court:{
+                            select:{
+                                branch:{
+                                    select:{
+                                        location:true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         })
     }
