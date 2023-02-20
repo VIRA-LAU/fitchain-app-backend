@@ -20,7 +20,8 @@ async function main() {
     await prisma.venue.create({
       data: {
         name: venueData.name,
-        managerfirstName: venueData.managerfirstName,
+        hash: venueData.hash,
+        managerFirstName: venueData.managerFirstName,
         managerLastName: venueData.managerLastName,
         managerEmail: venueData.managerEmail,
         managerPhoneNumber: venueData.managerPhoneNumber,
@@ -56,6 +57,7 @@ async function main() {
       data: {
         admin: { connect: { id: gameData.adminId }},
         date: new Date(gameData.date),
+        duration: gameData.duration,
         court: { connect: { id: gameData.courtId } },
         createdAt: new Date(gameData.createdAt),
         updatedAt: new Date(gameData.updatedAt),
