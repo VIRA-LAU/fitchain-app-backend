@@ -17,7 +17,7 @@ model User {
 
   email String @unique
   phoneNumber String? @unique
-  hash String
+  hash String @unique
 
   firstName String?
   lastName String?
@@ -40,6 +40,38 @@ model User {
   userStatistics         HasStatistics[]
 
   games Game[]
+
+}
+
+model Venue {
+
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name String
+  managerEmail String @unique
+  managerPhoneNumber String @unique
+  hash  String @unique
+  
+
+  managerFirstName String?
+  managerLastName String?
+  branches Branch[]
+
+
+}
+
+model Branch {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  location String
+  venueId Int
+  photoDirectoryURL String?
+  rating Int?
+  courts Court[]
+  venue  Venue    @relation(fields: [venueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+
 
 }
 
@@ -149,30 +181,9 @@ model Court {
 
 }
 
-model Branch {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  location String
-  venueId Int
-  courts Court[]
-  venue  Venue    @relation(fields: [venueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 
 
-}
 
-model Venue {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  name String
-  managerfirstName String?
-  managerLastName String?
-  managerEmail String @unique
-  managerPhoneNumber String @unique
-  photoDirectoryURL String?
-  branches Branch[]
-
-
-}
 
 enum invitationApproval {
   PENDING
