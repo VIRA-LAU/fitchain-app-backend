@@ -8,10 +8,9 @@ import { editBookingDto } from './dto/edit-booking.dto';
 export class GameService {
     constructor(private prisma: PrismaService){}
 
-    async getBookings(userId: number){
+    async getBookings() {
         return this.prisma.game.findMany({
             where:{
-                adminId: userId,
                 status: gameStatus.APPROVED
             },
             select:{
@@ -33,7 +32,8 @@ export class GameService {
                             
                         }
                     }
-                }
+                },
+                admin: true
             }
         })
     }
@@ -48,7 +48,51 @@ export class GameService {
         })
         return booking; 
     }
-
+    async getUpcomingGames(userId: number) {
+        const booking = await this.prisma.game.findMany({ 
+            where:{
+                OR: [
+                    { adminId: userId },
+                    {
+                        gameInvitation: {
+                            some: {
+                            friendId: userId
+                        }
+                        }
+                    },
+                    {
+                        gameRequests: {
+                            some: {
+                                userId:userId
+                            }
+                    }}
+                ]
+            },
+            select:{
+                date:true,
+                duration:true,
+                type: true,
+                court: {
+                    select:{
+                        branch:{
+                            select:{
+                                location: true,
+                                venue:{
+                                    select:{
+                                        name:true
+                                    }
+                                }
+                                
+                            }
+                            
+                        }
+                    }
+                },
+                admin: true
+            }
+        })
+        return booking; 
+    }
     async createBooking(userId: number, dto: createBookingDto){
         const booking = await this.prisma.game.create({ 
             data:{

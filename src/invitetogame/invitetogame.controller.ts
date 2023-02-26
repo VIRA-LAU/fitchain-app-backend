@@ -9,15 +9,15 @@ import { InvitetogameService } from './invitetogame.service';
 @Controller('invitations')
 export class InvitetogameController {
     constructor(private invitetogameService: InvitetogameService){}
-
+    
     @Get()
     getSentInvitations(@GetUser('id') userId:number){
         return this.invitetogameService.getSentInvitations(userId)
 
     }
 
-    @Get()
-    getRecievedInvitations(@GetUser('id') userId:number){
+    @Get('received')
+    getRecievedInvitations(@GetUser('id') userId: number) {
         return this.invitetogameService.getReceivedInvitations(userId)
 
     }

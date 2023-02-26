@@ -11,8 +11,8 @@ export class GameController {
     constructor(private gameService: GameService){}
 
     @Get('bookings')
-    getBookings(@GetUser('id') userId: number ){
-        return this.gameService.getBookings(userId)
+    getBookings(){
+        return this.gameService.getBookings()
     }
 
     @Get('bookings/:id')
@@ -20,6 +20,10 @@ export class GameController {
         return this.gameService.getBookingById(userId, bookingId)
     }
 
+    @Get('upcoming')
+    getUpcoming(@GetUser('id') userId: number) {
+        return this.gameService.getUpcomingGames(userId);
+    }
     @Post("bookings")
     createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){
         console.log("create booking")

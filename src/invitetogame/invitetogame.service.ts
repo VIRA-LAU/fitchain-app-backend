@@ -39,16 +39,40 @@ export class InvitetogameService {
         })
     }
 
-    async getReceivedInvitations(userId:number){
+    async getReceivedInvitations(userId: number) {
         return this.prisma.inviteToGame.findMany({
             where:{
                 friendId: userId
+            },
+            select:{
+                friend:{
+                    select:{
+                        firstName:true,
+                        lastName:true,
+                    }
+                },
+                game:{
+                    select:{
+                        type:true,
+                        date:true,
+                        duration: true,
+                        court:{
+                            select:{
+                                branch:{
+                                    select:{
+                                        location:true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         })
     }
 
 
-    async getSentInvitationById(userId:number, invitationId:number ){
+    async getSentInvitationById(userId: number, invitationId: number) {
         const sentInvitation = this.prisma.inviteToGame.findFirst({
             where:{
                 id: invitationId,
