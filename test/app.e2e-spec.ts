@@ -8,6 +8,8 @@ import { CreateInvitationDto, EditInvitationDto } from 'src/invitetogame/dto';
 import { invitationApproval, gameStatus } from '@prisma/client';
 import { createBookingDto, editBookingDto } from 'src/game/dto';
 import { EditVenueDto } from 'src/venue/dto';
+import { CreateBranchDto } from '../src/branch/dto/create-branch.dto';
+import { EditBranchDto } from 'src/branch/dto/edit-branch.dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -232,7 +234,7 @@ describe('App e2e', () => {
 
       })
 
-
+      
     }) 
 
     describe('create booking', () =>{
@@ -299,6 +301,76 @@ describe('App e2e', () => {
   })
 
 
+  describe('Branch', () =>{
+
+    describe('get empty  branches', () =>{
+      // it('Should get branches', ()=>{
+      //   return pactum.spec().get('/branches',).withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).expectStatus(200).expectBody([])
+      // })
+
+    })
+
+    describe('create branch', () =>{
+      const dto : CreateBranchDto = {
+        location:'Hamra',
+      }
+      // it('Should create branch', ()=>{
+      //   return pactum.spec().post('/branches',).withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).withBody(dto).expectStatus(201).stores('branchesId','id')
+      // })
+
+    })
+    describe('get branches', () =>{
+      it('Should get branches', ()=>{
+        return pactum.spec().get('/branches',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(2).inspect()
+      })
+
+
+    })
+    describe('get branch by id', () =>{
+      it('Should get branch by Id', ()=>{
+        return pactum.spec().get('/branches/{id}',).withPathParams('id',1).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBodyContains(1)
+      })
+
+      
+    })
+    describe('edit branch by id', () =>{
+      const dto : EditBranchDto = {
+        rating:  3
+      }
+      // it('Should edit branch by Id', ()=>{
+      //   return pactum.spec().patch('/branches/{id}',).withPathParams('id','$S{bookmarkId}').withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).withBody(dto).expectStatus(200)
+      // })
+
+    })
+    describe('delete branch by id', () =>{
+      // it('Should delete branch by Id', ()=>{
+      //   return pactum.spec().delete('/branches/{id}',).withPathParams('id','$S{bookmarkId}').withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).expectStatus(204)
+      // })
+
+      // it('Should get branches', ()=>{
+      //   return pactum.spec().get('/branches',).withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).expectStatus(200).expectJsonLength(0)
+      // })
+
+    })
+
+
+
+  })
+
 
   describe('Venue', () => {
 
@@ -306,7 +378,7 @@ describe('App e2e', () => {
       it('Should get venues', ()=>{
       return pactum.spec().get('/venues',).withHeaders({
         Authorization:'Bearer $S{UserAt}'
-      }).expectStatus(200).inspect()
+      }).expectStatus(200)
     })
 
     })

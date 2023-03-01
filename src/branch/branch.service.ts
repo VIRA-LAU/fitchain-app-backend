@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateBranchDto, EditBranchDto } from './dto';
 
 @Injectable()
 export class BranchService {
@@ -19,7 +20,7 @@ export class BranchService {
         return BranchesWithVenue;
     }
 
-    async getBranchesById(branchId: number) {
+    async getBranchById(branchId: number) {
         const branch = await this.prisma.branch.findFirst({
             where: {
                 id: branchId,
@@ -27,5 +28,53 @@ export class BranchService {
         })
         return branch;
 
+    }
+
+    async createBranch(venueId: number, dto: CreateBranchDto){
+        const branch = await this.prisma.branch.create({ 
+            data:{
+                venueId: venueId,
+                ...dto
+            }
+        })
+        return branch; 
+    }
+
+    async editBranchById(venueId: number, branchId:number, dto: EditBranchDto){
+        const branch = await this.prisma.branch.findUnique({
+            where:{
+                id:branchId
+            }
+        })
+
+        if(!branch || branch.venueId != venueId)
+             throw new ForbiddenException("Access to edit denied")
+        
+             return this.prisma.branch.update({
+                where:{
+                    id:branchId
+                },
+                data:{
+                    ...dto
+                }
+             })
+    }
+
+    async deleteBranchById(venueId:number,branchId:number){
+        const branch = await this.prisma.branch.findUnique({
+            where:{
+                id:branchId
+            }
+        })
+
+        if(!branch || branch.venueId != venueId)
+        throw new ForbiddenException("Access to edit denied")
+
+        await this.prisma.branch.delete({
+            where:{
+                id:branchId
+            }
+        })
+        
     }
 }
