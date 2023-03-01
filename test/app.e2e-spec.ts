@@ -8,8 +8,8 @@ import { CreateInvitationDto, EditInvitationDto } from 'src/invitetogame/dto';
 import { invitationApproval, gameStatus } from '@prisma/client';
 import { createBookingDto, editBookingDto } from 'src/game/dto';
 import { EditVenueDto } from 'src/venue/dto';
-import { CreateBranchDto } from '../src/branch/dto/create-branch.dto';
-import { EditBranchDto } from 'src/branch/dto/edit-branch.dto';
+import { CreateBranchDto,EditBranchDto } from '../src/branch/dto';
+import { CreateCourtDto, EditCourtDto } from '../src/court/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -234,7 +234,7 @@ describe('App e2e', () => {
 
       })
 
-      
+
     }) 
 
     describe('create booking', () =>{
@@ -301,6 +301,76 @@ describe('App e2e', () => {
   })
 
 
+  describe('Court', () =>{
+
+    describe('get empty  courts', () =>{
+      // it('Should get courts', ()=>{
+      //   return pactum.spec().get('/courts',).withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).expectStatus(200).expectBody([])
+      // })
+
+    })
+
+    describe('create court', () =>{
+      const dto : CreateCourtDto = {
+        nbOfPlayers:5,
+        branchId:1,
+        courtType:'outdoor'
+      }
+      // it('Should create court', ()=>{
+      //   return pactum.spec().post('/courts',).withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).withBody(dto).expectStatus(201).stores('courtId','id')
+      // })
+
+    })
+    describe('get courts', () =>{
+      it('Should get courts', ()=>{
+        return pactum.spec().get('/courts',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(2)
+      })
+
+    })
+    describe('get court by id', () =>{
+      it('Should get court by Id', ()=>{
+        return pactum.spec().get('/courts/{id}',).withPathParams('id',1).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBodyContains(1).inspect()
+
+      })
+      
+    })
+    describe('edit court by id', () =>{
+      const dto : EditCourtDto = {
+        courtType:  'indoor'
+      }
+      // it('Should edit court by Id', ()=>{
+      //   return pactum.spec().patch('/courts/{id}',).withPathParams('id','$S{courtId}').withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).withBody(dto).expectStatus(200)
+      // })
+
+    })
+    describe('delete court by id', () =>{
+      // it('Should delete court by Id', ()=>{
+      //   return pactum.spec().delete('/courts/{id}',).withPathParams('id','$S{courtId}').withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).expectStatus(204)
+      // })
+
+      // it('Should get courts', ()=>{
+      //   return pactum.spec().get('/courts',).withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).expectStatus(200).expectJsonLength(0)
+      // })
+
+    })
+
+
+  })
+
   describe('Branch', () =>{
 
     describe('get empty  branches', () =>{
@@ -327,7 +397,7 @@ describe('App e2e', () => {
       it('Should get branches', ()=>{
         return pactum.spec().get('/branches',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).expectJsonLength(2).inspect()
+        }).expectStatus(200).expectJsonLength(2)
       })
 
 
