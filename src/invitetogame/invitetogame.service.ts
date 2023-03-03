@@ -45,7 +45,7 @@ export class InvitetogameService {
                 friendId: userId
             },
             select:{
-                friend:{
+                user:{
                     select:{
                         firstName:true,
                         lastName:true,
