@@ -1,8 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { GetUser } from '../auth/decorator';
 import { JwtGaurd } from '../auth/gaurd';
-import { CreateInvitationDto } from './dto';
-import { EditInvitationDto } from './dto/edit-invitation.dto';
+import { CreateInvitationDto, EditInvitationDto } from './dto';
 import { InvitetogameService } from './invitetogame.service';
 
 @UseGuards(JwtGaurd)
@@ -28,7 +27,7 @@ export class InvitetogameController {
 
     }
 
-    @Get(':id')
+    @Get('received/:id')
     getReceivedInvitationById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) invitationId:number ){
         return this.invitetogameService.getReceivedInvitationById(userId,invitationId)
 
@@ -40,8 +39,8 @@ export class InvitetogameController {
     }
 
     @Patch(':id')
-    editInvitationkById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) invitationId: number,@Body() dto:EditInvitationDto){
-        return this.invitetogameService.editInvitationkById(userId,invitationId,dto)
+    editInvitationById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) invitationId: number,@Body() dto:EditInvitationDto){
+        return this.invitetogameService.editInvitationById(userId,invitationId,dto)
     }
 
     @HttpCode(HttpStatus.NO_CONTENT)
