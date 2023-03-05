@@ -8,8 +8,9 @@ import { GameModule } from './game/game.module';
 import { VenueModule } from './venue/venue.module';
 import { BranchModule } from './branch/branch.module';
 import { CourtModule } from './court/court.module';
+import { RequesttojoingameModule } from './requesttojoingame/requesttojoingame.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal:true}),AuthModule, UserModule, PrismaModule, InvitetogameModule, GameModule, VenueModule, BranchModule, CourtModule],
+  imports: [ConfigModule.forRoot({isGlobal:true}),AuthModule, UserModule, PrismaModule, InvitetogameModule, GameModule, VenueModule, BranchModule, CourtModule, RequesttojoingameModule],
 })
 export class AppModule {}

@@ -1,11 +1,8 @@
 import { invitationApproval, teamType } from "@prisma/client";
-import { IsNotEmpty, IsNumber, IsOptional } from "class-validator"
+import { IsNumber, IsOptional } from "class-validator"
 
-export class EditInvitationDto{  
+export class EditRequestToJoinDto{  
   
-    @IsNumber()
-    @IsOptional()
-    friendId?: number
 
     @IsNumber()
     @IsOptional()
