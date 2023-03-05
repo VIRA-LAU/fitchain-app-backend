@@ -1,8 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { GetUser } from '../auth/decorator';
 import { JwtGaurd } from '../auth/gaurd';
-import { CreateRequestToJoinDto } from './dto/create-request-to-join.dto';
-import { EditRequestToJoinDto } from './dto/edit-request-to-join.dto';
+import { EditRequestToJoinDto, CreateRequestToJoinDto } from './dto';
 import { RequesttojoingameService } from './requesttojoingame.service';
 
 @UseGuards(JwtGaurd)

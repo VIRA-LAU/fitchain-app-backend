@@ -13,6 +13,8 @@ import { CreateCourtDto, EditCourtDto } from '../src/court/dto';
 import { EditUserDto } from 'src/user/dto';
 import { CreateRequestToJoinDto } from 'src/requesttojoingame/dto/create-request-to-join.dto';
 import { EditRequestToJoinDto } from 'src/requesttojoingame/dto/edit-request-to-join.dto';
+import { CreateFriendRequestDto } from 'src/addfriend/dto/create-friend-request.dto';
+import { EditFriendRequestDto } from 'src/addfriend/dto/edit-friend-request.dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -338,6 +340,87 @@ describe('App e2e', () => {
       })
       it('Should get invitations', ()=>{
         return pactum.spec().get('/invitations',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(0)
+      })
+
+    })
+
+  })
+
+  describe('Friend Requests', () =>{
+
+    describe('get empty  friend requests', () =>{
+      it('Should get sent friend requests', ()=>{
+        return pactum.spec().get('/friendrequests',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBody([])
+      })
+
+      it('Should get received friend requests', ()=>{
+        return pactum.spec().get('/friendrequests/received',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBody([])
+      })
+
+    })
+
+    describe('create friend request', () =>{
+      const dto : CreateFriendRequestDto = {
+        friendId:2,
+      }
+      it('Should create friend request', ()=>{
+        return pactum.spec().post('/friendrequests',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(201).stores('friendrequestId','id')
+      })
+
+    })
+    
+    describe('get friend requests', () =>{
+      it('Should get friend requests', ()=>{
+        return pactum.spec().get('/friendrequests',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(1)
+      })
+
+
+    })
+
+    describe('get friend request by id', () =>{
+      it('Should get sent friend request by Id', ()=>{
+        return pactum.spec().get('/friendrequests/{id}',).withPathParams('id','$S{friendrequestId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBodyContains('$S{friendrequestId}')
+      })
+
+      // it('Should get received friend request by Id', ()=>{
+      //   return pactum.spec().get('/friendrequests/received/{id}',).withPathParams('id','$S{friendrequestId}').withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).expectStatus(200).expectBodyContains('$S{friendrequestId}')
+      // })
+
+    })
+
+    describe('edit friend request by id', () =>{
+      const dto : EditFriendRequestDto = {
+        status: invitationApproval.APPROVED,
+      }
+      it('Should edit friend request by Id', ()=>{
+        return pactum.spec().patch('/friendrequests/{id}',).withPathParams('id','$S{friendrequestId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(200)
+      })
+
+    })
+    describe('delete invitation by id', () =>{
+      it('Should delete friend request by Id', ()=>{
+        return pactum.spec().delete('/friendrequests/{id}',).withPathParams('id','$S{friendrequestId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(204)
+      })
+      it('Should get friend requests', ()=>{
+        return pactum.spec().get('/friendrequests',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
         }).expectStatus(200).expectJsonLength(0)
       })
