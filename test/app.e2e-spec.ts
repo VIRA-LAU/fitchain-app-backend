@@ -531,6 +531,18 @@ describe('App e2e', () => {
 
   })
 
+  describe('Game Updates', () =>{
+
+    describe('Get Game Updates', ()=>{
+      it('Shoud get Game Updates', ()=>{
+        return pactum.spec().get('/games/updates').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).inspect()
+      })
+    })
+
+  })
+
 
   describe('Venue', () => {
 

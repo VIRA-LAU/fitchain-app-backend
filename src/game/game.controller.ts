@@ -54,6 +54,11 @@ export class GameController {
         return this.gameService.getActivities(userId);
     }
 
+    @Get('updates')
+    getUpdates(@GetUser('id') userId: number) {
+        return this.gameService.getUpdates(userId);
+    }
+
 
 
 }
