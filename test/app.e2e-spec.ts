@@ -11,6 +11,8 @@ import { EditVenueDto } from 'src/venue/dto';
 import { CreateBranchDto,EditBranchDto } from '../src/branch/dto';
 import { CreateCourtDto, EditCourtDto } from '../src/court/dto';
 import { EditUserDto } from 'src/user/dto';
+import { CreateRequestToJoinDto } from 'src/requesttojoingame/dto/create-request-to-join.dto';
+import { EditRequestToJoinDto } from 'src/requesttojoingame/dto/edit-request-to-join.dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -19,6 +21,7 @@ describe('App e2e', () => {
     const moduleRef = await Test.createTestingModule({
       imports:[AppModule],
     }).compile();
+
 
     app = moduleRef.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({
@@ -151,7 +154,7 @@ describe('App e2e', () => {
       it('Should get user', ()=>{
       return pactum.spec().get('/users/{id}',).withPathParams('id','1').withHeaders({
         Authorization:'Bearer $S{UserAt}'
-      }).expectStatus(200).inspect()
+      }).expectStatus(200)
     })
 
     })
@@ -172,12 +175,103 @@ describe('App e2e', () => {
 
   })
 
+  describe('Requests To Join Game', () =>{
+
+    describe('get empty game requests', () =>{
+      it('Should get sent game requests', ()=>{
+        return pactum.spec().get('/gamerequests',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBody([])
+      })
+
+      it('Should get received game requests', ()=>{
+        return pactum.spec().get('/gamerequests/received',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBody([])
+      })
+
+    })
+
+
+    describe('create game request', () =>{
+      const dto : CreateRequestToJoinDto = {
+        gameId:1,
+        team: teamType.AWAY
+
+      }
+      it('Should create game request', ()=>{
+        return pactum.spec().post('/gamerequests',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(201).stores('gamerequestId','id')
+      })
+
+    })
+    
+    describe('get game requests', () =>{
+      it('Should get game requests', ()=>{
+        return pactum.spec().get('/gamerequests',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(1)
+      })
+
+
+
+    })
+
+    describe('get game request by id', () =>{
+      it('Should get sent game request by Id', ()=>{
+        return pactum.spec().get('/gamerequests/{id}',).withPathParams('id','$S{gamerequestId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBodyContains('$S{gamerequestId}').inspect()
+      })
+
+      // it('Should get received game request by Id', ()=>{
+      //   return pactum.spec().get('/gamerequests/received/{id}',).withPathParams('id','$S{gamerequestId}').withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).expectStatus(200).expectBodyContains('$S{gamerequestId}').inspect()
+      // })
+
+
+    })
+    describe('edit game request by id', () =>{
+      const dto : EditRequestToJoinDto = {
+        status: invitationApproval.APPROVED,
+      }
+      it('Should edit game request by Id', ()=>{
+        return pactum.spec().patch('/gamerequests/{id}',).withPathParams('id','$S{gamerequestId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(200)
+      })
+
+    })
+
+    describe('delete game request by id', () =>{
+      it('Should delete game request by Id', ()=>{
+        return pactum.spec().delete('/gamerequests/{id}',).withPathParams('id','$S{gamerequestId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(204)
+      })
+      it('Should get game requests', ()=>{
+        return pactum.spec().get('/gamerequests',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(0)
+      })
+
+    })
+
+  })
 
   describe('Invitations', () =>{
 
     describe('get empty  invitations', () =>{
-      it('Should get invitations', ()=>{
+      it('Should get sent invitations', ()=>{
         return pactum.spec().get('/invitations',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBody([])
+      })
+
+      it('Should get received invitations', ()=>{
+        return pactum.spec().get('/invitations/received',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
         }).expectStatus(200).expectBody([])
       })
@@ -211,24 +305,31 @@ describe('App e2e', () => {
     })
 
     describe('get invitation by id', () =>{
-      it('Should get invitation by Id', ()=>{
+      it('Should get sent invitation by Id', ()=>{
         return pactum.spec().get('/invitations/{id}',).withPathParams('id','$S{invitationId}').withHeaders({
           Authorization:'Bearer $S{UserAt}'
         }).expectStatus(200).expectBodyContains('$S{invitationId}')
       })
 
-    })
-    // describe('edit invitation by id', () =>{
-    //   const dto : EditInvitationDto = {
-    //     status: invitationApproval.APPROVED,
-    //   }
-    //   it('Should edit invitation by Id', ()=>{
-    //     return pactum.spec().patch('/invitations/{id}',).withPathParams('id','$S{invitationId}').withHeaders({
-    //       Authorization:'Bearer $S{UserAt}'
-    //     }).withBody(dto).expectStatus(200)
-    //   })
+      // it('Should get received invitation by Id', ()=>{
+      //   return pactum.spec().get('/invitations/received/{id}',).withPathParams('id','$S{invitationId}').withHeaders({
+      //     Authorization:'Bearer $S{UserAt}'
+      //   }).expectStatus(200).expectBodyContains('$S{invitationId}')
+      // })
 
-    // })
+    })
+
+    describe('edit invitation by id', () =>{
+      const dto : EditInvitationDto = {
+        status: invitationApproval.APPROVED,
+      }
+      it('Should edit invitation by Id', ()=>{
+        return pactum.spec().patch('/invitations/{id}',).withPathParams('id','$S{invitationId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(200)
+      })
+
+    })
     describe('delete invitation by id', () =>{
       it('Should delete invitation by Id', ()=>{
         return pactum.spec().delete('/invitations/{id}',).withPathParams('id','$S{invitationId}').withHeaders({

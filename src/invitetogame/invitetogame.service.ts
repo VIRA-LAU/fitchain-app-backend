@@ -106,7 +106,7 @@ export class InvitetogameService {
         return invitation; 
     }
 
-    async editInvitationkById(userId:number,invitationId: number, dto:EditInvitationDto){
+    async editInvitationById(userId:number,invitationId: number, dto:EditInvitationDto){
         const invitation = await this.prisma.inviteToGame.findUnique({
             where:{
                 id:invitationId
