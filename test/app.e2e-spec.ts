@@ -10,6 +10,7 @@ import { createBookingDto, editBookingDto } from 'src/game/dto';
 import { EditVenueDto } from 'src/venue/dto';
 import { CreateBranchDto,EditBranchDto } from '../src/branch/dto';
 import { CreateCourtDto, EditCourtDto } from '../src/court/dto';
+import { EditUserDto } from 'src/user/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -125,6 +126,7 @@ describe('App e2e', () => {
     })
 
   })
+
   describe('User', () => {
 
     describe('Get me', () =>{
@@ -135,19 +137,37 @@ describe('App e2e', () => {
     })
 
     })
-     
-    // describe('Edit User', () =>{
-    //   it('Should edit user', ()=>{
-    //     const dto : EditUserDto = {
-    //       firstName: 'Sara',
-    //       lastName: 'Al Arab'
-    //     }
-    //     return pactum.spec().patch('/users',).withHeaders({
-    //       Authorization:'Bearer $S{UserAt}'
-    //     }).withBody(dto).expectStatus(200).expectBodyContains(dto.firstName)
-    //   })
 
-    // })
+    describe('Get users', () =>{
+      it('Should get users', ()=>{
+      return pactum.spec().get('/users',).withHeaders({
+        Authorization:'Bearer $S{UserAt}'
+      }).expectStatus(200)
+    })
+
+    })
+
+    describe('Get user by Id', () =>{
+      it('Should get user', ()=>{
+      return pactum.spec().get('/users/{id}',).withPathParams('id','1').withHeaders({
+        Authorization:'Bearer $S{UserAt}'
+      }).expectStatus(200).inspect()
+    })
+
+    })
+     
+    describe('Edit User', () =>{
+      it('Should edit user', ()=>{
+        const dto : EditUserDto = {
+          firstName: 'Sara',
+          lastName: 'Al Arab'
+        }
+        return pactum.spec().patch('/users',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(200).expectBodyContains(dto.firstName)
+      })
+
+    })
 
 
   })
@@ -354,7 +374,7 @@ describe('App e2e', () => {
       it('Should get upcoming by Id', ()=>{
         return pactum.spec().get('/games/upcomings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).expectBodyContains('$S{bookingId}').inspect()
+        }).expectStatus(200).expectBodyContains('$S{bookingId}')
       })
 
     })
@@ -525,7 +545,7 @@ describe('App e2e', () => {
       it('Shoud get activities', ()=>{
         return pactum.spec().get('/games/activities').withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).inspect()
+        }).expectStatus(200)
       })
     })
 
@@ -537,7 +557,7 @@ describe('App e2e', () => {
       it('Shoud get Game Updates', ()=>{
         return pactum.spec().get('/games/updates').withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).inspect()
+        }).expectStatus(200)
       })
     })
 
