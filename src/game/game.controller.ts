@@ -16,14 +16,11 @@ export class GameController {
     }
 
     @Get('bookings/:id')
-    getBookingById(@GetUser('id') userId: number,  @Param('id', ParseIntPipe) bookingId:number ){
-        return this.gameService.getBookingById(userId, bookingId)
+    getBookingById(@Param('id', ParseIntPipe) bookingId:number ){
+        return this.gameService.getBookingById(bookingId)
     }
 
-    @Get('upcoming')
-    getUpcoming(@GetUser('id') userId: number) {
-        return this.gameService.getUpcomingGames(userId);
-    }
+ 
     @Post("bookings")
     createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){
         console.log("create booking")
@@ -41,6 +38,22 @@ export class GameController {
         return this.gameService.deleteBookingById(userId,bookingId)
         
     }
+
+    @Get('upcomings')
+    getUpcomings(@GetUser('id') userId: number) {
+        return this.gameService.getUpcomings(userId);
+    }
+
+    @Get('upcomings/:id')
+    getUpcomingById(@GetUser('id') userId: number,  @Param('id', ParseIntPipe) upcomingId:number ){
+        return this.gameService.getUpcomingById(userId, upcomingId)
+    }
+
+    @Get('activities')
+    getActivities(@GetUser('id') userId: number) {
+        return this.gameService.getActivities(userId);
+    }
+
 
 
 }

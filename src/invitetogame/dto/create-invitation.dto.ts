@@ -1,3 +1,4 @@
+import { teamType } from "@prisma/client"
 import { IsNotEmpty, IsNumber } from "class-validator"
 
 export class CreateInvitationDto{
@@ -10,5 +11,8 @@ export class CreateInvitationDto{
     @IsNumber()
     @IsNotEmpty()
     gameId: number
+
+    @IsNotEmpty()
+    team: teamType
   
 }

@@ -5,7 +5,7 @@ import { AppModule } from '../src/app.module'
 import * as pactum from 'pactum';
 import { AuthSigninDto, AuthSignupDto } from '../src/auth/dto';
 import { CreateInvitationDto, EditInvitationDto } from 'src/invitetogame/dto';
-import { invitationApproval, gameStatus } from '@prisma/client';
+import { invitationApproval, gameStatus, teamType } from '@prisma/client';
 import { createBookingDto, editBookingDto } from 'src/game/dto';
 import { EditVenueDto } from 'src/venue/dto';
 import { CreateBranchDto,EditBranchDto } from '../src/branch/dto';
@@ -169,6 +169,7 @@ describe('App e2e', () => {
       const dto : CreateInvitationDto = {
         friendId:2,
         gameId:1,
+        team: teamType.AWAY
 
       }
       it('Should create invitation', ()=>{
@@ -272,7 +273,7 @@ describe('App e2e', () => {
         }).expectStatus(200).expectJsonLength(1)
       })
 
-
+      
     })
     describe('get booking by id', () =>{
       it('Should get booking by Id', ()=>{
@@ -294,6 +295,83 @@ describe('App e2e', () => {
         return pactum.spec().get('/games/bookings',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
         }).expectStatus(200).expectJsonLength(0)
+      })
+
+    })
+
+  })
+
+  describe('Upcomings', () =>{
+
+    describe('get empty upcomings', () =>{
+      it('Should get upcomings', ()=>{
+        return pactum.spec().get('/games/upcomings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBody([])
+
+      })
+
+
+    }) 
+
+    describe('create booking', () =>{
+      const dto : createBookingDto = {
+        courtId:1,
+        date:new Date('2019-05-14T11:01:58.135Z'),
+        duration: 30,
+      }
+
+      it('Should create booking', ()=>{
+        return pactum.spec().post('/games/bookings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(201).stores('bookingId','id')
+      })
+
+    })
+
+    describe('edit booking by id', () =>{
+      const dto : editBookingDto = {
+        status: gameStatus.APPROVED
+      }
+      it('Should edit booking by Id', ()=>{
+        return pactum.spec().patch('/games/bookings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(200)
+      })
+
+    })
+
+    describe('get upcomings', () =>{
+      it('Should get upcomings', ()=>{
+        return pactum.spec().get('/games/upcomings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(1)
+      
+      })
+
+    })
+    describe('get upcoming by id', () =>{
+      it('Should get upcoming by Id', ()=>{
+        return pactum.spec().get('/games/upcomings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectBodyContains('$S{bookingId}').inspect()
+      })
+
+    })
+
+    describe('delete booking by id', () =>{
+      it('Should delete booking by Id', ()=>{
+        return pactum.spec().delete('/games/bookings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(204)
+      })
+
+
+      it('Should get upcomings', ()=>{
+        return pactum.spec().get('/games/upcomings',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(0)
+
       })
 
     })
@@ -337,7 +415,7 @@ describe('App e2e', () => {
       it('Should get court by Id', ()=>{
         return pactum.spec().get('/courts/{id}',).withPathParams('id',1).withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).expectBodyContains(1).inspect()
+        }).expectStatus(200).expectBodyContains(1)
 
       })
       
@@ -438,6 +516,18 @@ describe('App e2e', () => {
     })
 
 
+
+  })
+
+  describe('Activities', () =>{
+
+    describe('Get Activities', ()=>{
+      it('Shoud get activities', ()=>{
+        return pactum.spec().get('/games/activities').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).inspect()
+      })
+    })
 
   })
 

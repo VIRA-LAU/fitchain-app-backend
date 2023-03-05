@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { gameStatus } from '@prisma/client';
+import { gameStatus, invitationApproval } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { createBookingDto } from './dto/create-booking.dto';
 import { editBookingDto } from './dto/edit-booking.dto';
@@ -17,6 +17,7 @@ export class GameService {
                 date:true,
                 duration:true,
                 type: true,
+                adminTeam: true,
                 court: {
                     select:{
                         branch:{
@@ -33,66 +34,51 @@ export class GameService {
                         }
                     }
                 },
-                admin: true
+                gameRequests:{
+                    where:{
+                        status: invitationApproval.APPROVED
+                    },
+                    select:{
+                        team: true,
+                        user:{
+                            select:{
+                                id:true
+                            }
+                        }
+                    }
+                },
+                gameInvitation:{
+                    where:{
+                        status: invitationApproval.APPROVED
+                    },
+                    select:{
+                        team: true,
+                        friend:{
+                            select:{
+                                id:true
+                            }
+                        }
+                    }
+                },
+                admin: {
+                    select:{
+                        id:true
+                    }
+                }
             }
         })
     }
 
-   async getBookingById(userId:number, bookingId:number){
+   async getBookingById(bookingId:number){
         const booking = await this.prisma.game.findFirst({ 
             where:{
                 id:bookingId,
-                adminId: userId,
                 
             }
         })
         return booking; 
     }
-    async getUpcomingGames(userId: number) {
-        const booking = await this.prisma.game.findMany({ 
-            where:{
-                OR: [
-                    { adminId: userId },
-                    {
-                        gameInvitation: {
-                            some: {
-                            friendId: userId
-                        }
-                        }
-                    },
-                    {
-                        gameRequests: {
-                            some: {
-                                userId:userId
-                            }
-                    }}
-                ]
-            },
-            select:{
-                date:true,
-                duration:true,
-                type: true,
-                court: {
-                    select:{
-                        branch:{
-                            select:{
-                                location: true,
-                                venue:{
-                                    select:{
-                                        name:true
-                                    }
-                                }
-                                
-                            }
-                            
-                        }
-                    }
-                },
-                admin: true
-            }
-        })
-        return booking; 
-    }
+ 
     async createBooking(userId: number, dto: createBookingDto){
         const booking = await this.prisma.game.create({ 
             data:{
@@ -140,4 +126,110 @@ export class GameService {
         })
         
     }
+
+    async getUpcomings(userId: number) {
+        const upcomings = await this.prisma.game.findMany({ 
+            where:{
+                OR: [
+                    { adminId: userId },
+                    {
+                        gameInvitation: {
+                            some: {
+                            friendId: userId
+                        }
+                        }
+                    },
+                    {
+                        gameRequests: {
+                            some: {
+                                userId:userId
+                            }
+                    }}
+                ]
+            },
+            select:{
+                date:true,
+                duration:true,
+                adminTeam: true,
+                type: true,
+                court: {
+                    select:{
+                        branch:{
+                            select:{
+                                location: true,
+                                venue:{
+                                    select:{
+                                        name:true
+                                    }
+                                }
+                                
+                            }
+                            
+                        }
+                    }
+                },
+                gameRequests:{
+                    select:{
+                        team: true
+                    }
+                },
+                gameInvitation:{
+                    select:{
+                        team: true
+                    }
+                },
+                admin: {
+                    select:{
+                        id: true
+                    }
+                }
+            }
+        })
+        return upcomings; 
+    }
+
+    async getUpcomingById(userId:number, upcomingId:number){
+        const upcoming = await this.prisma.game.findFirst({ 
+            where:{
+                id:upcomingId,
+                adminId: userId,
+                
+            }
+        })
+        return upcoming; 
+    }
+
+    async getActivities(userId: number) {
+        const activities = await this.prisma.game.findMany({ 
+            where:{
+                OR: [
+                    { adminId: userId },
+                    {
+                        gameInvitation: {
+                            some: {
+                            friendId: userId
+                        }
+                        }
+                    },
+                    {
+                        gameRequests: {
+                            some: {
+                                userId:userId
+                            }
+                    }}
+                ],
+                AND: [
+                    {status: gameStatus.FINISHED}
+                ],
+            },
+            select:{
+                date:true,
+                duration:true,
+                type: true,
+                winnerTeam: true,
+            }
+        })
+        return activities; 
+    }
+
 }

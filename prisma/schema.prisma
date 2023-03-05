@@ -28,6 +28,7 @@ model User {
   age Int?
   nationality String?
   position String?
+  rating Int?
 
   invitationsSent           InviteToGame[]  @relation("sender")
   invitationsReceived       InviteToGame[]  @relation("receiver")
@@ -85,7 +86,8 @@ model Game {
   date DateTime
   duration Int
   type gameType @default(Basketball)
-  winnerTeam String?
+  adminTeam teamType @default(HOME)
+  winnerTeam teamType @default(HOME)
   highlights String[]
   status gameStatus @default(PENDING)
 
@@ -106,6 +108,7 @@ model InviteToGame {
   userId Int
   friendId Int
   gameId Int
+  team teamType @default(HOME)
   status invitationApproval @default(PENDING)
 
   user User @relation(name:"sender",fields: [userId], references: [id], onDelete: Cascade)
@@ -139,6 +142,7 @@ model RequestToJoin {
 
   userId Int
   gameId Int
+  team teamType @default(HOME)
   status invitationApproval @default(PENDING)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -182,9 +186,6 @@ model Court {
 }
 
 
-
-
-
 enum invitationApproval {
   PENDING
   APPROVED
@@ -197,10 +198,16 @@ enum gameStatus {
   REJECTED
   ACTIVE
   CANCELLED
+  FINISHED
 }
 
 enum gameType {
   Basketball
   Football
   Tennis
+}
+
+enum teamType {
+  HOME
+  AWAY
 }

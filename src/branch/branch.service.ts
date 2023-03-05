@@ -12,7 +12,11 @@ export class BranchService {
             select: {
                 location: true,
                 rating: true,
-                venue: true,
+                venue: {
+                    select:{
+                        id:true
+                    }
+                },
             }
        
         });

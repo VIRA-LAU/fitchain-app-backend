@@ -13,6 +13,7 @@ export class InvitetogameService {
                 userId
             },
             select:{
+                team: true,
                 friend:{
                     select:{
                         firstName:true,
@@ -45,6 +46,7 @@ export class InvitetogameService {
                 friendId: userId
             },
             select:{
+                team: true,
                 friend:{
                     select:{
                         firstName:true,
