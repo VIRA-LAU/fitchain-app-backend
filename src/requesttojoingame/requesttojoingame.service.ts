@@ -1,7 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateRequestToJoinDto } from './dto/create-request-to-join.dto';
-import { EditRequestToJoinDto } from './dto/edit-request-to-join.dto';
+import { CreateRequestToJoinDto, EditRequestToJoinDto } from './dto';
 
 @Injectable()
 export class RequesttojoingameService {
@@ -14,6 +13,7 @@ export class RequesttojoingameService {
             },
             select:{
                 team: true,
+                status:true,
                 game:{
                     select:{
                         type:true,
@@ -43,6 +43,7 @@ export class RequesttojoingameService {
             },
             select:{
                 team: true,
+                status:true,
                 user:{
                     select:{
                         firstName:true,
