@@ -47,7 +47,7 @@ export class InvitetogameService {
             },
             select:{
                 team: true,
-                friend:{
+                user:{
                     select:{
                         firstName:true,
                         lastName:true,
