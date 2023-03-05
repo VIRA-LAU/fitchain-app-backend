@@ -14,6 +14,7 @@ export class InvitetogameService {
             },
             select:{
                 team: true,
+                status:true,
                 friend:{
                     select:{
                         firstName:true,
@@ -47,6 +48,7 @@ export class InvitetogameService {
             },
             select:{
                 team: true,
+                status:true,
                 user:{
                     select:{
                         firstName:true,
