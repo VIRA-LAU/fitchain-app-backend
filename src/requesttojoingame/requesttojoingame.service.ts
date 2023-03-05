@@ -1,25 +1,19 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateInvitationDto } from './dto';
-import { EditInvitationDto } from './dto/edit-invitation.dto';
+import { CreateRequestToJoinDto } from './dto/create-request-to-join.dto';
+import { EditRequestToJoinDto } from './dto/edit-request-to-join.dto';
 
 @Injectable()
-export class InvitetogameService {
+export class RequesttojoingameService {
     constructor(private prisma: PrismaService){}
 
-    async getSentInvitations(userId:number){
-        return this.prisma.inviteToGame.findMany({
+    async getSentRequests(userId:number){
+        return this.prisma.requestToJoinGame.findMany({
             where:{
                 userId
             },
             select:{
                 team: true,
-                friend:{
-                    select:{
-                        firstName:true,
-                        lastName:true,
-                    }
-                },
                 game:{
                     select:{
                         type:true,
@@ -40,10 +34,12 @@ export class InvitetogameService {
         })
     }
 
-    async getReceivedInvitations(userId: number) {
-        return this.prisma.inviteToGame.findMany({
+    async getRecievedRequests(userId: number) {
+        return this.prisma.requestToJoinGame.findMany({
             where:{
-                friendId: userId
+                game:{
+                    adminId:userId
+                }
             },
             select:{
                 team: true,
@@ -74,51 +70,53 @@ export class InvitetogameService {
     }
 
 
-    async getSentInvitationById(userId: number, invitationId: number) {
-        const sentInvitation = this.prisma.inviteToGame.findFirst({
+    async getSentRequestById(userId: number, requestId: number) {
+        const sentRequest = this.prisma.requestToJoinGame.findFirst({
             where:{
-                id: invitationId,
+                id: requestId,
                 userId: userId
             }
         })
 
-        return sentInvitation
+        return sentRequest
     }
 
-    async getReceivedInvitationById(userId:number, invitationId:number ){
-        const receievdInvitation = this.prisma.inviteToGame.findFirst({
+    async getReceivedRequestById(userId:number, requestId:number ){
+        const receivedRequest = this.prisma.requestToJoinGame.findFirst({
             where:{
-                id: invitationId,
-                friendId: userId
+                id: requestId,
+                game:{
+                    adminId:userId
+                }
             }
         })
 
-        return receievdInvitation;
+        return receivedRequest;
     }
 
-    async createInvitation(userId:number, dto:CreateInvitationDto){
-        const invitation = await this.prisma.inviteToGame.create({ 
+    async createRequest(userId:number, dto:CreateRequestToJoinDto){
+        const request = await this.prisma.requestToJoinGame.create({ 
             data:{
                 userId,
                 ...dto
             }
         })
-        return invitation; 
+        return request; 
     }
 
-    async editInvitationById(userId:number,invitationId: number, dto:EditInvitationDto){
-        const invitation = await this.prisma.inviteToGame.findUnique({
+    async editRequestById(userId:number,requestId: number, dto:EditRequestToJoinDto){
+        const request = await this.prisma.requestToJoinGame.findUnique({
             where:{
-                id:invitationId
+                id:requestId
             }
         })
 
-        if(!invitation || invitation.userId != userId)
+        if(!request || request.userId != userId)
              throw new ForbiddenException("Access to edit denied")
         
-             return this.prisma.inviteToGame.update({
+             return this.prisma.requestToJoinGame.update({
                 where:{
-                    id:invitationId
+                    id:requestId
                 },
                 data:{
                     ...dto
@@ -126,19 +124,19 @@ export class InvitetogameService {
              })
     }
 
-    async deleteInvitationById(userId:number, invitationId:number){
-        const invitation = await this.prisma.inviteToGame.findUnique({
+    async deleteRequestById(userId:number, requestId:number){
+        const request = await this.prisma.requestToJoinGame.findUnique({
             where:{
-                id:invitationId
+                id:requestId
             }
         })
 
-        if(!invitation || invitation.userId != userId)
+        if(!request || request.userId != userId)
         throw new ForbiddenException("Access to edit denied")
 
-        await this.prisma.inviteToGame.delete({
+        await this.prisma.requestToJoinGame.delete({
             where:{
-                id:invitationId
+                id:requestId
             }
         })
         
