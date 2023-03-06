@@ -14,7 +14,8 @@ export class BranchService {
                 rating: true,
                 venue: {
                     select:{
-                        id:true
+                        id:true,
+                        name:true,
                     }
                 },
             }
