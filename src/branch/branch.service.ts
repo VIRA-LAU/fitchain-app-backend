@@ -18,6 +18,13 @@ export class BranchService {
                         name:true,
                     }
                 },
+                courts: {
+                    select: {
+                        id: true,
+                        nbOfPlayers: true,
+                        price: true
+                    }
+                }
             }
        
         });
