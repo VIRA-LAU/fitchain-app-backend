@@ -62,7 +62,9 @@ export class GameService {
                 },
                 admin: {
                     select:{
-                        id:true
+                        id:true,
+                        firstName: true,
+                        lastName: true
                     }
                 }
             }
@@ -179,8 +181,10 @@ export class GameService {
                     }
                 },
                 admin: {
-                    select:{
-                        id: true
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true
                     }
                 }
             }
