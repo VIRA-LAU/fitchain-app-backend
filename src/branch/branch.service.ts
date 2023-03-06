@@ -46,6 +46,23 @@ export class BranchService {
         const branches = await this.prisma.branch.findMany({
             where: {
                 venueId,
+            },
+            select: {
+                location: true,
+                rating: true,
+                venue: {
+                    select:{
+                        id:true,
+                        name:true,
+                    }
+                },
+                courts: {
+                    select: {
+                        id: true,
+                        courtType: true,
+                        price: true
+                    }
+                }
             }
         })
         return branches;

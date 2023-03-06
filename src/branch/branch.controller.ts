@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { GetVenue } from '../auth/decorator';
 import { BranchService } from './branch.service';
 import { CreateBranchDto, EditBranchDto } from './dto';
@@ -8,13 +8,10 @@ export class BranchController {
     constructor(private branchService: BranchService){}
 
     @Get()
-    getBranches(){
-        return this.branchService.getBranches()
-    }
-
-    @Get()
-    getBranchesByVenueId(@GetVenue('id') venueId: number){
-        return this.branchService.getBranchesByVenueId(venueId)
+    getBranches(@Query('venueId') venueId?: string){
+        if (!venueId)
+            return this.branchService.getBranches()
+        return this.branchService.getBranchesByVenueId(parseInt(venueId))
     }
 
     @Get(':id')
