@@ -30,7 +30,11 @@ export class VenueService {
                 id:venueId,
             },
             include:{
-                branches:true
+                branches:{
+                    include:{
+                        courts:true
+                    }
+                }
             }
         })
         return venue; 
