@@ -204,36 +204,78 @@ export class GameService {
     }
 
     async getActivities(userId: number) {
-        const activities = await this.prisma.game.findMany({ 
-            where:{
-                OR: [
+        const selectedFields = {
+            date:true,
+            type: true,
+            winnerTeam: true
+        }
+        const adminActivities = (await this.prisma.game.findMany({ 
+            where:{                
+                AND: [
                     { adminId: userId },
-                    {
-                        gameInvitation: {
-                            some: {
-                            friendId: userId
-                        }
-                        }
+                    {status: gameStatus.FINISHED}
+                ],
+            },
+            select:{
+                ...selectedFields,
+                adminTeam: true,
+            },
+        })).map(({date, type, winnerTeam, adminTeam}) => ({
+            date, type, isWinner: winnerTeam === adminTeam
+        }))
+        const invitedActivities = (await this.prisma.game.findMany({ 
+            where:{
+                AND: [{
+                    gameInvitation: {
+                        some: {
+                        friendId: userId
+                    }
+                    }
+                },
+                    {status: gameStatus.FINISHED}
+                ],
+            },
+            select:{
+                ...selectedFields,
+                gameInvitation: {
+                    select: {
+                        team: true,
                     },
+                }
+
+            },
+        })).map(({date, type, winnerTeam, gameInvitation}) => ({
+            date, type, isWinner: winnerTeam === gameInvitation.pop().team
+        }))
+        const requestedActivities = (await this.prisma.game.findMany({ 
+            where:{
+                AND: [
                     {
                         gameRequests: {
                             some: {
                                 userId:userId
                             }
-                    }}
-                ],
-                AND: [
+                    }},
                     {status: gameStatus.FINISHED}
                 ],
             },
             select:{
-                date:true,
-                duration:true,
-                type: true,
-                winnerTeam: true,
-            }
-        })
-        return activities; 
+                ...selectedFields,
+                gameRequests: {
+                    select: {
+                        team: true,
+                    }
+                },
+            },
+        })).map(({date, type, winnerTeam, gameRequests}) => ({
+            date, type, isWinner: winnerTeam === gameRequests.pop().team
+        }))
+
+        return [
+            ...adminActivities,
+            ...invitedActivities,
+            ...requestedActivities
+        ]; 
     }
 
     async getUpdates(gameId: number) {
