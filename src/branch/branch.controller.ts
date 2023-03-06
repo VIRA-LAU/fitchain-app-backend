@@ -12,6 +12,11 @@ export class BranchController {
         return this.branchService.getBranches()
     }
 
+    @Get()
+    getBranchesByVenueId(@GetVenue('id') venueId: number){
+        return this.branchService.getBranchesByVenueId(venueId)
+    }
+
     @Get(':id')
     getBranchById(@Param('id', ParseIntPipe) branchId:number ){
         return this.branchService.getBranchById(branchId)

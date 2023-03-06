@@ -255,8 +255,12 @@ export class GameService {
                     },
                     take:5
                 },
-                gameRequests: true,
-                gamestatistics: true,
+                gameRequests: {
+                    orderBy:{
+                        createdAt:'desc'
+                    },
+                    take:5
+                }
             }
         })
         return activities; 

@@ -21,7 +21,7 @@ export class BranchService {
                 courts: {
                     select: {
                         id: true,
-                        nbOfPlayers: true,
+                        courtType: true,
                         price: true
                     }
                 }
@@ -39,6 +39,16 @@ export class BranchService {
             }
         })
         return branch;
+
+    }
+
+    async getBranchesByVenueId(venueId: number) {
+        const branches = await this.prisma.branch.findMany({
+            where: {
+                venueId,
+            }
+        })
+        return branches;
 
     }
 
