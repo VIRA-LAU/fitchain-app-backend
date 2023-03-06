@@ -21,6 +21,7 @@ model User {
 
   firstName String?
   lastName String?
+  description String?
 
   gender String?
   height Int?
@@ -55,7 +56,7 @@ model Venue {
   managerPhoneNumber String @unique
   hash  String @unique
   
-
+  description String?
   managerFirstName String?
   managerLastName String?
   branches Branch[]
@@ -176,6 +177,7 @@ model Court {
   courtType String
   nbOfPlayers Int
   branchId Int
+  price Int?
 
   games   Game[]
   branch  Branch  @relation(fields: [branchId],references: [id],onDelete: Cascade,onUpdate: Cascade)

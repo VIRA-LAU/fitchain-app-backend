@@ -20,6 +20,11 @@ export class GameController {
         return this.gameService.getBookingById(bookingId)
     }
 
+    @Get('updates/:id')
+    getUpdates(@Param('id', ParseIntPipe) gameId:number) {
+        return this.gameService.getUpdates(gameId);
+    }
+
  
     @Post("bookings")
     createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){
@@ -52,11 +57,6 @@ export class GameController {
     @Get('activities')
     getActivities(@GetUser('id') userId: number) {
         return this.gameService.getActivities(userId);
-    }
-
-    @Get('updates')
-    getUpdates(@GetUser('id') userId: number) {
-        return this.gameService.getUpdates(userId);
     }
 
 

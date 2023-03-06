@@ -760,14 +760,14 @@ describe('App e2e', () => {
     })
     
     
-    // describe('Get venue by id', () =>{
-    //   it('Should get venue by id', ()=>{
-    //     return pactum.spec().get('/venues/{id}',).withPathParams('id','1').withHeaders({
-    //       Authorization:'Bearer $S{UserAt}'
-    //     }).expectStatus(200)
-    //   })
+    describe('Get venue by id', () =>{
+      it('Should get venue by id', ()=>{
+        return pactum.spec().get('/venues/{id}',).withPathParams('id','1').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200)
+      })
 
-    // })
+    })
      
     // describe('Edit Venue', () =>{
     //   it('Should edit venue', ()=>{

@@ -12,7 +12,7 @@ export class VenueController {
         return this.venueService.getVenues()
     }
 
-    @Get('id')
+    @Get(':id')
     getVenueById(@Param('id', ParseIntPipe) venueId:number ){
         return this.venueService.getVenueById(venueId)
 

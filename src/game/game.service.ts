@@ -232,33 +232,11 @@ export class GameService {
         return activities; 
     }
 
-    async getUpdates(userId: number) {
+    async getUpdates(gameId: number) {
         const activities = await this.prisma.game.findMany({ 
             where:{
-                OR: [
-                    { adminId: userId },
-                    {
-                        gameInvitation: {
-                            some: {
-                            friendId: userId
-                        }
-                        }
-                    },
-                    {
-                        gameRequests: {
-                            some: {
-                                userId:userId
-                            }
-                    }}
-                ],
-                AND: [
-                    {status: gameStatus.FINISHED}
-                ],
+               id:gameId
             },
-            orderBy:{
-                updatedAt: 'desc'
-            },
-            take:10,
             select:{
                 date:true,
                 duration:true,
@@ -267,7 +245,12 @@ export class GameService {
                 adminTeam: true,
                 status: true,
                 highlights: true,
-                gameInvitation: true,
+                gameInvitation: {
+                    orderBy:{
+                        createdAt:'desc'
+                    },
+                    take:5
+                },
                 gameRequests: true,
                 gamestatistics: true,
             }

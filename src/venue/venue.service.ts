@@ -28,6 +28,9 @@ export class VenueService {
         const venue = await this.prisma.venue.findFirst({ 
             where:{
                 id:venueId,
+            },
+            include:{
+                branches:true
             }
         })
         return venue; 
