@@ -14,6 +14,7 @@ export class GameService {
                 status: gameStatus.APPROVED
             },
             select:{
+                id: true,
                 date:true,
                 duration:true,
                 type: true,
@@ -150,6 +151,7 @@ export class GameService {
                 ]
             },
             select:{
+                id: true,
                 date:true,
                 duration:true,
                 adminTeam: true,
