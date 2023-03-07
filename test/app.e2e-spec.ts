@@ -657,9 +657,19 @@ describe('get empty bookings', () =>{
       it('Shoud get activities', ()=>{
         return pactum.spec().get('/games/activities').withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).inspect()
+        }).expectStatus(200)
       })
     })
+    
+// * * * * * * * * * * * Game Activities * * * * * * * * * * *
+
+describe('Get player status', ()=>{
+  it('Shoud get player status', ()=>{
+    return pactum.spec().get('/games/playerstatus').withHeaders({
+      Authorization:'Bearer $S{UserAt}'
+    }).withQueryParams({'gameId': '1'}).expectStatus(200).inspect()
+  })
+})
 
 // * * * * * * * * * * * Delete Invitations and Game Requests and Bookings * * * * * * * * * * *
 

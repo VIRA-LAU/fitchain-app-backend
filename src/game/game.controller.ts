@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { GetUser } from '../auth/decorator';
 import { JwtGaurd } from '../auth/gaurd';
 import { createBookingDto } from './dto/create-booking.dto';
@@ -25,6 +25,10 @@ export class GameController {
         return this.gameService.getUpdates(gameId);
     }
 
+    @Get('playerstatus')
+    getPlayerGameStatus(@GetUser('id') userId: number, @Query('gameId') gameId: string){
+        return this.gameService.getPlayerGameStatus(userId, parseInt(gameId))
+    }
  
     @Post("bookings")
     createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){

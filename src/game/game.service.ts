@@ -205,6 +205,40 @@ export class GameService {
         return upcoming; 
     }
 
+    async getPlayerGameStatus(userId: number, gameId: number) {
+        const gameStatus = await this.prisma.game.findFirst({
+          where: {
+            id: gameId,
+          },
+          include: {
+            gameRequests: {
+              where: {
+                userId: userId,
+              },
+              select:{
+                status:true,
+              }
+            },
+            gameInvitation: {
+              where: {
+                friendId: userId,
+              },
+              select:{
+                status:true,
+              }
+            },
+          },
+        });
+    
+        const userStatus = {
+          hasRequestedtoJoin: gameStatus?.gameRequests?.length>0? gameStatus.gameRequests[0].status:false,
+          hasBeenInvited: gameStatus?.gameInvitation?.length>0? gameStatus.gameInvitation[0].status:false,
+          isAdmin: gameStatus.adminId === userId,
+        };
+        return userStatus;
+      }
+      
+
     async getActivities(userId: number) {
         const selectedFields = {
             date:true,
