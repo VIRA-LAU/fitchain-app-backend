@@ -517,6 +517,17 @@ describe('get empty bookings', () =>{
       })
     })
 
+    describe('edit booking by id', () =>{
+      const dto : editBookingDto = {
+        status: gameStatus.FINISHED
+      }
+      it('Should edit booking by Id', ()=>{
+        return pactum.spec().patch('/games/bookings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).withBody(dto).expectStatus(200)
+      })
+    })
+
 // * * * * * * * * * * * Create - Update Invitations * * * * * * * * * * *
 
     describe('create invitation', () =>{
