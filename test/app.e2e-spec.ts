@@ -15,6 +15,7 @@ import { CreateRequestToJoinDto } from 'src/requesttojoingame/dto/create-request
 import { EditRequestToJoinDto } from 'src/requesttojoingame/dto/edit-request-to-join.dto';
 import { CreateFriendRequestDto } from 'src/addfriend/dto/create-friend-request.dto';
 import { EditFriendRequestDto } from 'src/addfriend/dto/edit-friend-request.dto';
+import { createFollowGameDto } from 'src/game/dto/create-follow-game.dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -623,6 +624,36 @@ describe('get empty bookings', () =>{
       })
     })
 
+// * * * * * * * * * * * Create Followed Games * * * * * * * * * * *
+
+describe('create follow', () =>{
+  const dto1 : createFollowGameDto = {
+    gameId:1,
+  }
+  const dto2 : createFollowGameDto = {
+    gameId:2,
+  }
+  it('Should create follow 1', ()=>{
+    return pactum.spec().post('/games/followed',).withHeaders({
+      Authorization:'Bearer $S{UserAt}'
+    }).withBody(dto1).expectStatus(201)
+  })
+
+  it('Should create follow 2', ()=>{
+    return pactum.spec().post('/games/followed',).withHeaders({
+      Authorization:'Bearer $S{UserAt}'
+    }).withBody(dto2).expectStatus(201)
+  })
+})
+
+describe('get followed games', () =>{
+  it('Should get followed games', ()=>{
+    return pactum.spec().get('/games/followed',).withHeaders({
+      Authorization:'Bearer $S{UserAt}'
+    }).expectStatus(200).expectJsonLength(2).inspect()
+  })
+})
+
 // * * * * * * * * * * * Game Upcomings * * * * * * * * * * *
 
     describe('get upcomings', () =>{
@@ -667,12 +698,31 @@ describe('Get player status', ()=>{
   it('Shoud get player status', ()=>{
     return pactum.spec().get('/games/playerstatus').withHeaders({
       Authorization:'Bearer $S{UserAt}'
-    }).withQueryParams({'gameId': '1'}).expectStatus(200).inspect()
+    }).withQueryParams({'gameId': '1'}).expectStatus(200)
   })
 })
 
-// * * * * * * * * * * * Delete Invitations and Game Requests and Bookings * * * * * * * * * * *
+// * * * * * * * * * * * Delete Invitations and Game Requests and Bookings and Followed Games * * * * * * * * * * *
 
+    describe('delete follow by game id', () =>{
+      it('Should delete booking by Id', ()=>{
+        return pactum.spec().delete('/games/followed',).withQueryParams({'gameId':'1'}).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(204)
+      })
+      it('Should delete booking by Id', ()=>{
+        return pactum.spec().delete('/games/followed',).withQueryParams({'gameId':'2'}).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(204)
+      })
+
+      it('Should get followed games', ()=>{
+        return pactum.spec().get('/games/followed',).withHeaders({
+          Authorization:'Bearer $S{UserAt}'
+        }).expectStatus(200).expectJsonLength(0)
+      })
+
+    })
 
     describe('delete invitation by id', () =>{
       it('Should delete invitation by Id', ()=>{

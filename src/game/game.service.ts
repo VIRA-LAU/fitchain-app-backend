@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { gameStatus, invitationApproval } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { createBookingDto } from './dto/create-booking.dto';
+import { createFollowGameDto } from './dto/create-follow-game.dto';
 import { editBookingDto } from './dto/edit-booking.dto';
 
 @Injectable()
@@ -203,6 +204,101 @@ export class GameService {
             }
         })
         return upcoming; 
+    }
+
+    async getFollowedGames(userId: number) {
+        return this.prisma.followsGame.findMany({
+            where:{
+                userId:userId
+            },
+           select:{
+            game:{
+                select:{
+                    id: true,
+                    date:true,
+                    duration:true,
+                    type: true,
+                    adminTeam: true,
+                    court: {
+                        select:{
+                            branch:{
+                                select:{
+                                    location: true,
+                                    venue:{
+                                        select:{
+                                            name:true
+                                        }
+                                    }
+                                    
+                                }
+                                
+                            }
+                        }
+                    },
+                    gameRequests:{
+                        where:{
+                            status: invitationApproval.APPROVED
+                        },
+                        select:{
+                            team: true,
+                            user:{
+                                select:{
+                                    id:true
+                                }
+                            }
+                        }
+                    },
+                    gameInvitation:{
+                        where:{
+                            status: invitationApproval.APPROVED
+                        },
+                        select:{
+                            team: true,
+                            friend:{
+                                select:{
+                                    id:true
+                                }
+                            }
+                        }
+                    },
+                    admin: {
+                        select:{
+                            id:true,
+                            firstName: true,
+                            lastName: true
+                        }
+                    }
+                }
+            }
+           }
+        })
+    }
+
+
+    async createFollowGame(userId: number, dto: createFollowGameDto) {
+        return this.prisma.followsGame.create({
+           data:{
+            userId:userId,
+            ...dto,
+           }
+        })
+    }
+
+    async deleteFollowById(userId: number, gameId: number) {
+        const follow = await this.prisma.followsGame.findUnique({
+            where:{
+               userId_gameId:{userId,gameId}
+            }
+        })
+
+        if(!follow || follow.userId != userId)
+        throw new ForbiddenException("Access to edit denied")
+
+        await this.prisma.followsGame.delete({
+            where:{
+                userId_gameId:{userId,gameId}
+            }
+        })
     }
 
     async getPlayerGameStatus(userId: number, gameId: number) {

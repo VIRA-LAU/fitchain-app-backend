@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPip
 import { GetUser } from '../auth/decorator';
 import { JwtGaurd } from '../auth/gaurd';
 import { createBookingDto } from './dto/create-booking.dto';
+import { createFollowGameDto } from './dto/create-follow-game.dto';
 import { editBookingDto } from './dto/edit-booking.dto';
 import { GameService } from './game.service';
 
@@ -20,16 +21,34 @@ export class GameController {
         return this.gameService.getBookingById(bookingId)
     }
 
+    @Get('playerstatus')
+    getPlayerGameStatus(@GetUser('id') userId: number, @Query('gameId') gameId: string){
+        return this.gameService.getPlayerGameStatus(userId, parseInt(gameId))
+    }
+
+    @Get('followed')
+    getFollowedGames(@GetUser('id') userId: number){
+        return this.gameService.getFollowedGames(userId)
+    }
+
+    @Post("followed")
+    createFollowGame(@GetUser('id') userId:number, @Body() dto:createFollowGameDto){
+        console.log("create follow")
+        return this.gameService.createFollowGame(userId,dto)
+    }
+
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @Delete('followed')
+    deleteFollowById(@GetUser('id') userId:number, @Query('gameId') gameId:string){
+        return this.gameService.deleteFollowById(userId,parseInt(gameId))
+        
+    }
+
     @Get('updates/:id')
     getUpdates(@Param('id', ParseIntPipe) gameId:number) {
         return this.gameService.getUpdates(gameId);
     }
 
-    @Get('playerstatus')
-    getPlayerGameStatus(@GetUser('id') userId: number, @Query('gameId') gameId: string){
-        return this.gameService.getPlayerGameStatus(userId, parseInt(gameId))
-    }
- 
     @Post("bookings")
     createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){
         console.log("create booking")

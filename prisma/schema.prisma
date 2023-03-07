@@ -41,7 +41,9 @@ model User {
 
   userStatistics         HasStatistics[]
 
-  games Game[]
+  gamesFollowed FollowsGame[]
+
+  games Game[]          @relation("createdGames")
 
 }
 
@@ -61,7 +63,6 @@ model Venue {
   managerLastName String?
   branches Branch[]
 
-
 }
 
 model Branch {
@@ -73,7 +74,6 @@ model Branch {
   rating Int @default(0)
   courts Court[]
   venue  Venue    @relation(fields: [venueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
-
 
 }
 
@@ -95,9 +95,25 @@ model Game {
   gamestatistics HasStatistics[]
   gameRequests  RequestToJoinGame[]
   gameInvitation InviteToGame[]
+  followers FollowsGame[]
 
   court  Court    @relation(fields: [courtId],references: [id],onDelete: Cascade,onUpdate: Cascade)
-  admin  User    @relation(fields: [adminId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  admin  User    @relation(name: "createdGames", fields: [adminId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+}
+
+model FollowsGame {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  userId Int
+  gameId Int
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade,onUpdate: Cascade)
+  game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+
+  @@unique([userId, gameId])
 }
 
 model InviteToGame {
@@ -112,8 +128,8 @@ model InviteToGame {
   team teamType @default(HOME)
   status invitationApproval @default(PENDING)
 
-  user User @relation(name:"sender",fields: [userId], references: [id], onDelete: Cascade)
-  friend User @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade)
+  user User @relation(name:"sender",fields: [userId], references: [id], onDelete: Cascade,onUpdate: Cascade)
+  friend User @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade,onUpdate: Cascade)
   game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 
   @@unique([userId, friendId, gameId])
@@ -129,8 +145,8 @@ model AddFriend {
   friendId Int
   status invitationApproval @default(PENDING)
 
-  user User @relation(name:"sender",fields: [userId], references: [id], onDelete: Cascade)
-  friend User @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade)
+  user User @relation(name:"sender",fields: [userId], references: [id], onDelete: Cascade,onUpdate: Cascade)
+  friend User @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade,onUpdate: Cascade)
 
   @@unique([userId, friendId])
 
@@ -146,7 +162,7 @@ model RequestToJoinGame {
   team teamType @default(HOME)
   status invitationApproval @default(PENDING)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade,onUpdate: Cascade)
   game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 
   @@unique([userId, gameId])

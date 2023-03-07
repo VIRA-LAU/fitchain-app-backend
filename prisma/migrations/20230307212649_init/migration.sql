@@ -2,10 +2,13 @@
 CREATE TYPE "invitationApproval" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "gameStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'ACTIVE', 'CANCELLED');
+CREATE TYPE "gameStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'ACTIVE', 'CANCELLED', 'FINISHED');
 
 -- CreateEnum
 CREATE TYPE "gameType" AS ENUM ('Basketball', 'Football', 'Tennis');
+
+-- CreateEnum
+CREATE TYPE "teamType" AS ENUM ('HOME', 'AWAY');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -17,12 +20,14 @@ CREATE TABLE "User" (
     "hash" TEXT NOT NULL,
     "firstName" TEXT,
     "lastName" TEXT,
+    "description" TEXT,
     "gender" TEXT,
     "height" INTEGER,
     "weight" INTEGER,
     "age" INTEGER,
     "nationality" TEXT,
     "position" TEXT,
+    "rating" INTEGER,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -36,6 +41,7 @@ CREATE TABLE "Venue" (
     "managerEmail" TEXT NOT NULL,
     "managerPhoneNumber" TEXT NOT NULL,
     "hash" TEXT NOT NULL,
+    "description" TEXT,
     "managerFirstName" TEXT,
     "managerLastName" TEXT,
 
@@ -64,11 +70,23 @@ CREATE TABLE "Game" (
     "date" TIMESTAMP(3) NOT NULL,
     "duration" INTEGER NOT NULL,
     "type" "gameType" NOT NULL DEFAULT 'Basketball',
-    "winnerTeam" TEXT,
+    "adminTeam" "teamType" NOT NULL DEFAULT 'HOME',
+    "winnerTeam" "teamType" NOT NULL DEFAULT 'HOME',
     "highlights" TEXT[],
     "status" "gameStatus" NOT NULL DEFAULT 'PENDING',
 
     CONSTRAINT "Game_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "FollowsGame" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "gameId" INTEGER NOT NULL,
+
+    CONSTRAINT "FollowsGame_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -79,6 +97,7 @@ CREATE TABLE "InviteToGame" (
     "userId" INTEGER NOT NULL,
     "friendId" INTEGER NOT NULL,
     "gameId" INTEGER NOT NULL,
+    "team" "teamType" NOT NULL DEFAULT 'HOME',
     "status" "invitationApproval" NOT NULL DEFAULT 'PENDING',
 
     CONSTRAINT "InviteToGame_pkey" PRIMARY KEY ("id")
@@ -97,15 +116,16 @@ CREATE TABLE "AddFriend" (
 );
 
 -- CreateTable
-CREATE TABLE "RequestToJoin" (
+CREATE TABLE "RequestToJoinGame" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "userId" INTEGER NOT NULL,
     "gameId" INTEGER NOT NULL,
+    "team" "teamType" NOT NULL DEFAULT 'HOME',
     "status" "invitationApproval" NOT NULL DEFAULT 'PENDING',
 
-    CONSTRAINT "RequestToJoin_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "RequestToJoinGame_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -126,6 +146,7 @@ CREATE TABLE "Court" (
     "courtType" TEXT NOT NULL,
     "nbOfPlayers" INTEGER NOT NULL,
     "branchId" INTEGER NOT NULL,
+    "price" INTEGER,
 
     CONSTRAINT "Court_pkey" PRIMARY KEY ("id")
 );
@@ -149,13 +170,16 @@ CREATE UNIQUE INDEX "Venue_managerPhoneNumber_key" ON "Venue"("managerPhoneNumbe
 CREATE UNIQUE INDEX "Venue_hash_key" ON "Venue"("hash");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "FollowsGame_userId_gameId_key" ON "FollowsGame"("userId", "gameId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "InviteToGame_userId_friendId_gameId_key" ON "InviteToGame"("userId", "friendId", "gameId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AddFriend_userId_friendId_key" ON "AddFriend"("userId", "friendId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "RequestToJoin_userId_gameId_key" ON "RequestToJoin"("userId", "gameId");
+CREATE UNIQUE INDEX "RequestToJoinGame_userId_gameId_key" ON "RequestToJoinGame"("userId", "gameId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "HasStatistics_userId_gameId_key" ON "HasStatistics"("userId", "gameId");
@@ -168,6 +192,12 @@ ALTER TABLE "Game" ADD CONSTRAINT "Game_courtId_fkey" FOREIGN KEY ("courtId") RE
 
 -- AddForeignKey
 ALTER TABLE "Game" ADD CONSTRAINT "Game_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FollowsGame" ADD CONSTRAINT "FollowsGame_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FollowsGame" ADD CONSTRAINT "FollowsGame_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "Game"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "InviteToGame" ADD CONSTRAINT "InviteToGame_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -185,10 +215,10 @@ ALTER TABLE "AddFriend" ADD CONSTRAINT "AddFriend_userId_fkey" FOREIGN KEY ("use
 ALTER TABLE "AddFriend" ADD CONSTRAINT "AddFriend_friendId_fkey" FOREIGN KEY ("friendId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RequestToJoin" ADD CONSTRAINT "RequestToJoin_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "RequestToJoinGame" ADD CONSTRAINT "RequestToJoinGame_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RequestToJoin" ADD CONSTRAINT "RequestToJoin_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "Game"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "RequestToJoinGame" ADD CONSTRAINT "RequestToJoinGame_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "Game"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "HasStatistics" ADD CONSTRAINT "HasStatistics_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
