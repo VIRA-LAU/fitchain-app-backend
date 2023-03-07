@@ -21,9 +21,9 @@ export class GameController {
         return this.gameService.getBookingById(bookingId)
     }
 
-    @Get('playerstatus')
-    getPlayerGameStatus(@GetUser('id') userId: number, @Query('gameId') gameId: string){
-        return this.gameService.getPlayerGameStatus(userId, parseInt(gameId))
+    @Get('playerstatus/:gameId')
+    getPlayerGameStatus(@GetUser('id') userId: number, @Param('gameId', ParseIntPipe) gameId: number){
+        return this.gameService.getPlayerGameStatus(userId, gameId)
     }
 
     @Get('followed')
