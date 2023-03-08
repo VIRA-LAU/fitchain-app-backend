@@ -23,16 +23,31 @@ export class InvitetogameService {
                 },
                 game:{
                     select:{
+                        id: true,
                         type:true,
                         date:true,
                         duration: true,
-                        court:{
+                        court: {
                             select:{
                                 branch:{
                                     select:{
-                                        location:true
+                                        location: true,
+                                        venue:{
+                                            select:{
+                                                name:true
+                                            }
+                                        }
+                                        
                                     }
+                                    
                                 }
+                            }
+                        },
+                        admin: {
+                            select: {
+                                id: true,
+                                firstName: true,
+                                lastName: true
                             }
                         }
                     }
@@ -57,16 +72,31 @@ export class InvitetogameService {
                 },
                 game:{
                     select:{
+                        id: true,
                         type:true,
                         date:true,
                         duration: true,
-                        court:{
+                        court: {
                             select:{
                                 branch:{
                                     select:{
-                                        location:true
+                                        location: true,
+                                        venue:{
+                                            select:{
+                                                name:true
+                                            }
+                                        }
+                                        
                                     }
+                                    
                                 }
+                            }
+                        },
+                        admin: {
+                            select: {
+                                id: true,
+                                firstName: true,
+                                lastName: true
                             }
                         }
                     }
