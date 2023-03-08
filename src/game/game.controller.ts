@@ -11,14 +11,24 @@ import { GameService } from './game.service';
 export class GameController {
     constructor(private gameService: GameService){}
 
+    @Get()
+    getGames(@GetUser('id') userId: number, @Query('limit') limit?: string, @Query('type') type?: string) {
+        return this.gameService.getGames(userId, parseInt(limit),type);
+    }
+
     @Get('bookings')
     getBookings(){
         return this.gameService.getBookings()
     }
 
-    @Get('bookings/:id')
-    getBookingById(@Param('id', ParseIntPipe) bookingId:number ){
-        return this.gameService.getBookingById(bookingId)
+    @Get('activities')
+    getActivities(@GetUser('id') userId: number) {
+        return this.gameService.getActivities(userId);
+    }
+
+    @Get('followed')
+    getFollowedGames(@GetUser('id') userId: number){
+        return this.gameService.getFollowedGames(userId)
     }
 
     @Get('playerstatus/:gameId')
@@ -26,9 +36,9 @@ export class GameController {
         return this.gameService.getPlayerGameStatus(userId, gameId)
     }
 
-    @Get('followed')
-    getFollowedGames(@GetUser('id') userId: number){
-        return this.gameService.getFollowedGames(userId)
+    @Get(':id')
+    getGameById(@GetUser('id') userId: number,  @Param('id', ParseIntPipe) upcomingId:number ){
+        return this.gameService.getGameById(userId, upcomingId)
     }
 
     @Post("followed")
@@ -67,20 +77,7 @@ export class GameController {
         
     }
 
-    @Get('upcomings')
-    getUpcomings(@GetUser('id') userId: number) {
-        return this.gameService.getUpcomings(userId);
-    }
 
-    @Get('upcomings/:id')
-    getUpcomingById(@GetUser('id') userId: number,  @Param('id', ParseIntPipe) upcomingId:number ){
-        return this.gameService.getUpcomingById(userId, upcomingId)
-    }
-
-    @Get('activities')
-    getActivities(@GetUser('id') userId: number) {
-        return this.gameService.getActivities(userId);
-    }
 
 
 

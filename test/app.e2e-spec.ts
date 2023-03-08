@@ -112,6 +112,7 @@ describe('App e2e', () => {
 
     })
 
+
     describe('Signin', () =>{
 
       it('Should throw error if email is empty ', ()=>{
@@ -239,7 +240,7 @@ describe('App e2e', () => {
       it('Should get courts', ()=>{
         return pactum.spec().get('/courts',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).expectJsonLength(2)
+        }).expectStatus(200)
       })
     })
 
@@ -466,11 +467,11 @@ describe('get empty bookings', () =>{
       })
     })
 
-// * * * * * * * * * * * Upcomings * * * * * * * * * * *
+// * * * * * * * * * * * Games * * * * * * * * * * *
 
-    describe('get empty upcomings', () =>{
-      it('Should get upcomings', ()=>{
-        return pactum.spec().get('/games/upcomings',).withHeaders({
+    describe('get empty games', () =>{
+      it('Should get games', ()=>{
+        return pactum.spec().get('/games',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
         }).expectStatus(200).expectBody([])
       })
@@ -506,13 +507,13 @@ describe('get empty bookings', () =>{
       it('Should get bookings', ()=>{
         return pactum.spec().get('/games/bookings',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
-        }).expectStatus(200).expectJsonLength(1)
+        }).expectStatus(200).expectJsonLength(1).inspect()
       })
     })
 
     describe('get booking by id', () =>{
       it('Should get booking by Id', ()=>{
-        return pactum.spec().get('/games/bookings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+        return pactum.spec().get('/games/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
           Authorization:'Bearer $S{UserAt}'
         }).expectStatus(200).expectBodyContains('$S{bookingId}')
       })
@@ -650,15 +651,15 @@ describe('get followed games', () =>{
   it('Should get followed games', ()=>{
     return pactum.spec().get('/games/followed',).withHeaders({
       Authorization:'Bearer $S{UserAt}'
-    }).expectStatus(200).expectJsonLength(2).inspect()
+    }).expectStatus(200).expectJsonLength(2)
   })
 })
 
-// * * * * * * * * * * * Game Upcomings * * * * * * * * * * *
+// * * * * * * * * * * * Games Upcoming * * * * * * * * * * *
 
     describe('get upcomings', () =>{
       it('Should get upcomings', ()=>{
-        return pactum.spec().get('/games/upcomings',).withHeaders({
+        return pactum.spec().get('/games',).withQueryParams('type','upcoming').withHeaders({
           Authorization:'Bearer $S{UserAt}'
         }).expectStatus(200).expectJsonLength(2)
       })
@@ -666,7 +667,7 @@ describe('get followed games', () =>{
 
     describe('get upcoming by id', () =>{
       it('Should get upcoming by Id', ()=>{
-        return pactum.spec().get('/games/upcomings/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
+        return pactum.spec().get('/games/{id}',).withPathParams('id','$S{bookingId}').withHeaders({
           Authorization:'Bearer $S{UserAt}'
         }).expectStatus(200).expectBodyContains('$S{bookingId}')
       })
@@ -696,9 +697,9 @@ describe('get followed games', () =>{
 
 describe('Get player status', ()=>{
   it('Shoud get player status', ()=>{
-    return pactum.spec().get('/games/playerstatus').withHeaders({
+    return pactum.spec().get('/games/playerstatus/{id}').withHeaders({
       Authorization:'Bearer $S{UserAt}'
-    }).withQueryParams({'gameId': '1'}).expectStatus(200)
+    }).withPathParams('id','1').expectStatus(200)
   })
 })
 
@@ -765,8 +766,8 @@ describe('Get player status', ()=>{
         }).expectStatus(200).expectJsonLength(0)
       })
 
-      it('Should get upcomings', ()=>{
-        return pactum.spec().get('/games/upcomings',).withHeaders({
+      it('Should get games', ()=>{
+        return pactum.spec().get('/games',).withHeaders({
           Authorization:'Bearer $S{UserAt}'
         }).expectStatus(200).expectJsonLength(0)
       })

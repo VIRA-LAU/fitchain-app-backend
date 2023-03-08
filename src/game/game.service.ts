@@ -9,6 +9,139 @@ import { editBookingDto } from './dto/edit-booking.dto';
 export class GameService {
     constructor(private prisma: PrismaService){}
 
+    async getGames(userId: number, limit?: number, type?: string) {
+        const whereClause = {
+          OR: [
+            { adminId: userId },
+            {
+              gameInvitation: {
+                some: {
+                  friendId: userId,
+                },
+              },
+            },
+            {
+              gameRequests: {
+                some: {
+                  userId: userId,
+                },
+              },
+            },
+          ],
+        };
+        const games = await this.prisma.game.findMany({
+          where: whereClause,
+          orderBy: type === 'upcoming' ? { date: 'asc' } : type === 'previous' ? { date: 'desc' } : undefined,
+          take: limit?limit:undefined,
+          select: {
+            id: true,
+            date: true,
+            duration: true,
+            adminTeam: true,
+            type: true,
+            court: {
+              select: {
+                branch: {
+                  select: {
+                    location: true,
+                    venue: {
+                      select: {
+                        name: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            gameRequests: {
+              select: {
+                team: true,
+              },
+            },
+            gameInvitation: {
+              select: {
+                team: true,
+              },
+            },
+            admin: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        });
+        return games;
+      }
+      
+
+    async getGameById(userId:number, gameId:number){
+        const game = await this.prisma.game.findFirst({ 
+            where:{
+                id:gameId,
+                adminId: userId,
+            },
+            select:{
+                id: true,
+                date:true,
+                duration:true,
+                type: true,
+                adminTeam: true,
+                court: {
+                    select:{
+                        branch:{
+                            select:{
+                                location: true,
+                                venue:{
+                                    select:{
+                                        name:true
+                                    }
+                                }
+                                
+                            }
+                            
+                        }
+                    }
+                },
+                gameRequests:{
+                    where:{
+                        status: invitationApproval.APPROVED
+                    },
+                    select:{
+                        team: true,
+                        user:{
+                            select:{
+                                id:true
+                            }
+                        }
+                    }
+                },
+                gameInvitation:{
+                    where:{
+                        status: invitationApproval.APPROVED
+                    },
+                    select:{
+                        team: true,
+                        friend:{
+                            select:{
+                                id:true
+                            }
+                        }
+                    }
+                },
+                admin: {
+                    select:{
+                        id:true,
+                        firstName: true,
+                        lastName: true
+                    }
+                }
+            }
+        })
+        return game; 
+    }
+
     async getBookings() {
         return this.prisma.game.findMany({
             where:{
@@ -72,16 +205,6 @@ export class GameService {
             }
         })
     }
-
-   async getBookingById(bookingId:number){
-        const booking = await this.prisma.game.findFirst({ 
-            where:{
-                id:bookingId,
-                
-            }
-        })
-        return booking; 
-    }
  
     async createBooking(userId: number, dto: createBookingDto){
         const booking = await this.prisma.game.create({ 
@@ -131,80 +254,7 @@ export class GameService {
         
     }
 
-    async getUpcomings(userId: number) {
-        const upcomings = await this.prisma.game.findMany({ 
-            where:{
-                OR: [
-                    { adminId: userId },
-                    {
-                        gameInvitation: {
-                            some: {
-                            friendId: userId
-                        }
-                        }
-                    },
-                    {
-                        gameRequests: {
-                            some: {
-                                userId:userId
-                            }
-                    }}
-                ]
-            },
-            select:{
-                id: true,
-                date:true,
-                duration:true,
-                adminTeam: true,
-                type: true,
-                court: {
-                    select:{
-                        branch:{
-                            select:{
-                                location: true,
-                                venue:{
-                                    select:{
-                                        name:true
-                                    }
-                                }
-                                
-                            }
-                            
-                        }
-                    }
-                },
-                gameRequests:{
-                    select:{
-                        team: true
-                    }
-                },
-                gameInvitation:{
-                    select:{
-                        team: true
-                    }
-                },
-                admin: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true
-                    }
-                }
-            }
-        })
-        return upcomings; 
-    }
-
-    async getUpcomingById(userId:number, upcomingId:number){
-        const upcoming = await this.prisma.game.findFirst({ 
-            where:{
-                id:upcomingId,
-                adminId: userId,
-                
-            }
-        })
-        return upcoming; 
-    }
+   
 
     async getFollowedGames(userId: number) {
         return this.prisma.followsGame.findMany({
