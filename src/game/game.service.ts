@@ -11,23 +11,29 @@ export class GameService {
 
     async getGames(userId: number, limit?: number, type?: string) {
         const whereClause = {
-          OR: [
-            { adminId: userId },
-            {
-              gameInvitation: {
-                some: {
-                  friendId: userId,
+          AND: [
+            {OR: [
+                { adminId: userId },
+                {
+                gameInvitation: {
+                    some: {
+                    friendId: userId,
+                    },
                 },
-              },
-            },
-            {
-              gameRequests: {
-                some: {
-                  userId: userId,
                 },
-              },
-            },
-          ],
+                {
+                gameRequests: {
+                    some: {
+                    userId: userId,
+                    },
+                },
+                },
+            ],},
+            type === 'upcoming' ? {
+                date: {gt: new Date()}
+            } : type === 'previous' ? {
+                date: {lt: new Date()}
+            } : {}]
         };
         const games = await this.prisma.game.findMany({
           where: whereClause,
@@ -76,11 +82,10 @@ export class GameService {
       }
       
 
-    async getGameById(userId:number, gameId:number){
+    async getGameById(gameId:number){
         const game = await this.prisma.game.findFirst({ 
             where:{
-                id:gameId,
-                adminId: userId,
+                id:gameId
             },
             select:{
                 id: true,
@@ -387,6 +392,7 @@ export class GameService {
 
     async getActivities(userId: number) {
         const selectedFields = {
+            id: true,
             date:true,
             type: true,
             winnerTeam: true
@@ -402,8 +408,8 @@ export class GameService {
                 ...selectedFields,
                 adminTeam: true,
             },
-        })).map(({date, type, winnerTeam, adminTeam}) => ({
-            date, type, isWinner: winnerTeam === adminTeam
+        })).map(({id, date, type, winnerTeam, adminTeam}) => ({
+            gameId: id, date, type, isWinner: winnerTeam === adminTeam
         }))
         const invitedActivities = (await this.prisma.game.findMany({ 
             where:{
@@ -426,8 +432,8 @@ export class GameService {
                 }
 
             },
-        })).map(({date, type, winnerTeam, gameInvitation}) => ({
-            date, type, isWinner: winnerTeam === gameInvitation.pop().team
+        })).map(({id, date, type, winnerTeam, gameInvitation}) => ({
+            gameId: id, date, type, isWinner: winnerTeam === gameInvitation.pop().team
         }))
         const requestedActivities = (await this.prisma.game.findMany({ 
             where:{
@@ -449,8 +455,8 @@ export class GameService {
                     }
                 },
             },
-        })).map(({date, type, winnerTeam, gameRequests}) => ({
-            date, type, isWinner: winnerTeam === gameRequests.pop().team
+        })).map(({id, date, type, winnerTeam, gameRequests}) => ({
+            gameId: id, date, type, isWinner: winnerTeam === gameRequests.pop().team
         }))
 
         return [

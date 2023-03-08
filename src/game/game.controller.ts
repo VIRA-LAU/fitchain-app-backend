@@ -36,9 +36,9 @@ export class GameController {
         return this.gameService.getPlayerGameStatus(userId, gameId)
     }
 
-    @Get(':id')
-    getGameById(@GetUser('id') userId: number,  @Param('id', ParseIntPipe) upcomingId:number ){
-        return this.gameService.getGameById(userId, upcomingId)
+    @Get('/:id')
+    getGameById(@Param('id', ParseIntPipe) upcomingId:number ){
+        return this.gameService.getGameById(upcomingId)
     }
 
     @Post("followed")
