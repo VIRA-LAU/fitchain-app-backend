@@ -27,8 +27,8 @@ export class GameController {
     }
 
     @Get('followed')
-    getFollowedGames(@GetUser('id') userId: number){
-        return this.gameService.getFollowedGames(userId)
+    getFollowedGames(@GetUser('id') userId: number, @Query('type') type?: string){
+        return this.gameService.getFollowedGames(userId, type)
     }
 
     @Get('playerstatus/:gameId')

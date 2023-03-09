@@ -265,11 +265,18 @@ export class GameService {
 
    
 
-    async getFollowedGames(userId: number) {
+    async getFollowedGames(userId: number, type?: string) {
         return this.prisma.followsGame.findMany({
-            where:{
-                userId:userId
-            },
+            where: {
+                AND: [{
+                userId:userId,
+                }, type === 'upcoming' ? {
+                game: {date: {gt: new Date()}}
+                } : type === 'previous' ? {
+                game: {date: {lt: new Date()}}
+                } : {}
+            ]},
+            orderBy: type === 'upcoming' ? {game:{ date: 'asc' }} : type === 'previous' ? {game: { date: 'desc' }} : undefined,
            select:{
             game:{
                 select:{
