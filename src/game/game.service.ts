@@ -496,4 +496,68 @@ export class GameService {
         return activities; 
     }
 
+    async getPlayers(gameId: number) {
+        const admin = await this.prisma.game.findMany({
+            where: {
+                id: gameId
+            }, 
+            select: {
+                admin: {
+                    select: {
+                        id: true
+                    }
+                }
+            }
+        });
+        const invited = await this.prisma.game.findFirst({
+            where: {
+              id: gameId
+            },
+            select: {
+              gameRequests: {
+                select: {
+                      userId: true,
+                    team: true,
+                    status: true,
+                }
+              }
+            }
+        });
+        const requested = await this.prisma.game.findFirst({
+            where: {
+              id: gameId
+            },
+            select: {
+              gameInvitation: {
+                select: {
+                      userId: true,
+                      team: true,
+                    status: true,
+                }
+              }
+            }
+          });
+          var players = admin.map(player => ({ id: player.admin.id, team: 'HOME', status: 'APPROVED' }));
+        players = players.concat(invited.gameRequests.map(player => ({ id: player.userId, team: player.team, status: player.status })));     
+        players = players.concat(requested.gameInvitation.map(player => ({ id: player.userId, team: player.team, status: player.status })));        
+        players = await Promise.all(players.map(async (player) => {
+            const user = await this.prisma.user.findUnique({
+              where: {
+                id: player.id,
+              },
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            });
+            return {
+              ...player,
+              firstName: user.firstName,
+              lastName: user.lastName,
+            };
+          }));
+        return players;
+          
+    }
+
 }
