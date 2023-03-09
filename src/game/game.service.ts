@@ -504,9 +504,10 @@ export class GameService {
             select: {
                 admin: {
                     select: {
-                        id: true
+                        id: true,
                     }
-                }
+                },
+                adminTeam: true
             }
         });
         const invited = await this.prisma.game.findFirst({
@@ -537,7 +538,7 @@ export class GameService {
               }
             }
           });
-          var players = admin.map(player => ({ id: player.admin.id, team: 'HOME', status: 'APPROVED' }));
+          var players = admin.map(player => ({ id: player.admin.id, team: player.adminTeam, status: 'APPROVED' }));
         players = players.concat(invited.gameRequests.map(player => ({ id: player.userId, team: player.team, status: player.status })));     
         players = players.concat(requested.gameInvitation.map(player => ({ id: player.userId, team: player.team, status: player.status })));        
         players = await Promise.all(players.map(async (player) => {
