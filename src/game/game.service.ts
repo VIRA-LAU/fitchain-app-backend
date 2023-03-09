@@ -47,6 +47,7 @@ export class GameService {
             type: true,
             court: {
               select: {
+                courtType: true,
                 branch: {
                   select: {
                     location: true,
@@ -95,6 +96,7 @@ export class GameService {
                 adminTeam: true,
                 court: {
                     select:{
+                        courtType: true,
                         branch:{
                             select:{
                                 location: true,
@@ -160,6 +162,7 @@ export class GameService {
                 adminTeam: true,
                 court: {
                     select:{
+                        courtType: true,
                         branch:{
                             select:{
                                 location: true,
@@ -215,6 +218,7 @@ export class GameService {
         const booking = await this.prisma.game.create({ 
             data:{
                 adminId: userId,
+                status: 'APPROVED',
                 ...dto
             }
         })
@@ -276,6 +280,7 @@ export class GameService {
                     adminTeam: true,
                     court: {
                         select:{
+                            courtType: true,
                             branch:{
                                 select:{
                                     location: true,
@@ -510,38 +515,38 @@ export class GameService {
                 adminTeam: true
             }
         });
-        const invited = await this.prisma.game.findFirst({
+        const requested = await this.prisma.game.findFirst({
             where: {
               id: gameId
             },
             select: {
               gameRequests: {
                 select: {
-                      userId: true,
+                    userId: true,
                     team: true,
                     status: true,
                 }
               }
             }
         });
-        const requested = await this.prisma.game.findFirst({
+        const invited = await this.prisma.game.findFirst({
             where: {
               id: gameId
             },
             select: {
               gameInvitation: {
                 select: {
-                      userId: true,
-                      team: true,
+                    friendId: true,
+                    team: true,
                     status: true,
                 }
               }
             }
           });
-          var players = admin.map(player => ({ id: player.admin.id, team: player.adminTeam, status: 'APPROVED' }));
-        players = players.concat(invited.gameRequests.map(player => ({ id: player.userId, team: player.team, status: player.status })));     
-        players = players.concat(requested.gameInvitation.map(player => ({ id: player.userId, team: player.team, status: player.status })));        
-        players = await Promise.all(players.map(async (player) => {
+            var players = admin.map(player => ({ id: player.admin.id, team: player.adminTeam, status: 'APPROVED' }));
+            players = players.concat(requested.gameRequests.map(player => ({ id: player.userId, team: player.team, status: player.status })));     
+            players = players.concat(invited.gameInvitation.map(player => ({ id: player.friendId, team: player.team, status: player.status })));        
+            players = await Promise.all(players.map(async (player) => {
             const user = await this.prisma.user.findUnique({
               where: {
                 id: player.id,
