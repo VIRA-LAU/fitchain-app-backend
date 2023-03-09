@@ -36,6 +36,16 @@ export class GameController {
         return this.gameService.getPlayerGameStatus(userId, gameId)
     }
 
+    @Get('players/:id')
+    getPlayersOfGame(@Param('id', ParseIntPipe) gameId:number) {
+        return this.gameService.getPlayers(gameId);
+    }
+
+    @Get('updates/:id')
+    getUpdates(@Param('id', ParseIntPipe) gameId:number) {
+        return this.gameService.getUpdates(gameId);
+    }
+
     @Get('/:id')
     getGameById(@Param('id', ParseIntPipe) upcomingId:number ){
         return this.gameService.getGameById(upcomingId)
@@ -54,15 +64,8 @@ export class GameController {
         
     }
 
-    @Get('updates/:id')
-    getUpdates(@Param('id', ParseIntPipe) gameId:number) {
-        return this.gameService.getUpdates(gameId);
-    }
 
-    @Get('players/:id')
-    getPlayersOfGame(@Param('id', ParseIntPipe) gameId:number) {
-        return this.gameService.getPlayers(gameId);
-    }
+
     @Post("bookings")
     createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){
         console.log("create booking")
