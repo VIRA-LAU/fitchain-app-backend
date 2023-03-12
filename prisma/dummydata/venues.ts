@@ -5,7 +5,8 @@ export const venues = [
         managerPhoneNumber: "1234567890",
         managerFirstName:"John",
         managerLastName:"Doe",
-        hash:"123hash"
+        hash:"123hash",
+        description: "ABC Sports Description"
         },
         {
         name: "XYZ Sports Club",
@@ -13,6 +14,7 @@ export const venues = [
         managerPhoneNumber: "9876543210",
         managerFirstName:"John",
         managerLastName:"Doe",
-        hash:"456hash"
+        hash:"456hash",
+        description: "XYZ Sports Description"
         }
 ]
