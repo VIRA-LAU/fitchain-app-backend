@@ -25,6 +25,7 @@ async function main() {
         managerLastName: venueData.managerLastName,
         managerEmail: venueData.managerEmail,
         managerPhoneNumber: venueData.managerPhoneNumber,
+	description: venueData.description
       },
     });
   }
@@ -46,6 +47,7 @@ async function main() {
           courtType: courtData.courtType,
           nbOfPlayers: courtData.nbOfPlayers,
           branch: { connect: { id: courtData.branchId } },
+	price: courtData.price
         },
       });
     }
@@ -59,6 +61,7 @@ async function main() {
         date: new Date(gameData.date),
         duration: gameData.duration,
         court: { connect: { id: gameData.courtId } },
+	status: "APPROVED",
         createdAt: new Date(gameData.createdAt),
         updatedAt: new Date(gameData.updatedAt),
       },
