@@ -27,6 +27,7 @@ export class InvitetogameService {
                         type:true,
                         date:true,
                         duration: true,
+                        createdAt: true,
                         court: {
                             select:{
                                 branch:{
@@ -76,6 +77,7 @@ export class InvitetogameService {
                         type:true,
                         date:true,
                         duration: true,
+                        createdAt: true,
                         court: {
                             select:{
                                 branch:{

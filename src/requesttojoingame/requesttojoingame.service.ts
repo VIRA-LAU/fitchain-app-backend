@@ -16,14 +16,21 @@ export class RequesttojoingameService {
                 status:true,
                 game:{
                     select:{
+                        id: true,
                         type:true,
                         date:true,
                         duration: true,
+                        createdAt: true,
                         court:{
                             select:{
                                 branch:{
                                     select:{
-                                        location:true
+                                        location:true,
+                                        venue: {
+                                            select: {
+                                                name: true
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -52,14 +59,21 @@ export class RequesttojoingameService {
                 },
                 game:{
                     select:{
+                        id: true,
                         type:true,
                         date:true,
                         duration: true,
+                        createdAt: true,
                         court:{
                             select:{
                                 branch:{
                                     select:{
-                                        location:true
+                                        location:true,
+                                        venue: {
+                                            select: {
+                                                name: true
+                                            }
+                                        }
                                     }
                                 }
                             }
