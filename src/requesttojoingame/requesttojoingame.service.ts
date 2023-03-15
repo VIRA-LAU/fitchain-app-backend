@@ -125,6 +125,28 @@ export class RequesttojoingameService {
              })
     }
 
+    async deleteRequestByGameId(userId:number, gameId:number){
+        const request = await this.prisma.requestToJoinGame.findUnique({
+            where:{
+                userId_gameId: {
+                    userId,
+                    gameId
+                }
+            }
+        })
+        if(!request || request.userId != userId)
+        throw new ForbiddenException("Access to edit denied")
+
+        await this.prisma.requestToJoinGame.delete({
+            where:{
+                userId_gameId: {
+                    userId,
+                    gameId
+                }
+            }
+        })
+    }
+
     async deleteRequestById(userId:number, requestId:number){
         const request = await this.prisma.requestToJoinGame.findUnique({
             where:{

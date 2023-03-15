@@ -17,8 +17,8 @@ export class GameController {
     }
 
     @Get('bookings')
-    getBookings(){
-        return this.gameService.getBookings()
+    getBookings(@Query('type') type?: string){
+        return this.gameService.getBookings(type)
     }
 
     @Get('activities')
