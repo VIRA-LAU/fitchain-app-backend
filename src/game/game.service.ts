@@ -390,6 +390,7 @@ export class GameService {
               },
               select:{
                 status:true,
+                id: true
               }
             },
             gameInvitation: {
@@ -398,14 +399,17 @@ export class GameService {
               },
               select:{
                 status:true,
+                id: true
               }
             },
           },
         });
     
         const userStatus = {
-          hasRequestedtoJoin: gameStatus?.gameRequests?.length>0? gameStatus.gameRequests[0].status:false,
-          hasBeenInvited: gameStatus?.gameInvitation?.length>0? gameStatus.gameInvitation[0].status:false,
+          hasRequestedtoJoin: gameStatus?.gameRequests?.length > 0 ? gameStatus.gameRequests[0].status : false,
+          hasBeenInvited: gameStatus?.gameInvitation?.length > 0 ? gameStatus.gameInvitation[0].status : false,
+          requestId: gameStatus?.gameRequests?.length > 0 ? gameStatus.gameRequests[0].id : false,
+          invitationId: gameStatus?.gameInvitation?.length > 0 ? gameStatus.gameInvitation[0].id : false,
           isAdmin: gameStatus.adminId === userId,
         };
         return userStatus;

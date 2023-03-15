@@ -138,13 +138,17 @@ export class InvitetogameService {
     }
 
     async createInvitation(userId:number, dto:CreateInvitationDto){
-        const invitation = await this.prisma.inviteToGame.create({ 
-            data:{
-                userId,
-                ...dto
-            }
-        })
-        return invitation; 
+        const invitations = await Promise.all(dto.friendId.map(async (friendId) => {
+            let newDto = {...dto, friendId}
+            const invitation = await this.prisma.inviteToGame.create({ 
+                data:{
+                    userId,
+                    ...newDto
+                }
+            })
+            return invitation; 
+        }))
+        return invitations
     }
 
     async editInvitationById(userId:number,invitationId: number, dto:EditInvitationDto){
@@ -154,7 +158,7 @@ export class InvitetogameService {
             }
         })
 
-        if(!invitation || invitation.userId != userId)
+        if(!invitation)
              throw new ForbiddenException("Access to edit denied")
         
              return this.prisma.inviteToGame.update({
