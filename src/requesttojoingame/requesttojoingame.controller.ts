@@ -44,12 +44,6 @@ export class RequesttojoingameController {
     }
 
     @HttpCode(HttpStatus.NO_CONTENT)
-    @Delete()
-    deleteRequestByGameId(@GetUser('id') userId:number, @Query('gameId', ParseIntPipe) gameId:number){
-        return this.requesttojoingameService.deleteRequestByGameId(userId, gameId)
-    }
-
-    @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
     deleteRequestById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) requestId:number){
         return this.requesttojoingameService.deleteRequestById(userId,requestId)
