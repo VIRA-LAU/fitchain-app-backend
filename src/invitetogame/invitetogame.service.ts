@@ -13,6 +13,7 @@ export class InvitetogameService {
                 userId
             },
             select:{
+                id: true,
                 team: true,
                 status:true,
                 friend:{
@@ -60,9 +61,15 @@ export class InvitetogameService {
     async getReceivedInvitations(userId: number) {
         return this.prisma.inviteToGame.findMany({
             where:{
-                friendId: userId
+                AND: [
+                    {
+                        friendId: userId
+                    },
+                    { status: 'PENDING' }
+                ]
             },
             select:{
+                id: true,
                 team: true,
                 status:true,
                 user:{
@@ -167,7 +174,7 @@ export class InvitetogameService {
             }
         })
 
-        if(!invitation || invitation.userId != userId)
+        if(!invitation)
         throw new ForbiddenException("Access to edit denied")
 
         await this.prisma.inviteToGame.delete({

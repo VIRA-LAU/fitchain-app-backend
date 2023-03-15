@@ -12,6 +12,7 @@ export class RequesttojoingameService {
                 userId
             },
             select:{
+                id: true,
                 team: true,
                 status:true,
                 game:{
@@ -44,11 +45,17 @@ export class RequesttojoingameService {
     async getRecievedRequests(userId: number) {
         return this.prisma.requestToJoinGame.findMany({
             where:{
-                game:{
-                    adminId:userId
-                }
+                AND: [
+                    {
+                    game:{
+                        adminId:userId
+                        }
+                    },
+                    { status: 'PENDING' }
+                ]
             },
             select:{
+                id: true,
                 team: true,
                 status:true,
                 user:{
@@ -126,7 +133,7 @@ export class RequesttojoingameService {
             }
         })
 
-        if(!request || request.userId != userId)
+        if(!request)
              throw new ForbiddenException("Access to edit denied")
         
              return this.prisma.requestToJoinGame.update({
