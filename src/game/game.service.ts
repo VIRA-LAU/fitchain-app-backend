@@ -17,14 +17,20 @@ export class GameService {
                 {
                 gameInvitation: {
                     some: {
-                    friendId: userId,
+                        AND: [
+                            {friendId: userId},
+                            {NOT: {status: invitationApproval.REJECTED}}
+                        ]
                     },
                 },
                 },
                 {
                 gameRequests: {
                     some: {
-                    userId: userId,
+                        AND: [
+                            {userId},
+                            {NOT: {status: invitationApproval.REJECTED}}
+                        ]
                     },
                 },
                 },
