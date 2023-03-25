@@ -27,7 +27,6 @@ export class InvitetogameService {
                         id: true,
                         type:true,
                         date:true,
-                        duration: true,
                         createdAt: true,
                         court: {
                             select:{
@@ -83,7 +82,6 @@ export class InvitetogameService {
                         id: true,
                         type:true,
                         date:true,
-                        duration: true,
                         createdAt: true,
                         court: {
                             select:{

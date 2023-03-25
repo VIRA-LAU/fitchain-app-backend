@@ -67,7 +67,7 @@ async function main() {
       });
     }
 
-  // Create courts
+  // Link courts to time slots
   for (const hasTimeSlotData of hasTimeSlots) {
     await prisma.hasTimeSlot.create({
       data: {
@@ -81,13 +81,12 @@ async function main() {
   for (const gameData of games) {
     await prisma.game.create({
       data: {
+
         admin: { connect: { id: gameData.adminId }},
         date: new Date(gameData.date),
-        duration: gameData.duration,
+        timeSlot: {connect: { id: gameData.timeSlotId }},
         court: { connect: { id: gameData.courtId } },
-	status: "APPROVED",
-        createdAt: new Date(gameData.createdAt),
-        updatedAt: new Date(gameData.updatedAt),
+	      status: "APPROVED",
       },
     });
   }

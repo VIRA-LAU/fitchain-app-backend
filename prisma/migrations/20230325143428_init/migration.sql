@@ -65,9 +65,9 @@ CREATE TABLE "Game" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "courtId" INTEGER NOT NULL,
+    "timeSlotId" INTEGER NOT NULL,
     "adminId" INTEGER NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
-    "duration" INTEGER NOT NULL,
     "type" "gameType" NOT NULL DEFAULT 'Basketball',
     "adminTeam" "teamType" NOT NULL DEFAULT 'HOME',
     "winnerTeam" "teamType" NOT NULL DEFAULT 'HOME',
@@ -208,6 +208,9 @@ ALTER TABLE "Branch" ADD CONSTRAINT "Branch_venueId_fkey" FOREIGN KEY ("venueId"
 
 -- AddForeignKey
 ALTER TABLE "Game" ADD CONSTRAINT "Game_courtId_fkey" FOREIGN KEY ("courtId") REFERENCES "Court"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Game" ADD CONSTRAINT "Game_timeSlotId_fkey" FOREIGN KEY ("timeSlotId") REFERENCES "TimeSlot"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Game" ADD CONSTRAINT "Game_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

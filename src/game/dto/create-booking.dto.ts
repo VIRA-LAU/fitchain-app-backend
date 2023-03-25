@@ -17,6 +17,6 @@ export class createBookingDto{
 
     @IsNumber()
     @IsNotEmpty()
-    duration:number
+    timeSlotId:number
 
 }

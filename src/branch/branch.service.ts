@@ -1,4 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { gameType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBranchDto, EditBranchDto } from './dto';
 
@@ -67,65 +68,155 @@ export class BranchService {
 
     }
 
-    async searchForBranches(date?: string, startTime?: string, endTime?: string) {
-        const timeSlots = await this.prisma.timeSlot.findMany({
-            where: {
-                AND: [
-                    {startTime: {lte: startTime}},
-                    {endTime: {gte: endTime}}
-                ]
-            }
-        })
-        const timeSlotIds = timeSlots.map(timeSlot => timeSlot.id)
-        const branches = await this.prisma.branch.findMany({
-            where: {
-                courts: {
-                    some: {
-                        hasTimeSlot: {
-                            some: {
-                                timeSlotId: {
-                                    in: timeSlotIds
+    async searchForBranches(date: string, gameType: gameType, startTime?: string, endTime?: string, ) {
+        if (startTime) {
+            const timeSlots = await this.prisma.timeSlot.findMany({
+                where: {
+                    AND: [
+                        { startTime: { lte: startTime } },
+                        { endTime: { gte: endTime } }
+                    ]
+                }
+            })
+            let timeSlotIds = timeSlots.map(timeSlot => timeSlot.id)
+            const gamesInTimeSlots = await this.prisma.game.findMany({
+                where: {
+                    AND: [
+                        { timeSlotId: { in: timeSlotIds } },
+                        { date }
+                    ]
+                }
+            })
+            const occupiedCourtIds = gamesInTimeSlots.map(game => game.courtId)
+            const branches = await this.prisma.branch.findMany({
+                where: {
+                    courts: {
+                        some: {
+                            AND: [
+                                { hasTimeSlot: {
+                                    some: {
+                                        timeSlotId: {
+                                            in: timeSlotIds
+                                        }
+                                    }
+                                }},
+                                { NOT: { id: { in: occupiedCourtIds }}},
+                                { courtType: gameType }
+                            ]
+                        }
+                    }
+                },
+                select: {
+                    location: true,
+                    venue: {
+                        select:{
+                            id:true,
+                            name:true,
+                        }
+                    },
+                    courts: {
+                        where: {
+                            AND: [
+                                { hasTimeSlot: {
+                                    some: {
+                                        timeSlotId: {
+                                            in: timeSlotIds
+                                        }
+                                    }
+                                }},
+                                { NOT: { id: { in: occupiedCourtIds }}},
+                                { courtType: gameType }
+                            ]
+                        },
+                        select: {
+                            id: true,
+                            courtType: true,
+                            price: true,
+                            rating: true,
+                            hasTimeSlot: {
+                                where: {
+                                    timeSlotId: {in: timeSlotIds}
+                                },
+                                select: {
+                                    timeSlot: true
                                 }
                             }
                         }
                     }
-                }
-            },
-            select: {
-                location: true,
-                venue: {
-                    select:{
-                        id:true,
-                        name:true,
+                },
+            })
+            return branches;
+        } else {
+            const gamesInDate = await this.prisma.game.findMany({ where: {date} })
+            const existingGames = gamesInDate.map(game => ({courtId: game.courtId, timeSlotId: game.timeSlotId}))
+            const branches = await this.prisma.branch.findMany({
+                where: {
+                    courts: {
+                        some: {
+                            AND: [
+                                { courtType: gameType },
+                                {
+                                    NOT : {
+                                        OR: existingGames.map(game => ({
+                                            AND: [
+                                                { hasTimeSlot: {
+                                                    some: {
+                                                        timeSlotId: game.timeSlotId
+                                                    }
+                                                }},
+                                                { id: game.courtId }
+                                            ]
+                                        }))
+                                    }
+                                }
+                            ]
+                        }
                     }
                 },
-                courts: {
-                    where: {
-                        hasTimeSlot: {
-                            some: {
-                                timeSlotId: {in: timeSlotIds}
-                            }
+                select: {
+                    location: true,
+                    venue: {
+                        select:{
+                            id:true,
+                            name:true,
                         }
                     },
-                    select: {
-                        id: true,
-                        courtType: true,
-                        price: true,
-                        rating: true,
-                        hasTimeSlot: {
-                            where: {
-                                timeSlotId: {in: timeSlotIds}
-                            },
-                            select: {
-                                timeSlot: true
+                    courts: {
+                        where: {
+                            AND: [
+                                { courtType: gameType },
+                                {
+                                    NOT : {
+                                        OR: existingGames.map(game => ({
+                                            AND: [
+                                                { hasTimeSlot: {
+                                                    some: {
+                                                        timeSlotId: game.timeSlotId
+                                                    }
+                                                }},
+                                                { id: game.courtId }
+                                            ]
+                                        }))
+                                    }
+                                }
+                            ]
+                        },
+                        select: {
+                            id: true,
+                            courtType: true,
+                            price: true,
+                            rating: true,
+                            hasTimeSlot: {
+                                select: {
+                                    timeSlot: true
+                                }
                             }
                         }
                     }
-                }
-            },
-        })
-        return branches;
-
+                },
+            })
+            return branches;
+        }
     }
 
     async createBranch(venueId: number, dto: CreateBranchDto){

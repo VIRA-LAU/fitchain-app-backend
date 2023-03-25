@@ -20,7 +20,6 @@ export class RequesttojoingameService {
                         id: true,
                         type:true,
                         date:true,
-                        duration: true,
                         createdAt: true,
                         court:{
                             select:{
@@ -69,7 +68,6 @@ export class RequesttojoingameService {
                         id: true,
                         type:true,
                         date:true,
-                        duration: true,
                         createdAt: true,
                         court:{
                             select:{

@@ -82,9 +82,9 @@ model Game {
   updatedAt DateTime @updatedAt
 
   courtId Int
+  timeSlotId Int
   adminId Int
   date DateTime
-  duration Int
   type gameType @default(Basketball)
   adminTeam teamType @default(HOME)
   winnerTeam teamType @default(HOME)
@@ -96,8 +96,9 @@ model Game {
   gameInvitation InviteToGame[]
   followers FollowsGame[]
 
-  court  Court    @relation(fields: [courtId],references: [id],onDelete: Cascade,onUpdate: Cascade)
-  admin  User    @relation(name: "createdGames", fields: [adminId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  court     Court     @relation(fields: [courtId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  timeSlot  TimeSlot  @relation(fields: [timeSlotId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  admin     User      @relation(name: "createdGames", fields: [adminId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 }
 
 model FollowsGame {
@@ -190,6 +191,7 @@ model TimeSlot {
   startTime String
   endTime String
 
+  game Game[]
   hasTimeSlot HasTimeSlot[]
 }
 
