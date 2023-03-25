@@ -72,7 +72,7 @@ export class BranchService {
 
     }
 
-    async searchForBranches(date: string, gameType: gameType, startTime?: string, endTime?: string, ) {
+    async searchForBranches(date: string, gameType: gameType, startTime?: string, endTime?: string, venueId?: number) {
         if (startTime) {
             const timeSlots = await this.prisma.timeSlot.findMany({
                 where: {
@@ -97,21 +97,26 @@ export class BranchService {
             const occupiedCourtIds = gamesInTimeSlots.map(game => game.courtId)
             const branches = await this.prisma.branch.findMany({
                 where: {
-                    courts: {
-                        some: {
-                            AND: [
-                                { hasTimeSlot: {
-                                    some: {
-                                        timeSlotId: {
-                                            in: timeSlotIds
-                                        }
-                                    }
-                                }},
-                                { NOT: { id: { in: occupiedCourtIds }}},
-                                { courtType: gameType }
-                            ]
-                        }
-                    }
+                    AND: [
+                        {
+                            courts: {
+                                some: {
+                                    AND: [
+                                        { hasTimeSlot: {
+                                            some: {
+                                                timeSlotId: {
+                                                    in: timeSlotIds
+                                                }
+                                            }
+                                        }},
+                                        { NOT: { id: { in: occupiedCourtIds }}},
+                                        { courtType: gameType },
+                                    ]
+                                }
+                            }
+                        },
+                        venueId ? { venueId } : {}
+                    ]
                 },
                 select: {
                     location: true,
@@ -162,27 +167,32 @@ export class BranchService {
             const existingGames = gamesInDate.map(game => ({courtId: game.courtId, timeSlotId: game.timeSlotId}))
             const branches = await this.prisma.branch.findMany({
                 where: {
-                    courts: {
-                        some: {
-                            AND: [
-                                { courtType: gameType },
-                                {
-                                    NOT : {
-                                        OR: existingGames.map(game => ({
-                                            AND: [
-                                                { hasTimeSlot: {
-                                                    some: {
-                                                        timeSlotId: game.timeSlotId
-                                                    }
-                                                }},
-                                                { id: game.courtId }
-                                            ]
-                                        }))
-                                    }
+                    AND: [
+                        {
+                            courts: {
+                                some: {
+                                    AND: [
+                                        { courtType: gameType },
+                                        {
+                                            NOT : {
+                                                OR: existingGames.map(game => ({
+                                                    AND: [
+                                                        { hasTimeSlot: {
+                                                            some: {
+                                                                timeSlotId: game.timeSlotId
+                                                            }
+                                                        }},
+                                                        { id: game.courtId }
+                                                    ]
+                                                }))
+                                            }
+                                        }
+                                    ]
                                 }
-                            ]
-                        }
-                    }
+                            }
+                        },
+                        venueId ? { venueId } : {}
+                    ]
                 },
                 select: {
                     location: true,
