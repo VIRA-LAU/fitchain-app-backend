@@ -49,6 +49,7 @@ export class GameService {
             id: true,
             date: true,
             adminTeam: true,
+            timeSlot: true,
             type: true,
             court: {
               select: {
@@ -98,6 +99,7 @@ export class GameService {
                 date:true,
                 type: true,
                 adminTeam: true,
+                timeSlot: true,
                 court: {
                     select:{
                         courtType: true,
@@ -173,6 +175,7 @@ export class GameService {
                 date:true,
                 type: true,
                 adminTeam: true,
+                timeSlot: true,
                 court: {
                     select:{
                         courtType: true,
@@ -297,6 +300,7 @@ export class GameService {
                     date:true,
                     type: true,
                     adminTeam: true,
+                    timeSlot: true,
                     court: {
                         select:{
                             courtType: true,

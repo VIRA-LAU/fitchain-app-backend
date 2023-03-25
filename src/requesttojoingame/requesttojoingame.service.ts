@@ -21,6 +21,7 @@ export class RequesttojoingameService {
                         type:true,
                         date:true,
                         createdAt: true,
+                        timeSlot: true,
                         court:{
                             select:{
                                 branch:{
@@ -69,6 +70,7 @@ export class RequesttojoingameService {
                         type:true,
                         date:true,
                         createdAt: true,
+                        timeSlot: true,
                         court:{
                             select:{
                                 branch:{

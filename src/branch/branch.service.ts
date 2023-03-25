@@ -22,7 +22,9 @@ export class BranchService {
                     select: {
                         id: true,
                         courtType: true,
-                        price: true
+                        price: true,
+                        rating: true,
+                        branchId: true
                     }
                 }
             }
@@ -59,7 +61,9 @@ export class BranchService {
                     select: {
                         id: true,
                         courtType: true,
-                        price: true
+                        price: true,
+                        rating: true,
+                        branchId: true
                     }
                 }
             }
@@ -83,7 +87,10 @@ export class BranchService {
                 where: {
                     AND: [
                         { timeSlotId: { in: timeSlotIds } },
-                        { date }
+                        { date: {
+                            gte: new Date(date),
+                            lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
+                        } }
                     ]
                 }
             })
@@ -133,6 +140,7 @@ export class BranchService {
                             courtType: true,
                             price: true,
                             rating: true,
+                            branchId: true,
                             hasTimeSlot: {
                                 where: {
                                     timeSlotId: {in: timeSlotIds}
@@ -147,7 +155,10 @@ export class BranchService {
             })
             return branches;
         } else {
-            const gamesInDate = await this.prisma.game.findMany({ where: {date} })
+            const gamesInDate = await this.prisma.game.findMany({ where: { date: {
+                                                                gte: new Date(date),
+                                                                lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
+                                                                } } })
             const existingGames = gamesInDate.map(game => ({courtId: game.courtId, timeSlotId: game.timeSlotId}))
             const branches = await this.prisma.branch.findMany({
                 where: {
@@ -206,6 +217,7 @@ export class BranchService {
                             courtType: true,
                             price: true,
                             rating: true,
+                            branchId: true,
                             hasTimeSlot: {
                                 select: {
                                     timeSlot: true
