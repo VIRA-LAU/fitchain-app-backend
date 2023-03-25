@@ -14,7 +14,6 @@ export class VenueService {
             branches:{
                 select:{
                     location:true,
-                    rating:true,
                 }
             }
         }

@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { gameType } from '@prisma/client';
 import { GetVenue } from '../auth/decorator';
 import { BranchService } from './branch.service';
 import { CreateBranchDto, EditBranchDto } from './dto';
@@ -12,6 +13,12 @@ export class BranchController {
         if (!venueId)
             return this.branchService.getBranches()
         return this.branchService.getBranchesByVenueId(parseInt(venueId))
+    }
+    
+    @Get('search')
+    searchForBranches(@Query('date') date?: string, @Query('startTime') startTime?: string,
+        @Query('endTime') endTime?: string, @Query('gameType') gameType?: gameType){
+            return this.branchService.searchForBranches(date, gameType, startTime, endTime)
     }
 
     @Get(':id')

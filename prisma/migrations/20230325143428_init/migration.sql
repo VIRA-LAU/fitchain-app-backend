@@ -55,7 +55,6 @@ CREATE TABLE "Branch" (
     "location" TEXT NOT NULL,
     "venueId" INTEGER NOT NULL,
     "photoDirectoryURL" TEXT,
-    "rating" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "Branch_pkey" PRIMARY KEY ("id")
 );
@@ -66,9 +65,9 @@ CREATE TABLE "Game" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "courtId" INTEGER NOT NULL,
+    "timeSlotId" INTEGER NOT NULL,
     "adminId" INTEGER NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
-    "duration" INTEGER NOT NULL,
     "type" "gameType" NOT NULL DEFAULT 'Basketball',
     "adminTeam" "teamType" NOT NULL DEFAULT 'HOME',
     "winnerTeam" "teamType" NOT NULL DEFAULT 'HOME',
@@ -140,15 +139,35 @@ CREATE TABLE "HasStatistics" (
 );
 
 -- CreateTable
+CREATE TABLE "TimeSlot" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "startTime" TEXT NOT NULL,
+    "endTime" TEXT NOT NULL,
+
+    CONSTRAINT "TimeSlot_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Court" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "courtType" TEXT NOT NULL,
     "nbOfPlayers" INTEGER NOT NULL,
     "branchId" INTEGER NOT NULL,
-    "price" INTEGER,
+    "price" INTEGER NOT NULL,
+    "rating" DOUBLE PRECISION DEFAULT 0.0,
 
     CONSTRAINT "Court_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "HasTimeSlot" (
+    "id" SERIAL NOT NULL,
+    "courtId" INTEGER NOT NULL,
+    "timeSlotId" INTEGER NOT NULL,
+
+    CONSTRAINT "HasTimeSlot_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -191,6 +210,9 @@ ALTER TABLE "Branch" ADD CONSTRAINT "Branch_venueId_fkey" FOREIGN KEY ("venueId"
 ALTER TABLE "Game" ADD CONSTRAINT "Game_courtId_fkey" FOREIGN KEY ("courtId") REFERENCES "Court"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Game" ADD CONSTRAINT "Game_timeSlotId_fkey" FOREIGN KEY ("timeSlotId") REFERENCES "TimeSlot"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Game" ADD CONSTRAINT "Game_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -228,3 +250,9 @@ ALTER TABLE "HasStatistics" ADD CONSTRAINT "HasStatistics_gameId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "Court" ADD CONSTRAINT "Court_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "HasTimeSlot" ADD CONSTRAINT "HasTimeSlot_courtId_fkey" FOREIGN KEY ("courtId") REFERENCES "Court"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "HasTimeSlot" ADD CONSTRAINT "HasTimeSlot_timeSlotId_fkey" FOREIGN KEY ("timeSlotId") REFERENCES "TimeSlot"("id") ON DELETE CASCADE ON UPDATE CASCADE;
