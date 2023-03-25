@@ -13,6 +13,11 @@ export class BranchController {
             return this.branchService.getBranches()
         return this.branchService.getBranchesByVenueId(parseInt(venueId))
     }
+    
+    @Get('search')
+    searchForBranches(@Query('date') date?: string, @Query('startTime') startTime?: string, @Query('endTime') endTime?: string){
+        return this.branchService.searchForBranches(date, startTime, endTime)
+    }
 
     @Get(':id')
     getBranchById(@Param('id', ParseIntPipe) branchId:number ){

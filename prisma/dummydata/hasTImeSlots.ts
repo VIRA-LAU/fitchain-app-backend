@@ -13,15 +13,15 @@ export const hasTimeSlots = [
     },
     {
         courtId: 2,
-        timeSlotId: 1
+        timeSlotId: 4
     },
     {
         courtId: 2,
-        timeSlotId: 2
+        timeSlotId: 5
     },
     {
         courtId: 2,
-        timeSlotId: 3
+        timeSlotId: 6
     },
     {
         courtId: 3,
@@ -37,14 +37,14 @@ export const hasTimeSlots = [
     },
     {
         courtId: 4,
-        timeSlotId: 1
+        timeSlotId: 4
     },
     {
         courtId: 4,
-        timeSlotId: 2
+        timeSlotId: 5
     },
     {
         courtId: 4,
-        timeSlotId: 3
+        timeSlotId: 6
     },
 ];

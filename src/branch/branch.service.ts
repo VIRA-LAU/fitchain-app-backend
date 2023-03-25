@@ -11,7 +11,6 @@ export class BranchService {
         const BranchesWithVenue = await this.prisma.branch.findMany({
             select: {
                 location: true,
-                rating: true,
                 venue: {
                     select:{
                         id:true,
@@ -49,7 +48,6 @@ export class BranchService {
             },
             select: {
                 location: true,
-                rating: true,
                 venue: {
                     select:{
                         id:true,
@@ -64,6 +62,67 @@ export class BranchService {
                     }
                 }
             }
+        })
+        return branches;
+
+    }
+
+    async searchForBranches(date?: string, startTime?: string, endTime?: string) {
+        const timeSlots = await this.prisma.timeSlot.findMany({
+            where: {
+                AND: [
+                    {startTime: {lte: startTime}},
+                    {endTime: {gte: endTime}}
+                ]
+            }
+        })
+        const timeSlotIds = timeSlots.map(timeSlot => timeSlot.id)
+        const branches = await this.prisma.branch.findMany({
+            where: {
+                courts: {
+                    some: {
+                        hasTimeSlot: {
+                            some: {
+                                timeSlotId: {
+                                    in: timeSlotIds
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            select: {
+                location: true,
+                venue: {
+                    select:{
+                        id:true,
+                        name:true,
+                    }
+                },
+                courts: {
+                    where: {
+                        hasTimeSlot: {
+                            some: {
+                                timeSlotId: {in: timeSlotIds}
+                            }
+                        }
+                    },
+                    select: {
+                        id: true,
+                        courtType: true,
+                        price: true,
+                        rating: true,
+                        hasTimeSlot: {
+                            where: {
+                                timeSlotId: {in: timeSlotIds}
+                            },
+                            select: {
+                                timeSlot: true
+                            }
+                        }
+                    }
+                }
+            },
         })
         return branches;
 

@@ -200,7 +200,7 @@ model Court {
   nbOfPlayers Int
   branchId Int
   price Int
-  rating Float @default(0.0)
+  rating Float? @default(0.0)
   hasTimeSlot HasTimeSlot[]
   
   games   Game[]

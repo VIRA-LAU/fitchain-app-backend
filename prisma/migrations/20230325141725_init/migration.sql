@@ -156,7 +156,7 @@ CREATE TABLE "Court" (
     "nbOfPlayers" INTEGER NOT NULL,
     "branchId" INTEGER NOT NULL,
     "price" INTEGER NOT NULL,
-    "rating" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "rating" DOUBLE PRECISION DEFAULT 0.0,
 
     CONSTRAINT "Court_pkey" PRIMARY KEY ("id")
 );
