@@ -71,7 +71,6 @@ model Branch {
   location String
   venueId Int
   photoDirectoryURL String?
-  rating Int @default(0)
   courts Court[]
   venue  Venue    @relation(fields: [venueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 
@@ -185,7 +184,14 @@ model HasStatistics {
 
 }
 
+model TimeSlot {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  startTime String
+  endTime String
 
+  hasTimeSlot HasTimeSlot[]
+}
 
 model Court {
   id Int @id @default(autoincrement())
@@ -193,16 +199,23 @@ model Court {
   courtType String
   nbOfPlayers Int
   branchId Int
-  price Int?
-
+  price Int
+  rating Float @default(0.0)
+  hasTimeSlot HasTimeSlot[]
+  
   games   Game[]
   branch  Branch  @relation(fields: [branchId],references: [id],onDelete: Cascade,onUpdate: Cascade)
-
-
-
-
 }
 
+model HasTimeSlot {
+  id Int @id @default(autoincrement())
+
+  courtId Int
+  timeSlotId Int
+
+  court Court @relation(fields: [courtId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  timeSlot TimeSlot @relation(fields: [timeSlotId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+}
 
 enum invitationApproval {
   PENDING
