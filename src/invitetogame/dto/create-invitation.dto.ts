@@ -3,10 +3,9 @@ import { IsArray, IsNotEmpty, IsNumber } from "class-validator"
 
 export class CreateInvitationDto{
   
-    @IsArray()
+    @IsNumber()
     @IsNotEmpty()
-    friendId: number[]
-
+    friendId: number
 
     @IsNumber()
     @IsNotEmpty()

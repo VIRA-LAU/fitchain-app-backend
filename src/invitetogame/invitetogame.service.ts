@@ -138,17 +138,13 @@ export class InvitetogameService {
     }
 
     async createInvitation(userId:number, dto:CreateInvitationDto){
-        const invitations = await Promise.all(dto.friendId.map(async (friendId) => {
-            let newDto = {...dto, friendId}
-            const invitation = await this.prisma.inviteToGame.create({ 
-                data:{
-                    userId,
-                    ...newDto
-                }
-            })
-            return invitation; 
-        }))
-        return invitations
+        const invitation = await this.prisma.inviteToGame.create({ 
+            data:{
+                userId,
+                ...dto
+            }
+        })
+        return invitation; 
     }
 
     async editInvitationById(userId:number,invitationId: number, dto:EditInvitationDto){
