@@ -133,7 +133,7 @@ export class BranchService {
                                     some: {
                                         timeSlotId: {
                                             in: timeSlotIds
-                                        }
+                                        },
                                     }
                                 }},
                                 { NOT: { id: { in: occupiedCourtIds }}},
@@ -160,34 +160,24 @@ export class BranchService {
             })
             return branches;
         } else {
-            const gamesInDate = await this.prisma.game.findMany({ where: { date: {
-                                                                gte: new Date(date),
-                                                                lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
-                                                                } } })
+            const gamesInDate = await this.prisma.game.findMany({ 
+                where: { 
+                    AND: [
+                        { date: {
+                            gte: new Date(date),
+                            lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
+                        } },
+                        { type: gameType}
+                    ]
+                } })
             const existingGames = gamesInDate.map(game => ({courtId: game.courtId, timeSlotId: game.timeSlotId}))
-            const branches = await this.prisma.branch.findMany({
+            let branches = await this.prisma.branch.findMany({
                 where: {
                     AND: [
                         {
                             courts: {
                                 some: {
-                                    AND: [
-                                        { courtType: gameType },
-                                        {
-                                            NOT : {
-                                                OR: existingGames.map(game => ({
-                                                    AND: [
-                                                        { hasTimeSlot: {
-                                                            some: {
-                                                                timeSlotId: game.timeSlotId
-                                                            }
-                                                        }},
-                                                        { id: game.courtId }
-                                                    ]
-                                                }))
-                                            }
-                                        }
-                                    ]
+                                    courtType: gameType
                                 }
                             }
                         },
@@ -204,23 +194,7 @@ export class BranchService {
                     },
                     courts: {
                         where: {
-                            AND: [
-                                { courtType: gameType },
-                                {
-                                    NOT : {
-                                        OR: existingGames.map(game => ({
-                                            AND: [
-                                                { hasTimeSlot: {
-                                                    some: {
-                                                        timeSlotId: game.timeSlotId
-                                                    }
-                                                }},
-                                                { id: game.courtId }
-                                            ]
-                                        }))
-                                    }
-                                }
-                            ]
+                            courtType: gameType
                         },
                         select: {
                             id: true,
@@ -230,13 +204,37 @@ export class BranchService {
                             branchId: true,
                             hasTimeSlot: {
                                 select: {
-                                    timeSlot: true
+                                    timeSlot: true,
+                                    courtId: true,
+                                    timeSlotId: true,
                                 }
                             }
                         }
                     }
                 },
             })
+            branches = branches.map((branch) => {
+                branch.courts = branch.courts.map(
+                  (court) => {
+                    court.hasTimeSlot = court.hasTimeSlot.filter(
+                      ({ timeSlotId, courtId }) => !existingGames.some(
+                          (existing) =>
+                            timeSlotId ===
+                              existing.timeSlotId &&
+                            courtId === existing.courtId,
+                        )
+                    );
+                    return court;
+                  },
+                );
+                branch.courts = branch.courts.filter(
+                  (court) =>
+                    court.hasTimeSlot.length !== 0,
+                );
+                return branch;
+              }).filter(
+                (branch) => branch.courts.length !== 0,
+              );
             return branches;
         }
     }
