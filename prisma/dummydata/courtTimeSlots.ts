@@ -1,4 +1,4 @@
-export const hasTimeSlots = [
+export const courtTimeSlots = [
     {
         courtId: 1,
         timeSlotId: 1

@@ -49,7 +49,11 @@ export class GameService {
             id: true,
             date: true,
             adminTeam: true,
-            timeSlot: true,
+            gameTimeSlots: {
+                select: {
+                    timeSlot: true
+                }
+            },
             type: true,
             court: {
               select: {
@@ -97,8 +101,8 @@ export class GameService {
                     gte: new Date(date),
                     lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
                 } : { gt: new Date() } },
-                startTime ? { timeSlot: { startTime: {lte: startTime} } } : {},
-                endTime ? { timeSlot: { endTime: {gte: endTime} } } : {},
+                startTime ? { gameTimeSlots: { some: { timeSlot: { startTime: {lte: startTime} } } } } : {},
+                endTime ? { gameTimeSlots: { some: { timeSlot: { endTime: {gte: endTime} } } } } : {},
             ]
           },
           orderBy: { date: 'asc' },
@@ -106,7 +110,11 @@ export class GameService {
             id: true,
             date: true,
             adminTeam: true,
-            timeSlot: true,
+            gameTimeSlots: {
+                select: {
+                    timeSlot: true
+                }
+            },
             type: true,
             court: {
               select: {
@@ -155,7 +163,11 @@ export class GameService {
                 date:true,
                 type: true,
                 adminTeam: true,
-                timeSlot: true,
+                gameTimeSlots: {
+                    select: {
+                        timeSlot: true
+                    }
+                },
                 court: {
                     select:{
                         courtType: true,
@@ -218,7 +230,7 @@ export class GameService {
                     {OR: [
                         {status: gameStatus.APPROVED},
                         {status: gameStatus.FINISHED},  
-                    ]},
+                    ], },
                     type === 'upcoming' ? {
                         date: {gt: new Date()}
                     } : type === 'previous' ? {
@@ -231,7 +243,11 @@ export class GameService {
                 date:true,
                 type: true,
                 adminTeam: true,
-                timeSlot: true,
+                gameTimeSlots: {
+                    select: {
+                        timeSlot: true
+                    }
+                },
                 court: {
                     select:{
                         courtType: true,
@@ -287,22 +303,28 @@ export class GameService {
     }
  
     async createBooking(userId: number, dto: createBookingDto){
-        const timeSlot = await this.prisma.timeSlot.findUnique({
+        const timeSlots = await this.prisma.timeSlot.findMany({
             where: {
-                id: dto.timeSlotId
+                id: { in: dto.timeSlotIds}
             },
             select: {
+                id: true,
                 startTime: true
             }
         })
         const dateStr = new Date(dto.date).toISOString()
-        const bookingDate = new Date(`${dateStr.substring(0, dateStr.indexOf('T'))} ${timeSlot.startTime}`)
+        const bookingDate = new Date(`${dateStr.substring(0, dateStr.indexOf('T'))} ${timeSlots[0].startTime}`)
+        const { timeSlotIds, ...dtoData } = dto
         const booking = await this.prisma.game.create({ 
             data:{
                 adminId: userId,
                 status: 'APPROVED',
-                ...dto,
+                ...dtoData,
                 date: bookingDate,
+
+                gameTimeSlots: {
+                    create: timeSlots.map(slot => ({timeSlotId: slot.id}))
+                }
             }
         })
         return booking; 
@@ -367,7 +389,11 @@ export class GameService {
                     date:true,
                     type: true,
                     adminTeam: true,
-                    timeSlot: true,
+                    gameTimeSlots: {
+                        select: {
+                            timeSlot: true
+                        }
+                    },
                     court: {
                         select:{
                             courtType: true,

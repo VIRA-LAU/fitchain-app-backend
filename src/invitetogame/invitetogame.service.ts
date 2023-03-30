@@ -28,7 +28,11 @@ export class InvitetogameService {
                         type:true,
                         date:true,
                         createdAt: true,
-                        timeSlot: true,
+                        gameTimeSlots: {
+                            select: {
+                                timeSlot: true
+                            }
+                        },
                         court: {
                             select:{
                                 branch:{
@@ -84,7 +88,11 @@ export class InvitetogameService {
                         type:true,
                         date:true,
                         createdAt: true,
-                        timeSlot: true,
+                        gameTimeSlots: {
+                            select: {
+                                timeSlot: true
+                            }
+                        },
                         court: {
                             select:{
                                 branch:{

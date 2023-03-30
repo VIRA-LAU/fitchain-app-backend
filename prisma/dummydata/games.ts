@@ -5,7 +5,6 @@ export const games =
       date: "2023-03-30T09:00:00.000Z",
       courtId: 1,
       status: 1,
-      timeSlotId: 1
     },
     {
       adminId: 1,
@@ -13,7 +12,6 @@ export const games =
       courtId: 2,
       status: 1,
       type: "Football",
-      timeSlotId: 5
 
     }
   ]

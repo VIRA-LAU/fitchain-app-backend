@@ -1,5 +1,5 @@
 import { gameType } from "@prisma/client"
-import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
+import { IsArray, IsDateString, IsNotEmpty, IsNumber, IsString } from "class-validator"
 
 export class createBookingDto{
 
@@ -15,8 +15,8 @@ export class createBookingDto{
     @IsNotEmpty()
     date:Date
 
-    @IsNumber()
+    @IsArray()
     @IsNotEmpty()
-    timeSlotId:number
+    timeSlotIds:number[]
 
 }

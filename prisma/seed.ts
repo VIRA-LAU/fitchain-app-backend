@@ -3,7 +3,8 @@ import {users} from './dummydata/users';
 import {games} from './dummydata/games';
 import {courts} from './dummydata/courts';
 import {timeSlots} from './dummydata/timeSlots'
-import {hasTimeSlots} from './dummydata/hasTimeSlots'
+import {courtTimeSlots} from './dummydata/courtTimeSlots'
+import {gameTimeSlots} from './dummydata/gameTimeSlots'
 import {branches} from './dummydata/branches';
 import {venues} from './dummydata/venues';
 
@@ -68,11 +69,11 @@ async function main() {
     }
 
   // Link courts to time slots
-  for (const hasTimeSlotData of hasTimeSlots) {
-    await prisma.hasTimeSlot.create({
+  for (const courtTimeSlotData of courtTimeSlots) {
+    await prisma.courtTimeSlots.create({
       data: {
-        courtId: hasTimeSlotData.courtId,
-        timeSlotId: hasTimeSlotData.timeSlotId
+        courtId: courtTimeSlotData.courtId,
+        timeSlotId: courtTimeSlotData.timeSlotId
       },
     });
   }
@@ -81,16 +82,23 @@ async function main() {
   for (const gameData of games) {
     await prisma.game.create({
       data: {
-
         admin: { connect: { id: gameData.adminId }},
         date: new Date(gameData.date),
-        timeSlot: {connect: { id: gameData.timeSlotId }},
         court: { connect: { id: gameData.courtId } },
 	      status: "APPROVED",
       },
     });
   }
 
+  // Link games to time slots
+  for (const gameTimeSlotData of gameTimeSlots) {
+    await prisma.gameTimeSlots.create({
+      data: {
+        gameId: gameTimeSlotData.gameId,
+        timeSlotId: gameTimeSlotData.timeSlotId
+      },
+    });
+  }
 }
 
 main()
