@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { gameStatus, invitationApproval } from '@prisma/client';
+import { gameStatus, gameType, invitationApproval } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { createBookingDto } from './dto/create-booking.dto';
 import { createFollowGameDto } from './dto/create-follow-game.dto';
@@ -86,8 +86,64 @@ export class GameService {
           },
         });
         return games;
-      }
-      
+    }
+
+    async searchGames(gameType: gameType, date?: string, startTime?: string, endTime?: string) {
+        const games = await this.prisma.game.findMany({
+          where: {
+            AND: [
+                { type: gameType },
+                { date: date ? {
+                    gte: new Date(date),
+                    lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
+                } : { gt: new Date() } },
+                startTime ? { timeSlot: { startTime: {lte: startTime} } } : {},
+                endTime ? { timeSlot: { endTime: {gte: endTime} } } : {},
+            ]
+          },
+          orderBy: { date: 'asc' },
+          select: {
+            id: true,
+            date: true,
+            adminTeam: true,
+            timeSlot: true,
+            type: true,
+            court: {
+              select: {
+                courtType: true,
+                branch: {
+                  select: {
+                    location: true,
+                    venue: {
+                      select: {
+                        name: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            gameRequests: {
+              select: {
+                team: true,
+              },
+            },
+            gameInvitation: {
+              select: {
+                team: true,
+              },
+            },
+            admin: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        });
+        return games;
+    }
 
     async getGameById(gameId:number){
         const game = await this.prisma.game.findFirst({ 
@@ -231,11 +287,22 @@ export class GameService {
     }
  
     async createBooking(userId: number, dto: createBookingDto){
+        const timeSlot = await this.prisma.timeSlot.findUnique({
+            where: {
+                id: dto.timeSlotId
+            },
+            select: {
+                startTime: true
+            }
+        })
+        const dateStr = new Date(dto.date).toISOString()
+        const bookingDate = new Date(`${dateStr.substring(0, dateStr.indexOf('T'))} ${timeSlot.startTime}`)
         const booking = await this.prisma.game.create({ 
             data:{
                 adminId: userId,
                 status: 'APPROVED',
-                ...dto
+                ...dto,
+                date: bookingDate,
             }
         })
         return booking; 

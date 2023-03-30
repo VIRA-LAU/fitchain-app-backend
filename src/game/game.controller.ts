@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { gameType } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
 import { JwtGaurd } from '../auth/gaurd';
 import { createBookingDto } from './dto/create-booking.dto';
@@ -14,6 +15,11 @@ export class GameController {
     @Get()
     getGames(@GetUser('id') userId: number, @Query('limit') limit?: string, @Query('type') type?: string) {
         return this.gameService.getGames(userId, parseInt(limit),type);
+    }
+
+    @Get('search')
+    searchGames(@Query('gameType') gameType: gameType, @Query('date') date?: string, @Query('startTime') startTime?: string, @Query('endTime') endTime?: string) {
+        return this.gameService.searchGames(gameType, date, startTime, endTime);
     }
 
     @Get('bookings')
@@ -61,10 +67,7 @@ export class GameController {
     @Delete('followed')
     deleteFollowById(@GetUser('id') userId:number, @Query('gameId') gameId:string){
         return this.gameService.deleteFollowById(userId,parseInt(gameId))
-        
     }
-
-
 
     @Post("bookings")
     createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){
