@@ -92,11 +92,12 @@ export class GameService {
         return games;
     }
 
-    async searchGames(gameType: gameType, date?: string, startTime?: string, endTime?: string) {
+    async searchGames(userId: number, gameType: gameType, date?: string, startTime?: string, endTime?: string) {
         const games = await this.prisma.game.findMany({
           where: {
             AND: [
                 { type: gameType },
+                { NOT: { adminId: userId } },
                 { date: date ? {
                     gte: new Date(date),
                     lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
