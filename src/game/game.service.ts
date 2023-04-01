@@ -593,32 +593,62 @@ export class GameService {
     }
 
     async getUpdates(gameId: number) {
-        const activities = await this.prisma.game.findMany({ 
+        const updates = await this.prisma.game.findUnique({ 
             where:{
                id:gameId
             },
             select:{
-                date:true,
-                type: true,
+                admin: {
+                    select: {
+                        firstName: true,
+                        lastName: true
+                    }
+                },
+                createdAt: true,
                 winnerTeam: true,
-                adminTeam: true,
                 status: true,
-                highlights: true,
                 gameInvitation: {
                     orderBy:{
                         createdAt:'desc'
                     },
-                    take:5
+                    take:5,
+                    select: {
+                        createdAt: true,
+                        status: true,
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true
+                            }
+                        },
+                        friend: {
+                            select: {
+                                firstName: true,
+                                lastName: true
+                            }
+                        }
+                    }
                 },
                 gameRequests: {
                     orderBy:{
                         createdAt:'desc'
                     },
-                    take:5
+                    take:5,
+                    select: {
+                        id: true,
+                        createdAt: true,
+                        status: true,
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true
+                            }
+                        },
+                    }
                 }
             }
         })
-        return activities; 
+        return updates; 
     }
 
     async getPlayers(gameId: number) {
