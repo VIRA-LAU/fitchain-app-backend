@@ -145,11 +145,12 @@ export class GameService {
         return { "team": "none" };
     }
 
-    async searchGames(gameType: gameType, date?: string, startTime?: string, endTime?: string) {
+    async searchGames(userId: number, gameType: gameType, date?: string, startTime?: string, endTime?: string) {
         const games = await this.prisma.game.findMany({
           where: {
             AND: [
                 { type: gameType },
+                { NOT: { adminId: userId } },
                 { date: date ? {
                     gte: new Date(date),
                     lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
@@ -646,32 +647,62 @@ export class GameService {
     }
 
     async getUpdates(gameId: number) {
-        const activities = await this.prisma.game.findMany({ 
+        const updates = await this.prisma.game.findUnique({ 
             where:{
                id:gameId
             },
             select:{
-                date:true,
-                type: true,
+                admin: {
+                    select: {
+                        firstName: true,
+                        lastName: true
+                    }
+                },
+                createdAt: true,
                 winnerTeam: true,
-                adminTeam: true,
                 status: true,
-                highlights: true,
                 gameInvitation: {
                     orderBy:{
                         createdAt:'desc'
                     },
-                    take:5
+                    take:5,
+                    select: {
+                        createdAt: true,
+                        status: true,
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true
+                            }
+                        },
+                        friend: {
+                            select: {
+                                firstName: true,
+                                lastName: true
+                            }
+                        }
+                    }
                 },
                 gameRequests: {
                     orderBy:{
                         createdAt:'desc'
                     },
-                    take:5
+                    take:5,
+                    select: {
+                        id: true,
+                        createdAt: true,
+                        status: true,
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true
+                            }
+                        },
+                    }
                 }
             }
         })
-        return activities; 
+        return updates; 
     }
 
     async getPlayers(gameId: number, userId: number) {

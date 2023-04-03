@@ -18,8 +18,8 @@ export class GameController {
     }
 
     @Get('search')
-    searchGames(@Query('gameType') gameType: gameType, @Query('date') date?: string, @Query('startTime') startTime?: string, @Query('endTime') endTime?: string) {
-        return this.gameService.searchGames(gameType, date, startTime, endTime);
+    searchGames(@GetUser('id') userId: number, @Query('gameType') gameType: gameType, @Query('date') date?: string, @Query('startTime') startTime?: string, @Query('endTime') endTime?: string) {
+        return this.gameService.searchGames(userId, gameType, date, startTime, endTime);
     }
     @Get('getTeam')
     getPlayerTeam(@GetUser('id') userId: number, @Query('gameId') gameId: string) {
