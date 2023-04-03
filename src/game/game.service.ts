@@ -53,7 +53,10 @@ export class GameService {
                 select: {
                     timeSlot: true
                 }
-            },
+              },
+              homeScore: true,
+              awayScore: true,
+            winnerTeam: true,
             type: true,
             court: {
               select: {
@@ -90,6 +93,56 @@ export class GameService {
           },
         });
         return games;
+    }
+    async getPlayerTeam(userId: number, gameID: string) {
+        let gameId=  parseInt(gameID)
+        const game = await this.prisma.game.findFirst({
+            where: {
+                id: {
+                equals: gameId
+            }
+        }});
+        if (game.adminId == userId) return { "team": game.adminTeam };
+
+        const requested = await this.prisma.game.findFirst({
+            where: {
+              id: gameId
+            },
+            select: {
+              gameRequests: {
+                select: {
+                    userId: true,
+                    team: true,
+                }
+              }
+            }
+        });
+        for (let i = 0; i < requested['gameRequests'].length; i++){
+            if (requested['gameRequests'][i]['userId'] === userId) {
+                return { "team": requested['gameRequests'][i]['team'] }
+            }
+        }
+        const invited = await this.prisma.game.findFirst({
+            where: {
+              id: gameId
+            },
+            select: {
+              gameInvitation: {
+                select: {
+                    friendId: true,
+                    team: true,
+                    status: true,
+                }
+              }
+            }
+        });
+        for (let i = 0; i < invited['gameInvitation'].length; i++){
+            if (invited['gameInvitation'][i]['friendId'] === userId) {
+                return { "team": invited['gameInvitation'][i]['team'] }
+            }
+        }
+
+        return { "team": "none" };
     }
 
     async searchGames(gameType: gameType, date?: string, startTime?: string, endTime?: string) {
@@ -168,6 +221,9 @@ export class GameService {
                         timeSlot: true
                     }
                 },
+                homeScore: true,
+                awayScore: true,
+                winnerTeam: true,
                 court: {
                     select:{
                         courtType: true,
@@ -367,8 +423,6 @@ export class GameService {
         })
         
     }
-
-   
 
     async getFollowedGames(userId: number, type?: string) {
         return this.prisma.followsGame.findMany({
@@ -620,7 +674,7 @@ export class GameService {
         return activities; 
     }
 
-    async getPlayers(gameId: number) {
+    async getPlayers(gameId: number, userId: number) {
         const admin = await this.prisma.game.findMany({
             where: {
                 id: gameId
@@ -680,7 +734,25 @@ export class GameService {
               firstName: user.firstName,
               lastName: user.lastName,
             };
-          }));
+            }));
+        
+            players = await Promise.all(players.map(async (player) => {
+                const rate = await this.prisma.playerRating.findMany({
+                  where: {
+                        raterId: userId,
+                        gameId: gameId,
+                      playerId: player.id
+                  },
+                  select: {
+                    raterId: true
+                  },
+                });
+            return {
+              ...player,
+                rated: rate.length >= 1 ? true : false
+            };
+            }));
+        console.log(players);
         return players;
           
     }

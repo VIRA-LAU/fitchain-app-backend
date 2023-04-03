@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { JwtGaurd } from '../auth/gaurd';
 import { EditUserDto } from './dto/edit-user.dto';
+import { ratePlayerDto } from './dto/rate-player-dto';
 import { UserService } from './user.service';
 
 @UseGuards(JwtGaurd)
@@ -42,5 +43,8 @@ export class UserController {
         
     }
 
-
+    @Post('rate')
+    ratePlayer(@GetUser('id') raterId: number, @Body() dto: ratePlayerDto) {
+        return this.userService.ratePlayer(raterId, dto);
+    }
 }

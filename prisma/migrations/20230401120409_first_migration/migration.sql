@@ -72,6 +72,8 @@ CREATE TABLE "Game" (
     "winnerTeam" "teamType" NOT NULL DEFAULT 'HOME',
     "highlights" TEXT[],
     "status" "gameStatus" NOT NULL DEFAULT 'PENDING',
+    "homeScore" INTEGER DEFAULT 0,
+    "awayScore" INTEGER DEFAULT 0,
 
     CONSTRAINT "Game_pkey" PRIMARY KEY ("id")
 );
@@ -178,6 +180,17 @@ CREATE TABLE "CourtTimeSlots" (
     CONSTRAINT "CourtTimeSlots_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "PlayerRating" (
+    "id" SERIAL NOT NULL,
+    "gameId" INTEGER NOT NULL,
+    "raterId" INTEGER NOT NULL,
+    "playerId" INTEGER NOT NULL,
+    "rating" INTEGER NOT NULL,
+
+    CONSTRAINT "PlayerRating_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -267,3 +280,12 @@ ALTER TABLE "CourtTimeSlots" ADD CONSTRAINT "CourtTimeSlots_courtId_fkey" FOREIG
 
 -- AddForeignKey
 ALTER TABLE "CourtTimeSlots" ADD CONSTRAINT "CourtTimeSlots_timeSlotId_fkey" FOREIGN KEY ("timeSlotId") REFERENCES "TimeSlot"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PlayerRating" ADD CONSTRAINT "PlayerRating_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "Game"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PlayerRating" ADD CONSTRAINT "PlayerRating_playerId_fkey" FOREIGN KEY ("playerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PlayerRating" ADD CONSTRAINT "PlayerRating_raterId_fkey" FOREIGN KEY ("raterId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

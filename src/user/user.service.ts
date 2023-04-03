@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EditUserDto } from './dto/edit-user.dto';
+import { ratePlayerDto } from './dto/rate-player-dto';
 
 @Injectable()
 export class UserService {
@@ -61,5 +62,9 @@ export class UserService {
             }
         })
         
+    }
+    async ratePlayer(userId: number, body: ratePlayerDto) {
+        console.log(body);
+        await this.prisma.playerRating.create({ data: {raterId: userId, ...body} });
     }
 }

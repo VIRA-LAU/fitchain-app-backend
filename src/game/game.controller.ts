@@ -21,7 +21,10 @@ export class GameController {
     searchGames(@Query('gameType') gameType: gameType, @Query('date') date?: string, @Query('startTime') startTime?: string, @Query('endTime') endTime?: string) {
         return this.gameService.searchGames(gameType, date, startTime, endTime);
     }
-
+    @Get('getTeam')
+    getPlayerTeam(@GetUser('id') userId: number, @Query('gameId') gameId: string) {
+        return this.gameService.getPlayerTeam(userId, gameId);
+    }
     @Get('bookings')
     getBookings(@Query('type') type?: string){
         return this.gameService.getBookings(type)
@@ -43,8 +46,8 @@ export class GameController {
     }
 
     @Get('players/:id')
-    getPlayersOfGame(@Param('id', ParseIntPipe) gameId:number) {
-        return this.gameService.getPlayers(gameId);
+    getPlayersOfGame(@GetUser('id') userId: number, @Param('id', ParseIntPipe) gameId:number) {
+        return this.gameService.getPlayers(gameId, userId);
     }
 
     @Get('updates/:id')

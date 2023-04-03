@@ -40,11 +40,11 @@ model User {
   joinRequestsSent          RequestToJoinGame[]
 
   userStatistics         HasStatistics[]
-
+  playerRated PlayerRating[] @relation("player")
+  playerRater PlayerRating[] @relation("rater")
   gamesFollowed FollowsGame[]
 
   games Game[]          @relation("createdGames")
-
 }
 
 model Venue {
@@ -95,7 +95,11 @@ model Game {
   gameInvitation InviteToGame[]
   followers FollowsGame[]
   gameTimeSlots GameTimeSlots[]
+  playerRating PlayerRating[]
 
+  homeScore Int? @default(0)
+  awayScore Int? @default(0)
+  
   court     Court     @relation(fields: [courtId],references: [id],onDelete: Cascade,onUpdate: Cascade)
   admin     User      @relation(name: "createdGames", fields: [adminId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 }
@@ -226,6 +230,22 @@ model CourtTimeSlots {
 
   court Court @relation(fields: [courtId],references: [id],onDelete: Cascade,onUpdate: Cascade)
   timeSlot TimeSlot @relation(fields: [timeSlotId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+}
+
+model PlayerRating {
+  id Int @id @default(autoincrement())
+
+  gameId Int
+  raterId Int
+  playerId Int
+  performance Float
+  punctuality Float
+  teamPlayer Float
+  fairplay Float
+  game Game @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  player User @relation(name:"player",fields: [playerId], references: [id], onDelete: Cascade,onUpdate: Cascade)
+  rater User @relation(name:"rater", fields: [raterId], references: [id], onDelete: Cascade,onUpdate: Cascade)
+
 }
 
 enum invitationApproval {
