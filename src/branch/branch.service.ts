@@ -12,6 +12,8 @@ export class BranchService {
         const BranchesWithVenue = await this.prisma.branch.findMany({
             select: {
                 location: true,
+                latitude: true,
+                longitude: true,
                 venue: {
                     select:{
                         id:true,
@@ -51,6 +53,8 @@ export class BranchService {
             },
             select: {
                 location: true,
+                latitude: true,
+                longitude: true,
                 venue: {
                     select:{
                         id:true,
@@ -140,6 +144,8 @@ export class BranchService {
                 },
                 select: {
                     location: true,
+                    latitude: true,
+                    longitude: true,
                     venue: {
                         select:{
                             id:true,
@@ -215,6 +221,8 @@ export class BranchService {
                 },
                 select: {
                     location: true,
+                    latitude: true,
+                    longitude: true,
                     venue: {
                         select:{
                             id:true,
@@ -271,7 +279,9 @@ export class BranchService {
         const branch = await this.prisma.branch.create({ 
             data:{
                 venueId: venueId,
-                ...dto
+                ...dto,   
+                latitude: 33.91444916242689,
+                longitude: 35.586040802299976
             }
         })
         return branch; 
