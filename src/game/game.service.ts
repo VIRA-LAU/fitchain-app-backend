@@ -233,6 +233,8 @@ export class GameService {
                         branch:{
                             select:{
                                 location: true,
+                                latitude: true,
+                                longitude: true,
                                 venue:{
                                     select:{
                                         name:true
