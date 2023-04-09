@@ -53,6 +53,8 @@ CREATE TABLE "Branch" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "location" TEXT NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
     "venueId" INTEGER NOT NULL,
     "photoDirectoryURL" TEXT,
 
@@ -186,7 +188,10 @@ CREATE TABLE "PlayerRating" (
     "gameId" INTEGER NOT NULL,
     "raterId" INTEGER NOT NULL,
     "playerId" INTEGER NOT NULL,
-    "rating" INTEGER NOT NULL,
+    "performance" DOUBLE PRECISION NOT NULL,
+    "punctuality" DOUBLE PRECISION NOT NULL,
+    "teamPlayer" DOUBLE PRECISION NOT NULL,
+    "fairplay" DOUBLE PRECISION NOT NULL,
 
     CONSTRAINT "PlayerRating_pkey" PRIMARY KEY ("id")
 );

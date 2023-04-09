@@ -39,6 +39,8 @@ async function main() {
           data: {
             location: branchData.location,
             venue: { connect: { id: branchData.venueId } },
+            latitude: branchData.latitude,
+            longitude: branchData.longitude
           },
         });
       }

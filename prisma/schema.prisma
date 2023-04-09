@@ -69,6 +69,8 @@ model Branch {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   location String
+  latitude Float
+  longitude Float
   venueId Int
   photoDirectoryURL String?
   courts Court[]
