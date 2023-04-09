@@ -775,7 +775,7 @@ export class GameService {
                       playerId: player.id
                   },
                   select: {
-                    raterId: true
+                      raterId: true,
                   },
                 });
             return {
@@ -783,6 +783,29 @@ export class GameService {
                 rated: rate.length >= 1 ? true : false
             };
             }));
+            players = await Promise.all(players.map(async (player) => {
+                const rate = await this.prisma.playerRating.findMany({
+                  where: {
+                      playerId: player.id
+                  },
+                  select: {
+                      performance: true,
+                      fairplay: true,
+                      teamPlayer: true,
+                      punctuality: true
+                  },
+                });
+                var overallRating = 0;
+                for (let i = 0; i < rate.length; i++){
+                    overallRating = (rate[i]['fairplay'] + rate[i]['performance'] + rate[i]['punctuality'] + rate[i]['teamPlayer']) / 4;
+                }
+                if (rate.length > 0) { overallRating /= rate.length; }
+            return {
+              ...player,
+                rating: overallRating,
+            };
+            }));
+        
         console.log(players);
         return players;
           
