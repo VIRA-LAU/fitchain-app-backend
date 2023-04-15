@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { gameStatus, gameType, invitationApproval } from '@prisma/client';
+import { gameStatus, gameType, invitationApproval, teamType, winnerTeamType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { createBookingDto } from './dto/create-booking.dto';
 import { createFollowGameDto } from './dto/create-follow-game.dto';
@@ -145,7 +145,8 @@ export class GameService {
         return { "team": "none" };
     }
 
-    async searchGames(userId: number, gameType: gameType, date?: string, startTime?: string, endTime?: string) {
+    async searchGames(userId: number, gameType: gameType, nbOfPlayers: number,
+    date?: string, startTime?: string, endTime?: string) {
         const games = await this.prisma.game.findMany({
           where: {
             AND: [
@@ -173,6 +174,7 @@ export class GameService {
             court: {
               select: {
                 courtType: true,
+                nbOfPlayers: true,
                 branch: {
                   select: {
                     location: true,
@@ -206,7 +208,24 @@ export class GameService {
             },
           },
         });
-        return games;
+        const filteredGames = []
+        for (const game of games){
+            const requestsInGame = await this.prisma.requestToJoinGame.count({
+                where: {
+                    gameId: game.id,
+                    status: 'APPROVED'
+                }
+            })
+            const invitationsInGame = await this.prisma.inviteToGame.count({
+                where: {
+                    gameId: game.id,
+                    status: 'APPROVED'
+                }
+            })
+            if (game.court.nbOfPlayers - requestsInGame - invitationsInGame - 1 >= nbOfPlayers)
+                filteredGames.push(game)
+        }
+        return filteredGames;
     }
 
     async getGameById(gameId:number){
@@ -399,16 +418,22 @@ export class GameService {
         })
 
         if(!booking || booking.adminId != userId)
-             throw new ForbiddenException("Access to edit denied")
+            throw new ForbiddenException("Access to edit denied")
         
-             return this.prisma.game.update({
-                where:{
-                    id:bookingId
-                },
-                data:{
-                    ...dto
-                }
-             })
+        let newWinner: winnerTeamType = "DRAW"
+        if (dto.homeScore && dto.awayScore)
+            newWinner = dto.homeScore === dto.awayScore ? 'DRAW' :
+                dto.homeScore > dto.awayScore ? 'HOME' : 'AWAY'
+
+        return this.prisma.game.update({
+        where:{
+            id:bookingId
+        },
+        data:{
+            ...dto,
+            winnerTeam: newWinner
+        }
+        })
     }
 
     async deleteBookingById(userId:number,bookingId:number){
@@ -419,7 +444,7 @@ export class GameService {
         })
 
         if(!booking || booking.adminId != userId)
-        throw new ForbiddenException("Access to edit denied")
+            throw new ForbiddenException("Access to edit denied")
 
         await this.prisma.game.delete({
             where:{
@@ -648,6 +673,37 @@ export class GameService {
             ...invitedActivities,
             ...requestedActivities
         ]; 
+    }
+
+    async getGameCount(userId: number) {
+        const adminGameCount = await this.prisma.game.count({
+            where: {
+                AND: [
+                        {date: {lte: new Date()}},
+                        {adminId: userId}
+                    ]
+                },
+            }
+        )
+        const invitedGameCount = await this.prisma.inviteToGame.count({
+            where: {
+                AND: [
+                        {game: {date: {lte: new Date()}}},
+                        {friendId: userId}
+                    ]
+                },
+            }
+        )
+        const requestedGameCount = await this.prisma.requestToJoinGame.count({
+            where: {
+                AND: [
+                    {game: {date: {lte: new Date()}}},
+                    {userId}
+                    ]
+                },
+            }
+        )
+        return adminGameCount + invitedGameCount + requestedGameCount
     }
 
     async getUpdates(gameId: number) {

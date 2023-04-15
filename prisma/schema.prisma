@@ -88,7 +88,7 @@ model Game {
   date DateTime
   type gameType @default(Basketball)
   adminTeam teamType @default(HOME)
-  winnerTeam teamType @default(HOME)
+  winnerTeam winnerTeamType @default(DRAW)
   highlights String[]
   status gameStatus @default(PENDING)
 
@@ -274,4 +274,10 @@ enum gameType {
 enum teamType {
   HOME
   AWAY
+}
+
+enum winnerTeamType {
+  HOME
+  AWAY
+  DRAW
 }

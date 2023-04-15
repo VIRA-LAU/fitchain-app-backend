@@ -18,8 +18,10 @@ export class GameController {
     }
 
     @Get('search')
-    searchGames(@GetUser('id') userId: number, @Query('gameType') gameType: gameType, @Query('date') date?: string, @Query('startTime') startTime?: string, @Query('endTime') endTime?: string) {
-        return this.gameService.searchGames(userId, gameType, date, startTime, endTime);
+    searchGames(@GetUser('id') userId: number, @Query('gameType') gameType: gameType,
+        @Query('nbOfPlayers', ParseIntPipe) nbOfPlayers: number, @Query('date') date?: string,
+        @Query('startTime') startTime?: string, @Query('endTime') endTime?: string) {
+            return this.gameService.searchGames(userId, gameType, nbOfPlayers, date, startTime, endTime);
     }
     @Get('getTeam')
     getPlayerTeam(@GetUser('id') userId: number, @Query('gameId') gameId: string) {
@@ -30,9 +32,14 @@ export class GameController {
         return this.gameService.getBookings(type)
     }
 
-    @Get('activities')
-    getActivities(@GetUser('id') userId: number) {
+    @Get('activities/:userId')
+    getActivities(@Param('userId', ParseIntPipe) userId: number) {
         return this.gameService.getActivities(userId);
+    }
+
+    @Get('count/:userId')
+    getGameCount(@Param('userId', ParseIntPipe) userId: number) {
+        return this.gameService.getGameCount(userId);
     }
 
     @Get('followed')
@@ -72,26 +79,20 @@ export class GameController {
         return this.gameService.deleteFollowById(userId,parseInt(gameId))
     }
 
-    @Post("bookings")
+    @Post("")
     createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){
         console.log("create booking")
         return this.gameService.createBooking(userId,dto)
     }
 
-    @Patch('bookings/:id')
+    @Patch(':id')
     editBookingById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) bookingId: number,@Body() dto:editBookingDto){
         return this.gameService.editBookingById(userId,bookingId,dto)
     }
 
     @HttpCode(HttpStatus.NO_CONTENT)
-    @Delete('bookings/:id')
+    @Delete(':id')
     deleteBookingById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) bookingId:number){
-        return this.gameService.deleteBookingById(userId,bookingId)
-        
+        return this.gameService.deleteBookingById(userId,bookingId)   
     }
-
-
-
-
-
 }
