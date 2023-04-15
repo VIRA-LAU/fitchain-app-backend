@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EditVenueDto } from './dto';
 
@@ -7,20 +7,47 @@ export class VenueService {
     constructor(private prisma: PrismaService){}
 
     async getVenues(){
-
-    const venuesWithBranches = await this.prisma.venue.findMany({
-        select:{
-            name: true,
-            branches:{
-                select:{
-                    location:true,
+        let venues = await this.prisma.venue.findMany({
+            select:{
+                name: true,
+                branches:{
+                    select:{
+                        location: true,
+                        latitude: true,
+                        longitude: true,
+                        venue: {
+                            select:{
+                                id:true,
+                                name:true,
+                            }
+                        },
+                        courts: {
+                            select: {
+                                id: true,
+                                courtType: true,
+                                price: true,
+                                rating: true,
+                                branchId: true
+                            }
+                        }
+                    }
                 }
             }
-        }
-       
-    });
-
-            return venuesWithBranches;
+        });
+        venues = venues.map(venue => {
+            let branches = venue.branches.map(branch => ({
+                ...branch,
+                rating: branch.courts.length > 0 ?
+                    branch.courts.map(court => court.rating).reduce((a, b) => a + b, 0) / branch.courts.length : 0
+            }))
+            let rating = branches.map(branch => branch.rating).reduce((a, b) => a + b, 0) / branches.length
+            return ({
+                ...venue,
+                branches,
+                rating
+            })
+        })
+        return venues;
     }
 
     async getVenueById(venueId: number){
@@ -36,8 +63,17 @@ export class VenueService {
                 }
             }
         })
-        return venue; 
-
+        let branches = venue.branches.map(branch => ({
+            ...branch,
+            rating: branch.courts.length > 0 ?
+                branch.courts.map(court => court.rating).reduce((a, b) => a + b, 0) / branch.courts.length : 0
+        }))
+        let rating = branches.map(branch => branch.rating).reduce((a, b) => a + b, 0) / branches.length
+        return ({
+            ...venue,
+            branches,
+            rating
+        })
     }
 
     async editVenue(venueId: number, dto:EditVenueDto){

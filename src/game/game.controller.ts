@@ -30,9 +30,14 @@ export class GameController {
         return this.gameService.getBookings(type)
     }
 
-    @Get('activities')
-    getActivities(@GetUser('id') userId: number) {
+    @Get('activities/:userId')
+    getActivities(@Param('userId', ParseIntPipe) userId: number) {
         return this.gameService.getActivities(userId);
+    }
+
+    @Get('count/:userId')
+    getGameCount(@Param('userId', ParseIntPipe) userId: number) {
+        return this.gameService.getGameCount(userId);
     }
 
     @Get('followed')

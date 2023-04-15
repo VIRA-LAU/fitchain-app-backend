@@ -650,6 +650,37 @@ export class GameService {
         ]; 
     }
 
+    async getGameCount(userId: number) {
+        const adminGameCount = await this.prisma.game.count({
+            where: {
+                AND: [
+                        {date: {lte: new Date()}},
+                        {adminId: userId}
+                    ]
+                },
+            }
+        )
+        const invitedGameCount = await this.prisma.inviteToGame.count({
+            where: {
+                AND: [
+                        {game: {date: {lte: new Date()}}},
+                        {friendId: userId}
+                    ]
+                },
+            }
+        )
+        const requestedGameCount = await this.prisma.requestToJoinGame.count({
+            where: {
+                AND: [
+                    {game: {date: {lte: new Date()}}},
+                    {userId}
+                    ]
+                },
+            }
+        )
+        return adminGameCount + invitedGameCount + requestedGameCount
+    }
+
     async getUpdates(gameId: number) {
         const updates = await this.prisma.game.findUnique({ 
             where:{

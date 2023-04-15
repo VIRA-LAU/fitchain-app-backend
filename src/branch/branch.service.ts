@@ -8,8 +8,7 @@ export class BranchService {
     constructor(private prisma: PrismaService) { }
 
     async getBranches() {
-
-        const BranchesWithVenue = await this.prisma.branch.findMany({
+        let branches = await this.prisma.branch.findMany({
             select: {
                 location: true,
                 latitude: true,
@@ -32,22 +31,47 @@ export class BranchService {
             }
        
         });
-
-        return BranchesWithVenue;
+        branches = branches.map(branch => ({
+            ...branch,
+            rating: branch.courts.length > 0 ?
+                branch.courts.map(court => court.rating).reduce((a, b) => a + b, 0) / branch.courts.length : 0
+        }))
+        return branches;
     }
 
     async getBranchById(branchId: number) {
         const branch = await this.prisma.branch.findFirst({
             where: {
                 id: branchId,
+            },
+            select: {
+                location: true,
+                latitude: true,
+                longitude: true,
+                venue: {
+                    select:{
+                        id:true,
+                        name:true,
+                    }
+                },
+                courts: {
+                    select: {
+                        id: true,
+                        courtType: true,
+                        price: true,
+                        rating: true,
+                        branchId: true
+                    }
+                }
             }
         })
+        branch["rating"] = branch.courts.length > 0 ?
+            branch.courts.map(court => court.rating).reduce((a, b) => a + b, 0) / branch.courts.length : 0
         return branch;
-
     }
 
     async getBranchesByVenueId(venueId: number) {
-        const branches = await this.prisma.branch.findMany({
+        let branches = await this.prisma.branch.findMany({
             where: {
                 venueId,
             },
@@ -72,6 +96,11 @@ export class BranchService {
                 }
             }
         })
+        branches = branches.map(branch => ({
+            ...branch,
+            rating: branch.courts.length > 0 ?
+                branch.courts.map(court => court.rating).reduce((a, b) => a + b, 0) / branch.courts.length : 0
+        }))
         return branches;
 
     }
@@ -119,7 +148,7 @@ export class BranchService {
                 }
             })
             const occupiedCourtIds = gamesInTimeSlots.map(game => game.courtId)
-            const branches = await this.prisma.branch.findMany({
+            let branches = await this.prisma.branch.findMany({
                 where: {
                     AND: [
                         {
@@ -184,6 +213,11 @@ export class BranchService {
                     }
                 },
             })
+            branches = branches.map(branch => ({
+                ...branch,
+                rating: branch.courts.length > 0 ?
+                    branch.courts.map(court => court.rating).reduce((a, b) => a + b, 0) / branch.courts.length : 0
+            }))
             return branches;
         } else {
             const gamesInDate = await this.prisma.game.findMany({ 
@@ -271,6 +305,11 @@ export class BranchService {
               }).filter(
                 (branch) => branch.courts.length !== 0,
               );
+              branches = branches.map(branch => ({
+                  ...branch,
+                  rating: branch.courts.length > 0 ?
+                      branch.courts.map(court => court.rating).reduce((a, b) => a + b, 0) / branch.courts.length : 0
+              }))
             return branches;
         }
     }
