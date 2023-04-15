@@ -17,8 +17,9 @@ export class BranchController {
     
     @Get('search')
     searchForBranches(@Query('date') date?: string, @Query('startTime') startTime?: string,
-        @Query('endTime') endTime?: string, @Query('gameType') gameType?: gameType, @Query('venueId') venueId?: string){
-            return this.branchService.searchForBranches(date, gameType, startTime, endTime, parseInt(venueId))
+        @Query('endTime') endTime?: string, @Query('gameType') gameType?: gameType,
+        @Query('venueId') venueId?: string, @Query('nbOfPlayers', ParseIntPipe) nbOfPlayers?: number){
+            return this.branchService.searchForBranches(date, gameType, nbOfPlayers, startTime, endTime, parseInt(venueId))
     }
 
     @Get(':id')

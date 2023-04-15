@@ -10,6 +10,9 @@ CREATE TYPE "gameType" AS ENUM ('Basketball', 'Football', 'Tennis');
 -- CreateEnum
 CREATE TYPE "teamType" AS ENUM ('HOME', 'AWAY');
 
+-- CreateEnum
+CREATE TYPE "winnerTeamType" AS ENUM ('HOME', 'AWAY', 'DRAW');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
@@ -71,7 +74,7 @@ CREATE TABLE "Game" (
     "date" TIMESTAMP(3) NOT NULL,
     "type" "gameType" NOT NULL DEFAULT 'Basketball',
     "adminTeam" "teamType" NOT NULL DEFAULT 'HOME',
-    "winnerTeam" "teamType" NOT NULL DEFAULT 'HOME',
+    "winnerTeam" "winnerTeamType" NOT NULL DEFAULT 'DRAW',
     "highlights" TEXT[],
     "status" "gameStatus" NOT NULL DEFAULT 'PENDING',
     "homeScore" INTEGER DEFAULT 0,

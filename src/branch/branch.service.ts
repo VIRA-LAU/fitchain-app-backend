@@ -105,7 +105,8 @@ export class BranchService {
 
     }
 
-    async searchForBranches(date: string, gameType: gameType, startTime?: string, endTime?: string, venueId?: number) {
+    async searchForBranches(date: string, gameType: gameType, nbOfPlayers: number, 
+    startTime?: string, endTime?: string, venueId?: number) {
         if (startTime) {
             const timeSlots = await this.prisma.timeSlot.findMany({
                 where: {
@@ -164,6 +165,7 @@ export class BranchService {
                                         }},
                                         { NOT: { id: { in: occupiedCourtIds }}},
                                         { courtType: gameType },
+                                        { nbOfPlayers: { gte: nbOfPlayers }}
                                     ]
                                 }
                             }
@@ -192,7 +194,8 @@ export class BranchService {
                                     }
                                 }},
                                 { NOT: { id: { in: occupiedCourtIds }}},
-                                { courtType: gameType }
+                                { courtType: gameType },
+                                { nbOfPlayers: { gte: nbOfPlayers }}
                             ]
                         },
                         select: {
@@ -246,7 +249,10 @@ export class BranchService {
                         {
                             courts: {
                                 some: {
-                                    courtType: gameType
+                                    AND: [
+                                        { courtType: gameType },
+                                        { nbOfPlayers: { gte: nbOfPlayers }}
+                                    ]
                                 }
                             }
                         },
@@ -265,7 +271,10 @@ export class BranchService {
                     },
                     courts: {
                         where: {
-                            courtType: gameType
+                            AND: [
+                                { courtType: gameType },
+                                { nbOfPlayers: { gte: nbOfPlayers }}
+                            ]
                         },
                         select: {
                             id: true,
