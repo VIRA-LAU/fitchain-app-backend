@@ -11,5 +11,6 @@ export const users = [
     age: 30,
     nationality: "Canada",
     position: "midfielder",
+    description: "I'm a test user!"
   },
 ];

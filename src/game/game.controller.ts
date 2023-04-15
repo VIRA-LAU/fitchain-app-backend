@@ -6,11 +6,13 @@ import { createBookingDto } from './dto/create-booking.dto';
 import { createFollowGameDto } from './dto/create-follow-game.dto';
 import { editBookingDto } from './dto/edit-booking.dto';
 import { GameService } from './game.service';
+import { SocketGateway } from 'src/socket.gateway';
 
 @UseGuards(JwtGaurd)
 @Controller('games')
 export class GameController {
-    constructor(private gameService: GameService){}
+    constructor(private gameService: GameService,
+        private readonly socketGateway: SocketGateway){}
 
     @Get()
     getGames(@GetUser('id') userId: number, @Query('limit') limit?: string, @Query('type') type?: string) {
@@ -85,8 +87,14 @@ export class GameController {
         return this.gameService.createBooking(userId,dto)
     }
 
+    @Patch('recording/:gameId')
+    startRecording(@GetUser('id') userId:number, @Param('gameId', ParseIntPipe) gameId: number, @Body() dto: editBookingDto) {
+        this.socketGateway.server.emit(`${dto.recordingMode}_recording`)
+        return this.gameService.editBookingById(userId, gameId, dto)
+    }
+
     @Patch(':id')
-    editBookingById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) bookingId: number,@Body() dto:editBookingDto){
+    editBookingById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) bookingId: number, @Body() dto: editBookingDto){
         return this.gameService.editBookingById(userId,bookingId,dto)
     }
 

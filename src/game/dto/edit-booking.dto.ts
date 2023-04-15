@@ -1,5 +1,5 @@
 import { gameStatus } from "@prisma/client"
-import { IsDateString, IsNumber, IsOptional } from "class-validator"
+import { IsDateString, IsNumber, IsOptional, IsString } from "class-validator"
 
 export class editBookingDto{
 
@@ -21,4 +21,8 @@ export class editBookingDto{
     @IsOptional()
     @IsNumber()
     awayScore?: number
+    
+    @IsOptional()
+    @IsString()
+    recordingMode?: 'start' | 'stop'
 }

@@ -86,7 +86,6 @@ export class UserService {
         
     }
     async ratePlayer(userId: number, body: ratePlayerDto) {
-        console.log(body);
         await this.prisma.playerRating.create({ data: {raterId: userId, ...body} });
     }
 }

@@ -91,6 +91,7 @@ model Game {
   winnerTeam winnerTeamType @default(DRAW)
   highlights String[]
   status gameStatus @default(PENDING)
+  isRecording Boolean @default(false)
 
   gamestatistics HasStatistics[]
   gameRequests  RequestToJoinGame[]
