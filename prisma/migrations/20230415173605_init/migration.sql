@@ -77,6 +77,7 @@ CREATE TABLE "Game" (
     "winnerTeam" "winnerTeamType" NOT NULL DEFAULT 'DRAW',
     "highlights" TEXT[],
     "status" "gameStatus" NOT NULL DEFAULT 'PENDING',
+    "isRecording" BOOLEAN NOT NULL DEFAULT false,
     "homeScore" INTEGER DEFAULT 0,
     "awayScore" INTEGER DEFAULT 0,
 

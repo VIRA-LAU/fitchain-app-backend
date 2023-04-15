@@ -297,7 +297,8 @@ export class GameService {
                         firstName: true,
                         lastName: true
                     }
-                }
+                },
+                isRecording: true
             }
         })
         return game; 
@@ -420,19 +421,24 @@ export class GameService {
         if(!booking || booking.adminId != userId)
             throw new ForbiddenException("Access to edit denied")
         
-        let newWinner: winnerTeamType = "DRAW"
-        if (dto.homeScore && dto.awayScore)
-            newWinner = dto.homeScore === dto.awayScore ? 'DRAW' :
+        if (dto.homeScore && dto.awayScore) {
+            let newWinner = dto.homeScore === dto.awayScore ? 'DRAW' :
                 dto.homeScore > dto.awayScore ? 'HOME' : 'AWAY'
+            dto["winnerTeam"] = newWinner
+        }
+
+        if (dto.recordingMode) {
+            dto["isRecording"] = dto.recordingMode === 'start'
+            delete dto.recordingMode
+        }
 
         return this.prisma.game.update({
-        where:{
-            id:bookingId
-        },
-        data:{
-            ...dto,
-            winnerTeam: newWinner
-        }
+            where:{
+                id:bookingId
+            },
+            data:{
+                ...dto,
+            }
         })
     }
 
@@ -865,10 +871,7 @@ export class GameService {
                 rating: overallRating,
             };
             }));
-        
-        console.log(players);
-        return players;
-          
+        return players; 
     }
 
 }
