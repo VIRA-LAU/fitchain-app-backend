@@ -5,6 +5,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuthSigninDto, AuthSignupDto, VenueAuthSignupDto } from './dto';
+import { User, Venue } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -32,7 +33,7 @@ export class AuthService {
                 }
             }
             else if(dto instanceof(VenueAuthSignupDto)) {
-                const user = await this.prisma.venue.create({
+                const venue = await this.prisma.venue.create({
                     data: {
                         managerEmail: dto.managerEmail,
                         managerPhoneNumber: dto.phoneNumber,
@@ -43,11 +44,12 @@ export class AuthService {
                     }
                 })
                 return {
-                    access_token: await this.signToken(user.id, user.managerEmail),
-                    firstName: user.managerFirstName,
-                    lastName: user.managerLastName,
-                    email: user.managerEmail,
-                    userId: user.id
+                    access_token: await this.signToken(venue.id, venue.managerEmail),
+                    managerFirstName: venue.managerFirstName,
+                    managerLastName: venue.managerLastName,
+                    managerEmail: venue.managerEmail,
+                    venueId: venue.id,
+                    venueName: venue.name
                 }
             }
 
@@ -63,54 +65,46 @@ export class AuthService {
 
     }
 
-    async signin(dto: AuthSigninDto, isVenue) {
-        
-        const user =  isVenue ? await this.prisma.venue.findUnique({
-            where: {
-                managerEmail: dto.email,
-            }
-        }) : await this.prisma.user.findUnique({
+    async signin(dto: AuthSigninDto) {
+        let isVenue = false;
+        let user: User | Venue =  await this.prisma.user.findUnique({
             where: {
                 email: dto.email,
+
             }
-        });
-
-        interface CommonUserProperties {
-            email: string;
-            firstName: string;
-            lastName: string;
+        })
+        if (!user) {
+            user = await this.prisma.venue.findUnique({
+                where: {
+                    managerEmail: dto.email,
+                }
+            });
+            isVenue = true;
         }
-        let commonUserProperties: CommonUserProperties;
         if(!user) throw new ForbiddenException("Credentials incorrect!")
-
-        if ('email' in user) {
-            // User object
-            commonUserProperties = {
-              email: user.email,
-              firstName: user.firstName,
-              lastName: user.lastName,
-            };
-          } else {
-            // Venue object
-            commonUserProperties = {
-              email: user.managerEmail,
-              firstName: user.managerFirstName,
-              lastName: user.managerLastName,
-            };
-          }
 
         const pwMatches = await argon.verify(user.hash,dto.password)
         if(!pwMatches) throw new ForbiddenException("Credentials incorrect!")
 
-        return {
-            access_token: await this.signToken(user.id, commonUserProperties.email),
-            firstName: commonUserProperties.firstName,
-            lastName: commonUserProperties.lastName,
-            email: commonUserProperties.email,
-            userId: user.id
-          };
-        
-
+        if (!isVenue)
+            return {
+                isVenue: false,
+                access_token: await this.signToken(user.id, (user as User).email),
+                firstName: (user as User).firstName,
+                lastName: (user as User).lastName,
+                email: (user as User).email,
+                userId: user.id
+            };
+        else
+            return {
+                isVenue: true,
+                access_token: await this.signToken(user.id, (user as Venue).managerEmail),
+                managerFirstName: (user as Venue).managerFirstName,
+                managerLastName: (user as Venue).managerLastName,
+                managerEmail: (user as Venue).managerEmail,
+                name: (user as Venue).name,
+                venueId: user.id
+            };
     }
 
     async signToken(userId: number, email: string): Promise<string>{

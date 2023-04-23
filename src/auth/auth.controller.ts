@@ -7,7 +7,7 @@ export class AuthController {
     constructor(private authService: AuthService){}
     
     @Post('signup')
-    signup(@Body() dto: Object) {
+    signup(@Body() dto: VenueAuthSignupDto | AuthSignupDto) {
         console.log('signup');
         if (dto.hasOwnProperty('isVenue') && dto['isVenue'] == true) {
             const venueDto = new VenueAuthSignupDto(dto);
@@ -22,11 +22,6 @@ export class AuthController {
     @Post('signin')
     signin(@Body() dto: AuthSigninDto){
         console.log('signin')
-        if (dto.hasOwnProperty('isVenue') && dto['isVenue'] == true) {
-            return this.authService.signin(dto, true);
-        }
-        else {
-            return this.authService.signin(dto, false);
-        }
+        return this.authService.signin(dto);
     }
 }

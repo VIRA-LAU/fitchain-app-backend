@@ -90,5 +90,59 @@ export class VenueService {
         return user;
     } 
     
-
+    async getBookingsInVenue(venueId: number, date: Date) {
+        return this.prisma.game.findMany({
+            where:{
+                AND: [
+                        { court: {
+                            branch: {
+                                venueId: venueId
+                            }
+                        }},
+                        { date: {
+                            gte: new Date(date),
+                            lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
+                        }}
+                    ]
+                },
+            orderBy: { date: 'asc' },
+            select:{
+                id: true,
+                date:true,
+                type: true,
+                gameTimeSlots: {
+                    select: {
+                        timeSlot: true
+                    }
+                },
+                admin: {
+                    select:{
+                        id:true,
+                        firstName: true,
+                        lastName: true
+                    }
+                }
+            }
+        })
+    }
+    
+    async getTimeSlotsInVenue(venueId: number) {
+        return this.prisma.timeSlot.findMany({
+            where: { courtTimeSlots: {
+                        some: {
+                            court: {
+                                branch: {
+                                    venueId: venueId
+                                }
+                            }
+                        }
+                    }
+                },
+            select: {
+                id: true,
+                startTime: true,
+                endTime: true
+            }
+        })
+    }
 }
