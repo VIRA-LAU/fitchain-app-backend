@@ -14,6 +14,16 @@ export class CourtController {
     }
 
     @Get(':id')
+    getCourtsByBranch(@Param('id', ParseIntPipe) branchId: number) {
+        return this.courtService.getCourtsByBranch(branchId);
+    }
+
+    @Get(':id')
+    getCourtsByVenue(@Param('id', ParseIntPipe) venueId: number) {
+        return this.courtService.getCourtsByVenue(venueId);
+    }
+
+    @Get(':id')
     getCourtById(@Param('id', ParseIntPipe) courtId:number ){
         return this.courtService.getCourtById(courtId)
 

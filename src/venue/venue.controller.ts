@@ -23,5 +23,6 @@ export class VenueController {
         return this.venueService.editVenue(venueId,dto)
     }
 
+    
 
 }
