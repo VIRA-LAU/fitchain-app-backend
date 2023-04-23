@@ -63,12 +63,12 @@ export class VenueService {
                 }
             }
         })
-        let branches = venue.branches.map(branch => ({
+        let branches = venue?.branches.map(branch => ({
             ...branch,
             rating: branch.courts.length > 0 ?
                 branch.courts.map(court => court.rating).reduce((a, b) => a + b, 0) / branch.courts.length : 0
         }))
-        let rating = branches.map(branch => branch.rating).reduce((a, b) => a + b, 0) / branches.length
+        let rating = branches?.map(branch => branch.rating).reduce((a, b) => a + b, 0) / branches.length
         return ({
             ...venue,
             branches,
