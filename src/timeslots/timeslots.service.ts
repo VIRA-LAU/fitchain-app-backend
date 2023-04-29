@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTimeslotsDto, DeleteTimeSlotDto } from './dto';
 
@@ -6,7 +6,7 @@ import { CreateTimeslotsDto, DeleteTimeSlotDto } from './dto';
 export class TimeslotsService {
     constructor(private prisma: PrismaService){}
 
-    async getTimeSlots(courtId: number, venueId: number){
+    async getTimeSlots(courtId: number, branchId: number){
         return await this.prisma.timeSlot.findMany({
             where: {
                     AND: [
@@ -17,13 +17,11 @@ export class TimeslotsService {
                                 }
                             }
                         } : {},
-                        venueId ? {
+                        branchId ? {
                             courtTimeSlots: {
                                 some: {
                                     court: {
-                                        branch: {
-                                            venueId: venueId
-                                        }
+                                        branchId
                                     }
                                 }
                             }} : {}
@@ -42,12 +40,17 @@ export class TimeslotsService {
                          }
                     },
                     where: {
-                        court: {
-                            branch: {
-                                venueId: venueId
-                            }
-                        }
-                    }
+                        AND: [
+                            courtId ? {
+                                courtId
+                            } : {},
+                            branchId ? {
+                                court: {
+                                    branchId
+                                }
+                            } : {}
+                        ]
+                    },
                 }
             }
         })

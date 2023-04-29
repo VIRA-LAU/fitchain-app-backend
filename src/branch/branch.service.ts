@@ -40,7 +40,7 @@ export class BranchService {
     }
 
     async getBranchById(branchId: number) {
-        const branch = await this.prisma.branch.findFirst({
+        const branch = await this.prisma.branch.findUnique({
             where: {
                 id: branchId,
             },
@@ -105,31 +105,76 @@ export class BranchService {
 
     }
 
+    async getBookingsInBranch(branchId: number, date: Date) {
+        return this.prisma.game.findMany({
+            where:{
+                AND: [
+                        { court: {
+                            branchId
+                        }},
+                        { date: {
+                            gte: new Date(date),
+                            lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
+                        }}
+                    ]
+                },
+            orderBy: { date: 'asc' },
+            select:{
+                id: true,
+                date:true,
+                type: true,
+                gameTimeSlots: {
+                    select: {
+                        timeSlot: true
+                    }
+                },
+                admin: {
+                    select:{
+                        id:true,
+                        firstName: true,
+                        lastName: true
+                    }
+                }
+            }
+        })
+    }
+
     async searchForBranches(date: string, gameType: gameType, nbOfPlayers: number, 
     startTime?: string, endTime?: string, venueId?: number) {
         if (startTime) {
             const timeSlots = await this.prisma.timeSlot.findMany({
                 where: {
-                    OR: [
-                        {
-                            AND: [
-                                { startTime: { lte: startTime } },
-                                { endTime: { gte: endTime } }
-                            ]
-                        },
-                        {
-                            AND: [
-                                { startTime: { lte: startTime } },
-                                { endTime: { lte: endTime } },
-                                { endTime: { gte: startTime } },
-                            ]
-                        },
-                        {
-                            AND: [
-                                { startTime: { gte: startTime } },
-                                { startTime: { lte: endTime } },
-                                { endTime: { gte: endTime } }
-                            ]
+                    AND: [
+                        {         
+                            OR: [
+                                {
+                                    AND: [
+                                        { startTime: { lte: startTime } },
+                                        { endTime: { gte: endTime } }
+                                    ]
+                                },
+                                {
+                                    AND: [
+                                        { startTime: { lte: startTime } },
+                                        { endTime: { lte: endTime } },
+                                        { endTime: { gte: startTime } },
+                                    ]
+                                },
+                                {
+                                    AND: [
+                                        { startTime: { gte: startTime } },
+                                        { startTime: { lte: endTime } },
+                                        { endTime: { gte: endTime } }
+                                    ]
+                                }
+                            ],
+                            courtTimeSlots: {
+                                some: {
+                                    court: {
+                                        courtType: gameType
+                                    }
+                                }
+                            }
                         }
                     ]
                 }
@@ -323,17 +368,17 @@ export class BranchService {
         }
     }
 
-    async createBranch(venueId: number, dto: CreateBranchDto){
-        const branch = await this.prisma.branch.create({ 
-            data:{
-                venueId: venueId,
-                ...dto,   
-                latitude: 33.91444916242689,
-                longitude: 35.586040802299976
-            }
-        })
-        return branch; 
-    }
+    // async createBranch(venueId: number, dto: CreateBranchDto){
+    //     const branch = await this.prisma.branch.create({ 
+    //         data:{
+    //             venueId: venueId,
+    //             ...dto,   
+    //             latitude: 33.91444916242689,
+    //             longitude: 35.586040802299976
+    //         }
+    //     })
+    //     return branch; 
+    // }
 
     async editBranchById(venueId: number, branchId:number, dto: EditBranchDto){
         const branch = await this.prisma.branch.findUnique({

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
 import { GetVenue } from '../auth/decorator';
 import { EditVenueDto } from './dto';
 import { VenueService } from './venue.service';
@@ -10,11 +10,6 @@ export class VenueController {
     @Get()
     getVenues(){
         return this.venueService.getVenues()
-    }
-
-    @Get("bookings/:id")
-    getBookingsInVenue(@Param('id', ParseIntPipe) venueId:number, @Query('date') date: string) {
-        return this.venueService.getBookingsInVenue(venueId, new Date(date))
     }
 
     @Get(':id')

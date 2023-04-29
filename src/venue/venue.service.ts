@@ -51,7 +51,7 @@ export class VenueService {
     }
 
     async getVenueById(venueId: number){
-        const venue = await this.prisma.venue.findFirst({ 
+        const venue = await this.prisma.venue.findUnique({ 
             where:{
                 id:venueId,
             },
@@ -89,40 +89,4 @@ export class VenueService {
         delete user.hash;
         return user;
     } 
-    
-    async getBookingsInVenue(venueId: number, date: Date) {
-        return this.prisma.game.findMany({
-            where:{
-                AND: [
-                        { court: {
-                            branch: {
-                                venueId: venueId
-                            }
-                        }},
-                        { date: {
-                            gte: new Date(date),
-                            lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
-                        }}
-                    ]
-                },
-            orderBy: { date: 'asc' },
-            select:{
-                id: true,
-                date:true,
-                type: true,
-                gameTimeSlots: {
-                    select: {
-                        timeSlot: true
-                    }
-                },
-                admin: {
-                    select:{
-                        id:true,
-                        firstName: true,
-                        lastName: true
-                    }
-                }
-            }
-        })
-    }
 }

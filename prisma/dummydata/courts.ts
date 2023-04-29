@@ -1,5 +1,6 @@
 export const courts = [
     {
+        name: "Mars",
         courtType: "Basketball",
         nbOfPlayers: 6,
         createdAt: "2022-06-20T14:00:00.000Z",
@@ -8,6 +9,7 @@ export const courts = [
         rating: 4.6
     },
     {
+        name: "Mercury",
         courtType: "Football",
         createdAt: "2022-06-20T14:00:00.000Z",
         nbOfPlayers: 4,
@@ -16,6 +18,7 @@ export const courts = [
         rating: 3.6
     },
     {
+        name: "Earth",
         courtType: "Football",
         nbOfPlayers: 6,
         createdAt: "2022-06-20T14:00:00.000Z",
@@ -24,6 +27,7 @@ export const courts = [
         rating: 4
     },
     {
+        name: "Saturn",
         courtType: "Tennis",
         createdAt: "2022-06-20T14:00:00.000Z",
         nbOfPlayers: 4,

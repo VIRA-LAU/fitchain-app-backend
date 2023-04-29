@@ -4,6 +4,10 @@ export class CreateCourtDto{
 
     @IsString()
     @IsNotEmpty()
+    name: string;
+
+    @IsString()
+    @IsNotEmpty()
     courtType: string;
 
     @IsNumber()

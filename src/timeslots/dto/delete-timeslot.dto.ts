@@ -1,4 +1,3 @@
-import { CourtTimeSlots, GameTimeSlots } from "@prisma/client";
 import { IsNotEmpty, IsNumber } from "class-validator"
 
 export class DeleteTimeSlotDto{

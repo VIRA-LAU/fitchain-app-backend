@@ -4,14 +4,14 @@ import * as argon from 'argon2'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { AuthSigninDto, AuthSignupDto, VenueAuthSignupDto } from './dto';
-import { User, Venue } from '@prisma/client';
+import { AuthSigninDto, AuthSignupDto, BranchAuthSignupDto } from './dto';
+import { Branch, User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
     constructor(private prisma: PrismaService, private jwt: JwtService,private config: ConfigService){}
 
-    async signup(dto: AuthSignupDto | VenueAuthSignupDto) {
+    async signup(dto: AuthSignupDto | BranchAuthSignupDto) {
         const hash = await argon.hash(dto.password);
         try {
             if (dto instanceof (AuthSignupDto)) {
@@ -32,24 +32,34 @@ export class AuthService {
                     userId: user.id
                 }
             }
-            else if(dto instanceof(VenueAuthSignupDto)) {
-                const venue = await this.prisma.venue.create({
+            else if(dto instanceof(BranchAuthSignupDto)) {
+                const venue = await this.prisma.venue.findUnique({
+                    where: {
+                        id: dto.venueId
+                    }
+                })
+
+                const branch = await this.prisma.branch.create({
                     data: {
                         managerEmail: dto.managerEmail,
                         managerPhoneNumber: dto.phoneNumber,
                         managerFirstName: dto.managerFirstName,
                         managerLastName: dto.managerLastName,
-                        name: dto.name,
-                        hash
+                        venueId: venue.id,
+                        location: dto.location,
+                        latitude: dto.latitude,
+                        longitude: dto.longitude,
+                        hash,
                     }
                 })
                 return {
-                    access_token: await this.signToken(venue.id, venue.managerEmail),
-                    managerFirstName: venue.managerFirstName,
-                    managerLastName: venue.managerLastName,
-                    managerEmail: venue.managerEmail,
-                    venueId: venue.id,
-                    venueName: venue.name
+                    access_token: await this.signToken(branch.id, branch.managerEmail),
+                    managerFirstName: branch.managerFirstName,
+                    managerLastName: branch.managerLastName,
+                    managerEmail: branch.managerEmail,
+                    branchId: branch.id,
+                    venueName: venue.name,
+                    branchLocation: branch.location
                 }
             }
 
@@ -67,16 +77,27 @@ export class AuthService {
 
     async signin(dto: AuthSigninDto) {
         let isVenue = false;
-        let user: User | Venue =  await this.prisma.user.findUnique({
+        let user: User | (Branch & {
+            venue: {
+                name: string
+            }
+        }) =  await this.prisma.user.findUnique({
             where: {
                 email: dto.email,
 
             }
         })
         if (!user) {
-            user = await this.prisma.venue.findUnique({
+            user = await this.prisma.branch.findUnique({
                 where: {
                     managerEmail: dto.email,
+                },
+                include: {
+                    venue: {
+                        select: {
+                            name: true
+                        }
+                    }
                 }
             });
             isVenue = true;
@@ -98,12 +119,17 @@ export class AuthService {
         else
             return {
                 isVenue: true,
-                access_token: await this.signToken(user.id, (user as Venue).managerEmail),
-                managerFirstName: (user as Venue).managerFirstName,
-                managerLastName: (user as Venue).managerLastName,
-                managerEmail: (user as Venue).managerEmail,
-                name: (user as Venue).name,
-                venueId: user.id
+                access_token: await this.signToken(user.id, (user as Branch).managerEmail),
+                managerFirstName: (user as Branch).managerFirstName,
+                managerLastName: (user as Branch).managerLastName,
+                managerEmail: (user as Branch).managerEmail,
+                branchId: user.id,
+                venueName: (user as Branch & {
+                    venue: {
+                        name: string,
+                    }
+                }).venue.name,
+                branchLocation: (user as Branch).location
             };
     }
 

@@ -1,6 +1,22 @@
-import { IsEmail, IsNotEmpty, IsString, IsOptional, IsBoolean } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, IsBoolean, IsNumber } from "class-validator";
 
-export class VenueAuthSignupDto {
+export class BranchAuthSignupDto {
+
+    @IsNumber()
+    @IsNotEmpty()
+    venueId: number;
+
+    @IsString()
+    @IsNotEmpty()
+    location: string;
+    
+    @IsNumber()
+    @IsNotEmpty()
+    latitude: number;
+    
+    @IsNumber()
+    @IsNotEmpty()
+    longitude: number;
 
     @IsEmail()
     @IsNotEmpty()
@@ -22,16 +38,11 @@ export class VenueAuthSignupDto {
     @IsNotEmpty()
     password: string;
 
-    @IsString()
-    @IsNotEmpty()
-    name: string;
-
-
     @IsBoolean()
     @IsNotEmpty()
     isVenue: boolean;
     
-    constructor(data?: Partial<VenueAuthSignupDto>) {
+    constructor(data?: Partial<BranchAuthSignupDto>) {
         Object.assign(this, data);
     }
 }

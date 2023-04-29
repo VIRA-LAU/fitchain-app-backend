@@ -23,12 +23,7 @@ async function main() {
     await prisma.venue.create({
       data: {
         name: venueData.name,
-        hash: venueData.hash,
-        managerFirstName: venueData.managerFirstName,
-        managerLastName: venueData.managerLastName,
-        managerEmail: venueData.managerEmail,
-        managerPhoneNumber: venueData.managerPhoneNumber,
-	description: venueData.description
+	      description: venueData.description
       },
     });
   }
@@ -40,7 +35,12 @@ async function main() {
             location: branchData.location,
             venue: { connect: { id: branchData.venueId } },
             latitude: branchData.latitude,
-            longitude: branchData.longitude
+            longitude: branchData.longitude,
+            hash: branchData.hash,
+            managerFirstName: branchData.managerFirstName,
+            managerLastName: branchData.managerLastName,
+            managerEmail: branchData.managerEmail,
+            managerPhoneNumber: branchData.managerPhoneNumber,
           },
         });
       }
@@ -61,6 +61,7 @@ async function main() {
     for (const courtData of courts) {
       await prisma.court.create({
         data: {
+          name: courtData.name,
           courtType: courtData.courtType,
           nbOfPlayers: courtData.nbOfPlayers,
           branch: { connect: { id: courtData.branchId } },

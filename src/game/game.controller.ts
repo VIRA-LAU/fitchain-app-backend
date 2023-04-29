@@ -73,7 +73,6 @@ export class GameController {
 
     @Post("followed")
     createFollowGame(@GetUser('id') userId:number, @Body() dto:createFollowGameDto){
-        console.log("create follow")
         return this.gameService.createFollowGame(userId,dto)
     }
 
@@ -85,7 +84,6 @@ export class GameController {
 
     @Post("")
     createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){
-        console.log("create booking")
         return this.gameService.createBooking(userId,dto)
     }
 

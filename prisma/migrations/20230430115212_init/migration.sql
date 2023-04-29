@@ -41,12 +41,7 @@ CREATE TABLE "Venue" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
-    "managerEmail" TEXT NOT NULL,
-    "managerPhoneNumber" TEXT NOT NULL,
-    "hash" TEXT NOT NULL,
     "description" TEXT,
-    "managerFirstName" TEXT,
-    "managerLastName" TEXT,
 
     CONSTRAINT "Venue_pkey" PRIMARY KEY ("id")
 );
@@ -55,11 +50,16 @@ CREATE TABLE "Venue" (
 CREATE TABLE "Branch" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "location" TEXT NOT NULL,
+    "location" TEXT,
     "latitude" DOUBLE PRECISION NOT NULL,
     "longitude" DOUBLE PRECISION NOT NULL,
     "venueId" INTEGER NOT NULL,
     "photoDirectoryURL" TEXT,
+    "managerEmail" TEXT NOT NULL,
+    "managerPhoneNumber" TEXT NOT NULL,
+    "managerFirstName" TEXT NOT NULL,
+    "managerLastName" TEXT NOT NULL,
+    "hash" TEXT NOT NULL,
 
     CONSTRAINT "Branch_pkey" PRIMARY KEY ("id")
 );
@@ -168,6 +168,7 @@ CREATE TABLE "GameTimeSlots" (
 CREATE TABLE "Court" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "name" TEXT NOT NULL,
     "courtType" TEXT NOT NULL,
     "nbOfPlayers" INTEGER NOT NULL,
     "branchId" INTEGER NOT NULL,
@@ -210,13 +211,13 @@ CREATE UNIQUE INDEX "User_phoneNumber_key" ON "User"("phoneNumber");
 CREATE UNIQUE INDEX "User_hash_key" ON "User"("hash");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Venue_managerEmail_key" ON "Venue"("managerEmail");
+CREATE UNIQUE INDEX "Branch_managerEmail_key" ON "Branch"("managerEmail");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Venue_managerPhoneNumber_key" ON "Venue"("managerPhoneNumber");
+CREATE UNIQUE INDEX "Branch_managerPhoneNumber_key" ON "Branch"("managerPhoneNumber");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Venue_hash_key" ON "Venue"("hash");
+CREATE UNIQUE INDEX "Branch_hash_key" ON "Branch"("hash");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "FollowsGame_userId_gameId_key" ON "FollowsGame"("userId", "gameId");

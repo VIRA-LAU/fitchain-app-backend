@@ -54,13 +54,7 @@ model Venue {
   updatedAt DateTime @updatedAt
 
   name String
-  managerEmail String @unique
-  managerPhoneNumber String @unique
-  hash  String @unique
-  
   description String?
-  managerFirstName String?
-  managerLastName String?
   branches Branch[]
 
 }
@@ -68,11 +62,18 @@ model Venue {
 model Branch {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
-  location String
+  location String?
   latitude Float
   longitude Float
   venueId Int
   photoDirectoryURL String?
+
+  managerEmail String @unique
+  managerPhoneNumber String @unique
+  managerFirstName String
+  managerLastName String
+  hash  String @unique
+
   courts Court[]
   venue  Venue    @relation(fields: [venueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
 
@@ -214,6 +215,7 @@ model GameTimeSlots {
 model Court {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
+  name String
   courtType String
   nbOfPlayers Int
   branchId Int

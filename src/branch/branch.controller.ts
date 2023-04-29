@@ -15,6 +15,11 @@ export class BranchController {
         return this.branchService.getBranchesByVenueId(parseInt(venueId))
     }
     
+    @Get("bookings/:id")
+    getBookingsInVenue(@Param('id', ParseIntPipe) branchId:number, @Query('date') date: string) {
+        return this.branchService.getBookingsInBranch(branchId, new Date(date))
+    }
+
     @Get('search')
     searchForBranches(@Query('date') date?: string, @Query('startTime') startTime?: string,
         @Query('endTime') endTime?: string, @Query('gameType') gameType?: gameType,
@@ -23,15 +28,14 @@ export class BranchController {
     }
 
     @Get(':id')
-    getBranchById(@Param('id', ParseIntPipe) branchId:number ){
+    getBranchById(@Param('id', ParseIntPipe) branchId:number){
         return this.branchService.getBranchById(branchId)
-
     }
 
-    @Post()
-    createBranch(@GetVenue('id') venueId:number, @Body() dto:CreateBranchDto){
-        return this.branchService.createBranch(venueId,dto)
-    }
+    // @Post()
+    // createBranch(@GetVenue('id') venueId:number, @Body() dto:CreateBranchDto){
+    //     return this.branchService.createBranch(venueId,dto)
+    // }
 
     @Patch(':id')
     editBranchById(@GetVenue('id') venueId:number, @Param('id', ParseIntPipe) branchId: number,@Body() dto:EditBranchDto){
