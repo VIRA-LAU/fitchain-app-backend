@@ -16,11 +16,6 @@ export class VenueController {
     getBookingsInVenue(@Param('id', ParseIntPipe) venueId:number, @Query('date') date: string) {
         return this.venueService.getBookingsInVenue(venueId, new Date(date))
     }
-    
-    @Get("timeSlots/:id")
-    getTimeSlotsInVenue(@Param('id', ParseIntPipe) venueId:number) {
-        return this.venueService.getTimeSlotsInVenue(venueId)
-    }
 
     @Get(':id')
     getVenueById(@Param('id', ParseIntPipe) venueId:number){

@@ -125,24 +125,4 @@ export class VenueService {
             }
         })
     }
-    
-    async getTimeSlotsInVenue(venueId: number) {
-        return this.prisma.timeSlot.findMany({
-            where: { courtTimeSlots: {
-                        some: {
-                            court: {
-                                branch: {
-                                    venueId: venueId
-                                }
-                            }
-                        }
-                    }
-                },
-            select: {
-                id: true,
-                startTime: true,
-                endTime: true
-            }
-        })
-    }
 }

@@ -6,22 +6,51 @@ import { CreateTimeslotsDto, DeleteTimeSlotDto } from './dto';
 export class TimeslotsService {
     constructor(private prisma: PrismaService){}
 
-    async getCourtTimeslots(courtId: number){
-        const courtTimeSlots = await this.prisma.courtTimeSlots.findMany({
+    async getTimeSlots(courtId: number, venueId: number){
+        return await this.prisma.timeSlot.findMany({
             where: {
-                courtId: courtId,
-            }
-        });
-        let timeSlots = [];
-        for (let i = 0; i < courtTimeSlots.length; i++){
-            let timeSlot = await this.prisma.timeSlot.findFirst({
-                where: {
-                    id: courtTimeSlots[i].timeSlotId
+                    AND: [
+                        courtId ? {
+                            courtTimeSlots: {
+                                some: {
+                                    courtId
+                                }
+                            }
+                        } : {},
+                        venueId ? {
+                            courtTimeSlots: {
+                                some: {
+                                    court: {
+                                        branch: {
+                                            venueId: venueId
+                                        }
+                                    }
+                                }
+                            }} : {}
+                    ]
+                },
+            select: {
+                id: true,
+                startTime: true,
+                endTime: true,
+                courtTimeSlots: {
+                    select: {
+                         court: {
+                            select: {
+                                courtType: true
+                            }
+                         }
+                    },
+                    where: {
+                        court: {
+                            branch: {
+                                venueId: venueId
+                            }
+                        }
+                    }
                 }
-            });
-            timeSlots.push(timeSlot);
-        }
-        return timeSlots;
+            }
+        })
     }
 
     async addCourtTimeSlot(timeSlotInfo: CreateTimeslotsDto) {
@@ -31,7 +60,7 @@ export class TimeslotsService {
                 endTime: timeSlotInfo.endTime
             }
         });
-        if (timeSlot === null) {
+        if (!timeSlot) {
             timeSlot = await this.prisma.timeSlot.create({
                 data: {
                     startTime: timeSlotInfo.startTime,
@@ -66,7 +95,7 @@ export class TimeslotsService {
                 timeSlotId: dto.timeslotId
             }
         })
-        if (timeSlot !== null) {
+        if (timeSlot) {
             const deletedTimeSlot = await this.prisma.courtTimeSlots.deleteMany({
                 where: {
                     id: timeSlot.id

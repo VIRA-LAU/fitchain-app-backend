@@ -11,13 +11,15 @@ export class TimeslotsController {
     constructor(private timeslotsService: TimeslotsService){}
 
     @Get()
-    get(@GetUser('id') userId: number,@Query('courtId') courtId: string) {
-        return this.timeslotsService.getCourtTimeslots(parseInt(courtId));
+    get(@GetUser('id') userId: number, @Query('courtId', ParseIntPipe) courtId: number, @Query('venueId', ParseIntPipe) venueId: number) {
+        return this.timeslotsService.getTimeSlots(courtId, venueId);
     }
+
     @Post() 
     createTimeSlot(@GetUser('id') userId: number, @Body() dto: CreateTimeslotsDto) {
         return this.timeslotsService.addCourtTimeSlot(dto);
     }
+    
     @Delete()
     deleteTimeSlot(@GetUser('id') userId: number, @Body() dto: DeleteTimeSlotDto) {
         return this.timeslotsService.deleteTimeSlot(dto);
