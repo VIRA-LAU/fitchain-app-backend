@@ -22,7 +22,4 @@ export class VenueController {
     editVenue(@GetVenue('id') venueId: number,@Body() dto:EditVenueDto){
         return this.venueService.editVenue(venueId,dto)
     }
-
-    
-
 }
