@@ -25,10 +25,12 @@ export class GameController {
         @Query('startTime') startTime?: string, @Query('endTime') endTime?: string) {
             return this.gameService.searchGames(userId, gameType, nbOfPlayers, date, startTime, endTime);
     }
+    
     @Get('getTeam')
     getPlayerTeam(@GetUser('id') userId: number, @Query('gameId') gameId: string) {
         return this.gameService.getPlayerTeam(userId, gameId);
     }
+
     @Get('bookings')
     getBookings(@Query('type') type?: string){
         return this.gameService.getBookings(type)

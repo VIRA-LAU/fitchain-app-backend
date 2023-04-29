@@ -63,12 +63,12 @@ export class VenueService {
                 }
             }
         })
-        let branches = venue.branches.map(branch => ({
+        let branches = venue?.branches.map(branch => ({
             ...branch,
             rating: branch.courts.length > 0 ?
                 branch.courts.map(court => court.rating).reduce((a, b) => a + b, 0) / branch.courts.length : 0
         }))
-        let rating = branches.map(branch => branch.rating).reduce((a, b) => a + b, 0) / branches.length
+        let rating = branches?.map(branch => branch.rating).reduce((a, b) => a + b, 0) / branches.length
         return ({
             ...venue,
             branches,
@@ -90,5 +90,59 @@ export class VenueService {
         return user;
     } 
     
-
+    async getBookingsInVenue(venueId: number, date: Date) {
+        return this.prisma.game.findMany({
+            where:{
+                AND: [
+                        { court: {
+                            branch: {
+                                venueId: venueId
+                            }
+                        }},
+                        { date: {
+                            gte: new Date(date),
+                            lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000)
+                        }}
+                    ]
+                },
+            orderBy: { date: 'asc' },
+            select:{
+                id: true,
+                date:true,
+                type: true,
+                gameTimeSlots: {
+                    select: {
+                        timeSlot: true
+                    }
+                },
+                admin: {
+                    select:{
+                        id:true,
+                        firstName: true,
+                        lastName: true
+                    }
+                }
+            }
+        })
+    }
+    
+    async getTimeSlotsInVenue(venueId: number) {
+        return this.prisma.timeSlot.findMany({
+            where: { courtTimeSlots: {
+                        some: {
+                            court: {
+                                branch: {
+                                    venueId: venueId
+                                }
+                            }
+                        }
+                    }
+                },
+            select: {
+                id: true,
+                startTime: true,
+                endTime: true
+            }
+        })
+    }
 }
