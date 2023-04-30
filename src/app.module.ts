@@ -11,7 +11,8 @@ import { CourtModule } from './court/court.module';
 import { RequesttojoingameModule } from './requesttojoingame/requesttojoingame.module';
 import { AddfriendModule } from './addfriend/addfriend.module';
 import { TimeslotsModule } from './timeslots/timeslots.module';
+import { MapsModule } from './maps/maps.module';
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal:true}),AuthModule, UserModule, PrismaModule, InvitetogameModule, GameModule, VenueModule, BranchModule, CourtModule, RequesttojoingameModule, AddfriendModule, TimeslotsModule],
+  imports: [ConfigModule.forRoot({isGlobal:true}),AuthModule, UserModule, PrismaModule, InvitetogameModule, GameModule, VenueModule, BranchModule, CourtModule, RequesttojoingameModule, AddfriendModule, TimeslotsModule, MapsModule],
 })
 export class AppModule {}
