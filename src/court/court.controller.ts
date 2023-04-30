@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { GetVenue } from '../auth/decorator/get-venue.decorator';
 import { CourtService } from './court.service';
 import { CreateCourtDto, EditCourtDto } from './dto';
@@ -8,25 +8,13 @@ export class CourtController {
     constructor(private courtService: CourtService){}
 
     @Get()
-    getCourts(){
-        return this.courtService.getCourts()
-
-    }
-
-    @Get(':id')
-    getCourtsByBranch(@Param('id', ParseIntPipe) branchId: number) {
-        return this.courtService.getCourtsByBranch(branchId);
-    }
-
-    @Get(':id')
-    getCourtsByVenue(@Param('id', ParseIntPipe) venueId: number) {
-        return this.courtService.getCourtsByVenue(venueId);
+    getCourts(@Query('branchId') branchId?: string, @Query('venueId') venueId?: string){
+        return this.courtService.getCourts(parseInt(branchId), parseInt(venueId))
     }
 
     @Get(':id')
     getCourtById(@Param('id', ParseIntPipe) courtId:number ){
         return this.courtService.getCourtById(courtId)
-
     }
 
     @Post()

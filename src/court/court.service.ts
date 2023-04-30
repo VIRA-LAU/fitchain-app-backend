@@ -6,41 +6,28 @@ import { CreateCourtDto, EditCourtDto } from './dto';
 export class CourtService {
     constructor(private prisma:PrismaService){}
 
-    getCourts(){
-        return this.prisma.court.findMany({
-            
-        })
-
-    }
-    getCourtsByBranch(branchId: number) {
+    getCourts(branchId?: number, venueId?: number){
         return this.prisma.court.findMany({
             where: {
-                branchId: branchId
+                AND: [
+                    branchId ? {
+                        branchId
+                    } : {},
+                    venueId ? {
+                        branch: {
+                            venueId
+                        } 
+                    } : {}
+                ]
+            },
+            include: {
+                courtTimeSlots: true,
+                branch: true
             }
         })
+
     }
 
-    async getCourtsByVenue(venueId: number) {
-        var branches = await this.prisma.branch.findMany({
-            where: {
-                venueId: venueId
-            }
-        });
-        let courts = []
-        for (let i = 0; i < branches.length; i++){
-            var court = await this.prisma.court.findMany({
-                where: {
-                    branchId: branches[i].id
-                }
-            })
-
-        }
-        if (court.length > 0) {
-            courts = courts.concat(court);
-        }
-        return courts;
-        
-    }
     async getCourtById(courtId:number){
         const court = await this.prisma.court.findFirst({ 
             where:{

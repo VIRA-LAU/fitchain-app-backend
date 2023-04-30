@@ -64,6 +64,8 @@ export class GameService {
                 branch: {
                   select: {
                     location: true,
+                    latitude: true,
+                    longitude: true,
                     venue: {
                       select: {
                         name: true,
@@ -247,8 +249,7 @@ export class GameService {
                 awayScore: true,
                 winnerTeam: true,
                 court: {
-                    select:{
-                        courtType: true,
+                    include:{
                         branch:{
                             select:{
                                 location: true,
