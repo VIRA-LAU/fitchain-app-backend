@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtGaurd } from '../auth/gaurd';
 import { TimeslotsService } from './timeslots.service';
 import { CreateTimeslotsDto, DeleteTimeSlotDto } from './dto';

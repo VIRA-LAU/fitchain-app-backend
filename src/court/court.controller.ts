@@ -1,8 +1,10 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
-import { GetVenue } from '../auth/decorator/get-venue.decorator';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { GetUser } from '../auth/decorator/get-user.decorator'
 import { CourtService } from './court.service';
 import { CreateCourtDto, EditCourtDto } from './dto';
+import { JwtGaurd } from 'src/auth/gaurd';
 
+@UseGuards(JwtGaurd)
 @Controller('courts')
 export class CourtController {
     constructor(private courtService: CourtService){}
@@ -18,19 +20,19 @@ export class CourtController {
     }
 
     @Post()
-    createCourt(@GetVenue('id') venueId:number, @Body() dto:CreateCourtDto){
-        return this.courtService.createCourt(dto)
+    createCourt(@GetUser('id') branchId:number, @Body() dto:CreateCourtDto){
+        return this.courtService.createCourt(branchId, dto)
     }
 
     @Patch(':id')
-    editCourtById(@GetVenue('id') venueId:number, @Param('id', ParseIntPipe) courtId: number,@Body() dto:EditCourtDto){
-        return this.courtService.editCourtById(venueId,courtId,dto)
+    editCourtById(@GetUser('id') branchId:number, @Param('id', ParseIntPipe) courtId: number,@Body() dto:EditCourtDto){
+        return this.courtService.editCourtById(branchId,courtId,dto)
     }
 
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
-    deleteCourtById(@GetVenue('id') venueId:number, @Param('id', ParseIntPipe) courtId:number){
-        return this.courtService.deleteCourtById(venueId,courtId)
+    deleteCourtById(@GetUser('id') branchId:number, @Param('id', ParseIntPipe) courtId:number){
+        return this.courtService.deleteCourtById(branchId,courtId)
         
     }
 

@@ -128,6 +128,11 @@ export class BranchService {
                         timeSlot: true
                     }
                 },
+                court: {
+                    select: {
+                        name: true
+                    }
+                },
                 admin: {
                     select:{
                         id:true,

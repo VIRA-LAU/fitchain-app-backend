@@ -21,8 +21,18 @@ export class CourtService {
                 ]
             },
             include: {
-                courtTimeSlots: true,
-                branch: true
+                branch: {
+                    select: {
+                        location: true,
+                        latitude: true,
+                        longitude: true,
+                        venue: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
             }
         })
 
@@ -37,11 +47,21 @@ export class CourtService {
         return court; 
     }
 
-    async createCourt(dto: CreateCourtDto){
+    async createCourt(branchId: number, dto: CreateCourtDto){
+        const timeSlots = dto.timeSlots
+        delete dto.timeSlots
+
         const court = await this.prisma.court.create({ 
             data:{
-                ...dto
+                ...dto,
+                branchId
             }
+        })
+        await this.prisma.courtTimeSlots.createMany({
+            data: timeSlots.map(slot => ({
+                courtId: court.id,
+                timeSlotId: slot
+            }))
         })
         return court; 
     }

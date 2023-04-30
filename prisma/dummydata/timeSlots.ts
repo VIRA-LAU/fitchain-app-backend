@@ -1,26 +1,16 @@
-export const timeSlots = [
-    {
-        startTime: '09:00',
-        endTime: '10:00'
-    },
-    {
-        startTime: '11:00',
-        endTime: '12:30'
-    },
-    {
-        startTime: '14:00',
-        endTime: '15:00'
-    },
-    {
-        startTime: '11:00',
-        endTime: '12:00'
-    },
-    {
-        startTime: '13:30',
-        endTime: '14:30'
-    },
-    {
-        startTime: '15:00',
-        endTime: '16:30'
-    },
-];
+export const timeSlots = [];
+
+for (var i = 0; i < 24; i++) {
+  timeSlots.push({
+    startTime: `${('0' + i).slice(-2)}:00`,
+    endTime: `${('0' + i).slice(-2)}:30`,
+  });
+  timeSlots.push({
+    startTime: `${('0' + i).slice(-2)}:30`,
+    endTime: `${('0' + (i + 1)).slice(-2)}:00`,
+  });
+  timeSlots.push({
+    startTime: `${('0' + i).slice(-2)}:00`,
+    endTime: `${('0' + (i + 1)).slice(-2)}:00`,
+  });
+}

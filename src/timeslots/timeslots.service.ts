@@ -35,7 +35,8 @@ export class TimeslotsService {
                     select: {
                          court: {
                             select: {
-                                courtType: true
+                                courtType: true,
+                                name: true
                             }
                          }
                     },

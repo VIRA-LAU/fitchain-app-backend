@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator"
+import { IsArray, IsNotEmpty, IsNumber, IsString } from "class-validator"
 
 export class CreateCourtDto{
 
@@ -13,17 +13,12 @@ export class CreateCourtDto{
     @IsNumber()
     @IsNotEmpty()
     nbOfPlayers: number;
-
-    @IsNumber()
-    @IsNotEmpty()
-    branchId: number;
     
     @IsNumber()
     @IsNotEmpty()
     price: number;
-
-    @IsNumber()
+    
+    @IsArray()
     @IsNotEmpty()
-    rating: number;
-
+    timeSlots: number[];
 }

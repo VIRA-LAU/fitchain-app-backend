@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
-import { GetVenue } from '../auth/decorator';
+import { GetUser } from '../auth/decorator';
 import { EditVenueDto } from './dto';
 import { VenueService } from './venue.service';
 
@@ -17,8 +17,8 @@ export class VenueController {
         return this.venueService.getVenueById(venueId)
     }
 
-    @Patch()
-    editVenue(@GetVenue('id') venueId: number,@Body() dto:EditVenueDto){
-        return this.venueService.editVenue(venueId,dto)
-    }
+    // @Patch()
+    // editVenue(@GetUser('id') venueId: number,@Body() dto:EditVenueDto){
+    //     return this.venueService.editVenue(venueId,dto)
+    // }
 }
