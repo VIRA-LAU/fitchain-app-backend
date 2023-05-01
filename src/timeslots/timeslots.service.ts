@@ -6,53 +6,38 @@ import { CreateTimeslotsDto, DeleteTimeSlotDto } from './dto';
 export class TimeslotsService {
     constructor(private prisma: PrismaService){}
 
-    async getTimeSlots(courtId: number, branchId: number){
+    async getTimeSlots(){
         return await this.prisma.timeSlot.findMany({
-            where: {
-                    AND: [
-                        courtId ? {
-                            courtTimeSlots: {
-                                some: {
-                                    courtId
-                                }
-                            }
-                        } : {},
-                        branchId ? {
-                            courtTimeSlots: {
-                                some: {
-                                    court: {
-                                        branchId
-                                    }
-                                }
-                            }} : {}
-                    ]
-                },
             select: {
                 id: true,
                 startTime: true,
                 endTime: true,
                 courtTimeSlots: {
                     select: {
-                         court: {
+                        court: {
                             select: {
+                                id: true,
                                 courtType: true,
                                 name: true
                             }
-                         }
-                    },
-                    where: {
-                        AND: [
-                            courtId ? {
-                                courtId
-                            } : {},
-                            branchId ? {
-                                court: {
-                                    branchId
-                                }
-                            } : {}
-                        ]
-                    },
+                        }
+                    }
                 }
+            }
+        })
+    }
+
+    async getTimeSlotsInBranch(branchId: number){
+        return await this.prisma.courtTimeSlots.findMany({
+            where: {
+                court: {
+                    branchId
+                }    
+                },
+            select: {
+                id: true,
+                timeSlot: true,
+                court: true
             }
         })
     }

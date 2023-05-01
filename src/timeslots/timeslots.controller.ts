@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtGaurd } from '../auth/gaurd';
 import { TimeslotsService } from './timeslots.service';
 import { CreateTimeslotsDto, DeleteTimeSlotDto } from './dto';
@@ -9,8 +9,13 @@ export class TimeslotsController {
     constructor(private timeslotsService: TimeslotsService){}
 
     @Get()
-    getTimeSlot(@Query('courtId') courtId?: string, @Query('branchId') branchId?: string) {
-        return this.timeslotsService.getTimeSlots(parseInt(courtId), parseInt(branchId));
+    getTimeSlots() {
+        return this.timeslotsService.getTimeSlots();
+    }
+
+    @Get("branch/:id")
+    getTimeSlotsInBranch(@Param('id', ParseIntPipe) branchId:number) {
+        return this.timeslotsService.getTimeSlotsInBranch(branchId);
     }
 
     @Post() 

@@ -130,6 +130,7 @@ export class BranchService {
                 },
                 court: {
                     select: {
+                        id: true,
                         name: true
                     }
                 },
