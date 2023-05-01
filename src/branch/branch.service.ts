@@ -250,6 +250,7 @@ export class BranchService {
                         },
                         select: {
                             id: true,
+                            name: true,
                             courtType: true,
                             price: true,
                             rating: true,
@@ -328,6 +329,7 @@ export class BranchService {
                         },
                         select: {
                             id: true,
+                            name: true,
                             courtType: true,
                             price: true,
                             rating: true,
