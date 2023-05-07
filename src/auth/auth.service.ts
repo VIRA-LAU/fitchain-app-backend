@@ -58,6 +58,7 @@ export class AuthService {
                     managerLastName: branch.managerLastName,
                     managerEmail: branch.managerEmail,
                     branchId: branch.id,
+                    venueId: venue.id,
                     venueName: venue.name,
                     branchLocation: branch.location
                 }
@@ -95,6 +96,7 @@ export class AuthService {
                 include: {
                     venue: {
                         select: {
+                            id: true,
                             name: true
                         }
                     }
@@ -124,8 +126,15 @@ export class AuthService {
                 managerLastName: (user as Branch).managerLastName,
                 managerEmail: (user as Branch).managerEmail,
                 branchId: user.id,
+                venueId: (user as Branch & {
+                    venue: {
+                        id: number,
+                        name: string,
+                    }
+                }).venue.id,
                 venueName: (user as Branch & {
                     venue: {
+                        id: number,
                         name: string,
                     }
                 }).venue.name,
