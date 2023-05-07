@@ -15,23 +15,23 @@ export class CourtController {
     }
 
     @Get(':id')
-    getCourtById(@Param('id', ParseIntPipe) courtId:number ){
+    getCourtById(@Param('id', ParseIntPipe) courtId: number ){
         return this.courtService.getCourtById(courtId)
     }
 
     @Post()
-    createCourt(@GetUser('id') branchId:number, @Body() dto:CreateCourtDto){
+    createCourt(@GetUser('id') branchId: number, @Body() dto:CreateCourtDto){
         return this.courtService.createCourt(branchId, dto)
     }
 
     @Patch(':id')
-    editCourtById(@GetUser('id') branchId:number, @Param('id', ParseIntPipe) courtId: number,@Body() dto:EditCourtDto){
-        return this.courtService.editCourtById(branchId,courtId,dto)
+    editCourtById(@GetUser('id') branchId: number, @Param('id', ParseIntPipe) courtId: number, @Body() dto: EditCourtDto){
+        return this.courtService.editCourtById(courtId, dto)
     }
 
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
-    deleteCourtById(@GetUser('id') branchId:number, @Param('id', ParseIntPipe) courtId:number){
+    deleteCourtById(@GetUser('id') branchId:number, @Param('id', ParseIntPipe) courtId: number){
         return this.courtService.deleteCourtById(branchId,courtId)
         
     }

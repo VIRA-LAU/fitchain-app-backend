@@ -1,6 +1,14 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class EditCourtDto{
+
+    @IsString()
+    @IsOptional()
+    name?: string;
+
+    @IsNumber()
+    @IsOptional()
+    price?: number;
 
     @IsString()
     @IsOptional()
@@ -10,8 +18,8 @@ export class EditCourtDto{
     @IsOptional()
     nbOfPlayers?: number;
 
-    @IsNumber()
+    @IsArray()
     @IsOptional()
-    branchId?: number;
+    timeSlots: number[];
 
 }
