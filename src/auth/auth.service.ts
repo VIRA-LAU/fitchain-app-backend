@@ -65,10 +65,11 @@ export class AuthService {
             }
 
 
-        }catch(error){
+        } catch(error) {
             if( error instanceof PrismaClientKnownRequestError){
+                console.log(error)
                 if(error.code === 'P2002'){
-                    throw new ForbiddenException('Credentials taken',);
+                    throw new ForbiddenException('CREDENTIALS_TAKEN',);
                 }
             }
             throw error;
@@ -104,10 +105,10 @@ export class AuthService {
             });
             isVenue = true;
         }
-        if(!user) throw new ForbiddenException("Credentials incorrect!")
+        if(!user) throw new ForbiddenException("CREDENTIALS_INCORRECT")
 
         const pwMatches = await argon.verify(user.hash,dto.password)
-        if(!pwMatches) throw new ForbiddenException("Credentials incorrect!")
+        if(!pwMatches) throw new ForbiddenException("CREDENTIALS_INCORRECT")
 
         if (!isVenue)
             return {
