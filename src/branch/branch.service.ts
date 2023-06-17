@@ -24,6 +24,7 @@ export class BranchService {
                         id: true,
                         courtType: true,
                         price: true,
+                        nbOfPlayers: true,
                         rating: true,
                         branchId: true
                     }
@@ -59,6 +60,7 @@ export class BranchService {
                         id: true,
                         courtType: true,
                         price: true,
+                        nbOfPlayers: true,
                         rating: true,
                         branchId: true
                     }
@@ -90,6 +92,7 @@ export class BranchService {
                         id: true,
                         courtType: true,
                         price: true,
+                        nbOfPlayers: true,
                         rating: true,
                         branchId: true
                     }
@@ -253,6 +256,7 @@ export class BranchService {
                             id: true,
                             name: true,
                             courtType: true,
+                            nbOfPlayers: true,
                             price: true,
                             rating: true,
                             branchId: true,
@@ -333,6 +337,7 @@ export class BranchService {
                             name: true,
                             courtType: true,
                             price: true,
+                            nbOfPlayers: true,
                             rating: true,
                             branchId: true,
                             courtTimeSlots: {
