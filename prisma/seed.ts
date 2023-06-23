@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import {PrismaClient} from '@prisma/client';
 import {users} from './dummydata/users';
 import {games} from './dummydata/games';
 import {courts} from './dummydata/courts';
@@ -28,48 +28,48 @@ async function main() {
     });
   }
 
-      // Create branches
-      for (const branchData of branches) {
-        await prisma.branch.create({
-          data: {
-            location: branchData.location,
-            venue: { connect: { id: branchData.venueId } },
-            latitude: branchData.latitude,
-            longitude: branchData.longitude,
-            hash: branchData.hash,
-            managerFirstName: branchData.managerFirstName,
-            managerLastName: branchData.managerLastName,
-            managerEmail: branchData.managerEmail,
-            managerPhoneNumber: branchData.managerPhoneNumber,
-          },
-        });
-      }
-  
+  // Create branches
+  for (const branchData of branches) {
+    await prisma.branch.create({
+      data: {
+        location: branchData.location,
+        venue: { connect: { id: branchData.venueId } },
+        latitude: branchData.latitude,
+        longitude: branchData.longitude,
+        hash: branchData.hash,
+        managerFirstName: branchData.managerFirstName,
+        managerLastName: branchData.managerLastName,
+        email: branchData.email,
+        phoneNumber: branchData.phoneNumber,
+        emailVerified: branchData.emailVerified
+      },
+    });
+  }
       
-    // Create time slots
-    for (const timeSlotData of timeSlots) {
-      await prisma.timeSlot.create({
-        data: {
-          startTime: timeSlotData.startTime,
-          endTime: timeSlotData.endTime,
+  // Create time slots
+  for (const timeSlotData of timeSlots) {
+    await prisma.timeSlot.create({
+      data: {
+        startTime: timeSlotData.startTime,
+        endTime: timeSlotData.endTime,
 
-        },
-      });
-    }
+      },
+    });
+  }
 
-    // Create courts
-    for (const courtData of courts) {
-      await prisma.court.create({
-        data: {
-          name: courtData.name,
-          courtType: courtData.courtType,
-          nbOfPlayers: courtData.nbOfPlayers,
-          branch: { connect: { id: courtData.branchId } },
-          price: courtData.price,
-          rating: courtData.rating
-        },
-      });
-    }
+  // Create courts
+  for (const courtData of courts) {
+    await prisma.court.create({
+      data: {
+        name: courtData.name,
+        courtType: courtData.courtType,
+        nbOfPlayers: courtData.nbOfPlayers,
+        branch: { connect: { id: courtData.branchId } },
+        price: courtData.price,
+        rating: courtData.rating
+      },
+    });
+  }
 
   // Link courts to time slots
   for (const courtTimeSlotData of courtTimeSlots) {

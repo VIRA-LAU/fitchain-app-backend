@@ -10,12 +10,4 @@ export class AuthSigninDto {
     @IsNotEmpty()
     password: string;
 
-    @IsBoolean()
-    @IsOptional()
-    isVenue: boolean;
-
-    constructor(data?: Partial<AuthSigninDto>) {
-        Object.assign(this, data);
-    }
-
 }

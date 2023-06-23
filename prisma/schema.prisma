@@ -16,6 +16,8 @@ model User {
   updatedAt DateTime @updatedAt
 
   email String @unique
+  emailCode String?
+  emailVerified Boolean @default(false)
   phoneNumber String? @unique
   hash String @unique
 
@@ -68,8 +70,10 @@ model Branch {
   venueId Int
   photoDirectoryURL String?
 
-  managerEmail String @unique
-  managerPhoneNumber String @unique
+  email String @unique
+  emailCode String?
+  emailVerified Boolean @default(false)
+  phoneNumber String? @unique
   managerFirstName String
   managerLastName String
   hash  String @unique

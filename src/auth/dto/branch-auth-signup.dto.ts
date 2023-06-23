@@ -20,11 +20,7 @@ export class BranchAuthSignupDto {
 
     @IsEmail()
     @IsNotEmpty()
-    managerEmail: string;
-
-    @IsString()
-    @IsNotEmpty()
-    phoneNumber: string;
+    email: string;
 
     @IsString()
     @IsNotEmpty()
@@ -38,11 +34,4 @@ export class BranchAuthSignupDto {
     @IsNotEmpty()
     password: string;
 
-    @IsBoolean()
-    @IsNotEmpty()
-    isVenue: boolean;
-    
-    constructor(data?: Partial<BranchAuthSignupDto>) {
-        Object.assign(this, data);
-    }
 }

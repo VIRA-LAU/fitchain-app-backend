@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon from 'argon2'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
@@ -11,65 +11,72 @@ import { Branch, User } from '@prisma/client';
 export class AuthService {
     constructor(private prisma: PrismaService, private jwt: JwtService,private config: ConfigService){}
 
-    async signup(dto: AuthSignupDto | BranchAuthSignupDto) {
+    async signupAsUser(dto: AuthSignupDto) {
+        const existingBranch = await this.prisma.branch.findUnique({
+            where: {
+                email: dto.email
+            }
+        })
+        if (existingBranch)
+            throw new BadRequestException('CREDENTIALS_TAKEN');
+
         const hash = await argon.hash(dto.password);
         try {
-            if (dto instanceof (AuthSignupDto)) {
-                const user = await this.prisma.user.create({
-                    data:{
-                        email:dto.email,
-                        phoneNumber:dto.phoneNumber,
-                        firstName:dto.firstName,
-                        lastName: dto.lastName,
-                        hash,
-                    }
-                })
-                return {
-                    access_token: await this.signToken(user.id, user.email),
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email,
-                    userId: user.id
+            const user = await this.prisma.user.create({
+                data:{
+                    email: dto.email,
+                    firstName: dto.firstName,
+                    lastName: dto.lastName,
+                    hash,
+                    emailCode: "QWER"
                 }
-            }
-            else if(dto instanceof(BranchAuthSignupDto)) {
-                const venue = await this.prisma.venue.findUnique({
-                    where: {
-                        id: dto.venueId
-                    }
-                })
+            })
+            return user.id;
 
-                const branch = await this.prisma.branch.create({
-                    data: {
-                        managerEmail: dto.managerEmail,
-                        managerPhoneNumber: dto.phoneNumber,
-                        managerFirstName: dto.managerFirstName,
-                        managerLastName: dto.managerLastName,
-                        venueId: venue.id,
-                        location: dto.location,
-                        latitude: dto.latitude,
-                        longitude: dto.longitude,
-                        hash,
-                    }
-                })
-                return {
-                    access_token: await this.signToken(branch.id, branch.managerEmail),
-                    managerFirstName: branch.managerFirstName,
-                    managerLastName: branch.managerLastName,
-                    managerEmail: branch.managerEmail,
-                    branchId: branch.id,
-                    venueId: venue.id,
-                    venueName: venue.name,
-                    branchLocation: branch.location
-                }
-            }
-
-
-        } catch(error) {
-            if( error instanceof PrismaClientKnownRequestError){
+        } catch (error) {
+            if (error instanceof PrismaClientKnownRequestError){
                 console.log(error)
                 if(error.code === 'P2002'){
-                    throw new ForbiddenException('CREDENTIALS_TAKEN',);
+                    throw new BadRequestException('CREDENTIALS_TAKEN');
+                }
+            }
+            throw error;
+        }
+
+    }
+
+    async signupAsBranch(dto: BranchAuthSignupDto) {
+        const existingUser = await this.prisma.user.findUnique({
+            where: {
+                email: dto.email
+            }
+        })
+        if (existingUser)
+            throw new BadRequestException('CREDENTIALS_TAKEN');
+
+        const hash = await argon.hash(dto.password);
+        try {
+
+            const branch = await this.prisma.branch.create({
+                data: {
+                    email: dto.email,
+                    managerFirstName: dto.managerFirstName,
+                    managerLastName: dto.managerLastName,
+                    venueId: dto.venueId,
+                    location: dto.location,
+                    latitude: dto.latitude,
+                    longitude: dto.longitude,
+                    hash,
+                    emailCode: "QWER"
+                }
+            })
+            return branch.id;
+
+        } catch (error) {
+            if (error instanceof PrismaClientKnownRequestError){
+                console.log(error)
+                if(error.code === 'P2002'){
+                    throw new BadRequestException('CREDENTIALS_TAKEN');
                 }
             }
             throw error;
@@ -86,13 +93,12 @@ export class AuthService {
         }) =  await this.prisma.user.findUnique({
             where: {
                 email: dto.email,
-
             }
         })
         if (!user) {
             user = await this.prisma.branch.findUnique({
                 where: {
-                    managerEmail: dto.email,
+                    email: dto.email,
                 },
                 include: {
                     venue: {
@@ -105,27 +111,34 @@ export class AuthService {
             });
             isVenue = true;
         }
-        if(!user) throw new ForbiddenException("CREDENTIALS_INCORRECT")
+        if(!user) throw new BadRequestException("CREDENTIALS_INCORRECT")
+
+        if (!user.emailVerified) throw new BadRequestException({
+            statusCode: 400,
+            message: "EMAIL_NOT_VERIFIED",
+            userId: user.id,
+            isVenue
+        })
 
         const pwMatches = await argon.verify(user.hash,dto.password)
-        if(!pwMatches) throw new ForbiddenException("CREDENTIALS_INCORRECT")
+        if(!pwMatches) throw new BadRequestException("CREDENTIALS_INCORRECT")
 
         if (!isVenue)
             return {
                 isVenue: false,
-                access_token: await this.signToken(user.id, (user as User).email),
+                access_token: await this.signToken(user.id, user.email),
                 firstName: (user as User).firstName,
                 lastName: (user as User).lastName,
-                email: (user as User).email,
+                email: user.email,
                 userId: user.id
             };
         else
             return {
                 isVenue: true,
-                access_token: await this.signToken(user.id, (user as Branch).managerEmail),
+                access_token: await this.signToken(user.id, user.email),
                 managerFirstName: (user as Branch).managerFirstName,
                 managerLastName: (user as Branch).managerLastName,
-                managerEmail: (user as Branch).managerEmail,
+                email: user.email,
                 branchId: user.id,
                 venueId: (user as Branch & {
                     venue: {
@@ -151,6 +164,68 @@ export class AuthService {
         const secret = this.config.get('JWT_SECRET')
         const token = await this.jwt.signAsync(payload, {expiresIn:'10d', secret:secret})
         return token
+    }
+
+    async verifyUserEmail(userId: number, code: string) {
+        const user = await this.prisma.user.findUnique({
+            where: {
+                id: userId,
+            }
+        })
+        if (code.match(user.emailCode)) {
+            await this.prisma.user.update({
+                where: {
+                    id: userId
+                },
+                data: {
+                    emailVerified: true
+                }
+            })
+            return {
+                access_token: await this.signToken(user.id, user.email),
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                userId: user.id
+            }
+        } else throw new BadRequestException('INCORRECT_CODE');
+    }
+    
+    async verifyBranchEmail(branchId: number, code: string) {
+        const branch = await this.prisma.branch.findUnique({
+            where: {
+                id: branchId,
+            },
+            include: {
+                venue: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
+            }
+        });
+        
+        if (code.match(branch.emailCode)) {
+            await this.prisma.branch.update({
+                where: {
+                    id: branchId
+                },
+                data: {
+                    emailVerified: true
+                }
+            })
+            return {
+                access_token: await this.signToken(branch.id, branch.email),
+                managerFirstName: branch.managerFirstName,
+                managerLastName: branch.managerLastName,
+                email: branch.email,
+                branchId: branch.id,
+                venueId: branch.venue.id,
+                venueName: branch.venue.name,
+                branchLocation: branch.location
+            }
+        } else throw new BadRequestException('INCORRECT_CODE');
     }
     
 }

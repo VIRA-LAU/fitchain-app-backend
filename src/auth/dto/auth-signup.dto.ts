@@ -8,10 +8,6 @@ export class AuthSignupDto {
 
     @IsString()
     @IsNotEmpty()
-    phoneNumber: string;
-
-    @IsString()
-    @IsNotEmpty()
     firstName: string;
 
     @IsString()
@@ -22,11 +18,4 @@ export class AuthSignupDto {
     @IsNotEmpty()
     password: string;
 
-    @IsBoolean()
-    @IsOptional()
-    isVenue: boolean;
-
-    constructor(data?: Partial<AuthSignupDto>) {
-        Object.assign(this, data);
-    }
 }

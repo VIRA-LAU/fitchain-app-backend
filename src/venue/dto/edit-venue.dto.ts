@@ -9,7 +9,7 @@ export class EditVenueDto{
 
   @IsString()
   @IsOptional()
-  managerPhoneNumber?:string
+  phoneNumber?:string
 
   @IsString()
   @IsOptional()
