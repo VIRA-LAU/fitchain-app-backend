@@ -1,13 +1,13 @@
 import { Body, Controller, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthSigninDto, AuthSignupDto, BranchAuthSignupDto, VerifyBranchEmailDto, VerifyEmailDto } from './dto';
+import { AuthSigninDto, AuthSignupDto, BranchAuthSignupDto, ResendEmailCodeDto, VerifyBranchEmailDto, VerifyEmailDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService){}
     
     @Post('signup/user')
-    signupAsUser(@Body() dto:  AuthSignupDto) {
+    signupAsUser(@Body() dto: AuthSignupDto) {
         return this.authService.signupAsUser(dto);
     }
 
@@ -30,5 +30,10 @@ export class AuthController {
     @Patch('verifyEmail/branch')
     verifyBranchEmail(@Body() dto: VerifyBranchEmailDto) {
         return this.authService.verifyBranchEmail(dto.branchId, dto.code);
+    }
+
+    @Patch('resendEmailCode')
+    resendEmailCode(@Body() dto: ResendEmailCodeDto) {
+        return this.authService.resendEmailCode(dto.userId, dto.isVenue);
     }
 }

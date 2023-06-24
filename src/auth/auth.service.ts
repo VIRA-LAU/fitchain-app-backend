@@ -6,10 +6,12 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuthSigninDto, AuthSignupDto, BranchAuthSignupDto } from './dto';
 import { Branch, User } from '@prisma/client';
+import { EmailService } from './email.service';
+import * as shortid from 'shortid'
 
 @Injectable()
 export class AuthService {
-    constructor(private prisma: PrismaService, private jwt: JwtService,private config: ConfigService){}
+    constructor(private prisma: PrismaService, private jwt: JwtService, private config: ConfigService, private readonly emailService: EmailService){}
 
     async signupAsUser(dto: AuthSignupDto) {
         const existingBranch = await this.prisma.branch.findUnique({
@@ -21,6 +23,7 @@ export class AuthService {
             throw new BadRequestException('CREDENTIALS_TAKEN');
 
         const hash = await argon.hash(dto.password);
+        const code = shortid.generate().substring(0, 4).toUpperCase();
         try {
             const user = await this.prisma.user.create({
                 data:{
@@ -28,14 +31,14 @@ export class AuthService {
                     firstName: dto.firstName,
                     lastName: dto.lastName,
                     hash,
-                    emailCode: "QWER"
+                    emailCode: code
                 }
             })
+            this.emailService.sendEmail(user.email, "FitChain Verification Code", `Your code is: ${code}`);
             return user.id;
 
         } catch (error) {
             if (error instanceof PrismaClientKnownRequestError){
-                console.log(error)
                 if(error.code === 'P2002'){
                     throw new BadRequestException('CREDENTIALS_TAKEN');
                 }
@@ -55,8 +58,8 @@ export class AuthService {
             throw new BadRequestException('CREDENTIALS_TAKEN');
 
         const hash = await argon.hash(dto.password);
+        const code = shortid.generate().substring(0, 4).toUpperCase();
         try {
-
             const branch = await this.prisma.branch.create({
                 data: {
                     email: dto.email,
@@ -67,14 +70,14 @@ export class AuthService {
                     latitude: dto.latitude,
                     longitude: dto.longitude,
                     hash,
-                    emailCode: "QWER"
+                    emailCode: code
                 }
             })
+            this.emailService.sendEmail(branch.email, "FitChain Verification Code", `Your code is: ${code}`);
             return branch.id;
 
         } catch (error) {
             if (error instanceof PrismaClientKnownRequestError){
-                console.log(error)
                 if(error.code === 'P2002'){
                     throw new BadRequestException('CREDENTIALS_TAKEN');
                 }
@@ -226,6 +229,33 @@ export class AuthService {
                 branchLocation: branch.location
             }
         } else throw new BadRequestException('INCORRECT_CODE');
+    }
+
+    async resendEmailCode(userId: number, isVenue: boolean) {
+        const code = shortid.generate().substring(0, 4).toUpperCase();
+
+        let user: User | Branch
+
+        if (!isVenue)
+            user = await this.prisma.user.update({
+                where: {
+                    id: userId
+                },
+                data: {
+                    emailCode: code
+                }
+            })
+        else
+            user = await this.prisma.branch.update({
+                where: {
+                    id: userId
+                },
+                data: {
+                    emailCode: code
+                }
+            })
+
+        this.emailService.sendEmail(user.email, "Verification Code", `Your code is: ${code}`);
     }
     
 }
