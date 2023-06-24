@@ -34,7 +34,7 @@ export class AuthService {
                     emailCode: code
                 }
             })
-            this.emailService.sendEmail(user.email, "FitChain Verification Code", `Your code is: ${code}`);
+            this.emailService.sendEmail(user.email, code.split(""));
             return user.id;
 
         } catch (error) {
@@ -73,7 +73,7 @@ export class AuthService {
                     emailCode: code
                 }
             })
-            this.emailService.sendEmail(branch.email, "FitChain Verification Code", `Your code is: ${code}`);
+            this.emailService.sendEmail(branch.email, code.split(""));
             return branch.id;
 
         } catch (error) {
@@ -255,7 +255,7 @@ export class AuthService {
                 }
             })
 
-        this.emailService.sendEmail(user.email, "Verification Code", `Your code is: ${code}`);
+        this.emailService.sendEmail(user.email, code.split(""));
     }
     
 }
