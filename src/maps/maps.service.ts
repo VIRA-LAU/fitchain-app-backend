@@ -5,18 +5,20 @@ import {
 } from '@googlemaps/google-maps-services-js';
 import { ConfigService } from '@nestjs/config';
 
-const client = new Client({});
-
 @Injectable()
 export class MapsService {
-  constructor(private config: ConfigService) {}
+  private client: Client;
+
+  constructor(private config: ConfigService) {
+    this.client = new Client({});
+  }
 
   async getLocationName(
     latitude: number,
     longitude: number,
   ) {
     if (latitude && longitude) {
-      return await client
+      return await this.client
         .reverseGeocode({
           params: {
             latlng: {
@@ -59,7 +61,7 @@ export class MapsService {
     longitude: number,
     locations: LatLng[],
   ) {
-    return await client
+    return await this.client
       .distancematrix({
         params: {
           key: this.config.get(

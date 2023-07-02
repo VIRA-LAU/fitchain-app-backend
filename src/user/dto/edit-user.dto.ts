@@ -16,6 +16,10 @@ export class EditUserDto{
     @IsString()
     @IsOptional()
     description?: string
+    
+    @IsString()
+    @IsOptional()
+    profilePhotoUrl?: string
 
     @IsNumber()
     @IsOptional()
