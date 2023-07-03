@@ -82,13 +82,16 @@ export class UserService {
     dto: EditUserDto,
     image: Express.Multer.File,
   ) {
-    if (image) {
+    if (image && dto.imageType) {
       const location = await this.s3.uploadFile(
         image,
-        'profilePhotos',
+        `${dto.imageType}Photos`,
         image.originalname,
       );
-      dto.profilePhotoUrl = location;
+      dto[`${dto.imageType}PhotoUrl`] =
+        location +
+        `?lastModified=${new Date().toISOString()}`;
+      delete dto.imageType;
     }
     const user = await this.prisma.user.update({
       where: {

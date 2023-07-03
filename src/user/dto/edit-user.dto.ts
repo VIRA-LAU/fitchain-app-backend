@@ -21,6 +21,14 @@ export class EditUserDto{
     @IsOptional()
     profilePhotoUrl?: string
 
+    @IsString()
+    @IsOptional()
+    coverPhotoUrl?: string
+
+    @IsString()
+    @IsOptional()
+    imageType?: string
+
     @IsNumber()
     @IsOptional()
     height?: number

@@ -25,6 +25,7 @@ model User {
   lastName String?
   description String?
   profilePhotoUrl String?
+  coverPhotoUrl String?
 
   gender String?
   height Int?
