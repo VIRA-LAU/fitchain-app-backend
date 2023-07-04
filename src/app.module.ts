@@ -12,7 +12,6 @@ import { RequesttojoingameModule } from './requesttojoingame/requesttojoingame.m
 import { AddfriendModule } from './addfriend/addfriend.module';
 import { TimeslotsModule } from './timeslots/timeslots.module';
 import { MapsModule } from './maps/maps.module';
-import { AWSS3Module } from './aws-s3/aws-s3.module';
 
 @Module({
   imports: [
@@ -29,7 +28,6 @@ import { AWSS3Module } from './aws-s3/aws-s3.module';
     AddfriendModule,
     TimeslotsModule,
     MapsModule,
-    AWSS3Module,
   ],
 })
 export class AppModule {}
