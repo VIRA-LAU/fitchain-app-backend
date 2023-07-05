@@ -70,7 +70,8 @@ model Branch {
   latitude Float
   longitude Float
   venueId Int
-  photoDirectoryURL String?
+  photoDirectoryUrl String?
+  coverPhotoUrl String?
 
   email String @unique
   emailCode String?

@@ -8,7 +8,11 @@ export class EditBranchDto{
 
     @IsString()
     @IsOptional()
-    photoDirectoryURL?: string;
+    photoDirectoryUrl?: string;
+    
+    @IsString()
+    @IsOptional()
+    coverPhotoUrl?: string;
 
     @IsNumber()
     @IsOptional()

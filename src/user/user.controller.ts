@@ -11,14 +11,14 @@ import {
   Post,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { JwtGaurd } from '../auth/gaurd';
 import { EditUserDto } from './dto/edit-user.dto';
 import { ratePlayerDto } from './dto/rate-player-dto';
 import { UserService } from './user.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtGaurd)
 @Controller('users')
@@ -36,44 +36,37 @@ export class UserController {
   }
 
   @Get(':id')
-  getUserById(
-    @Param('id', ParseIntPipe) userId: number,
-  ) {
+  getUserById(@Param('id', ParseIntPipe) userId: number) {
     return this.userService.getUserById(userId);
   }
 
   @Patch()
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'coverPhoto', maxCount: 1 },
+      { name: 'profilePhoto', maxCount: 1 },
+    ]),
+  )
   editUser(
     @GetUser('id') userId: number,
     @Body() dto: EditUserDto,
-    @UploadedFile() image?: Express.Multer.File,
+    @UploadedFiles()
+    images?: {
+      profilePhoto?: Express.Multer.File[];
+      coverPhoto?: Express.Multer.File[];
+    },
   ) {
-    return this.userService.editUser(
-      userId,
-      dto,
-      image,
-    );
+    return this.userService.editUser(userId, dto, images);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':id')
-  deleteBookingById(
-    @GetUser('id') userId: number,
-  ) {
-    return this.userService.deleteUserById(
-      userId,
-    );
+  @Delete()
+  deleteBookingById(@GetUser('id') userId: number) {
+    return this.userService.deleteUserById(userId);
   }
 
   @Post('rate')
-  ratePlayer(
-    @GetUser('id') raterId: number,
-    @Body() dto: ratePlayerDto,
-  ) {
-    return this.userService.ratePlayer(
-      raterId,
-      dto,
-    );
+  ratePlayer(@GetUser('id') raterId: number, @Body() dto: ratePlayerDto) {
+    return this.userService.ratePlayer(raterId, dto);
   }
 }

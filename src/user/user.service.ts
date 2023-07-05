@@ -58,16 +58,30 @@ export class UserService {
     return user;
   }
 
-  async editUser(userId: number, dto: EditUserDto, image: Express.Multer.File) {
-    if (image && dto.imageType) {
+  async editUser(
+    userId: number,
+    dto: EditUserDto,
+    images?: {
+      profilePhoto?: Express.Multer.File[];
+      coverPhoto?: Express.Multer.File[];
+    },
+  ) {
+    if (images?.profilePhoto && images.profilePhoto.length > 0) {
       const location = await this.s3.uploadFile(
-        image,
-        `${dto.imageType}Photos`,
-        image.originalname,
+        images?.profilePhoto[0],
+        `profilePhotos`,
+        images?.profilePhoto[0].originalname,
       );
-      dto[`${dto.imageType}PhotoUrl`] =
+      dto.profilePhotoUrl =
         location + `?lastModified=${new Date().toISOString()}`;
-      delete dto.imageType;
+    } else if (images?.coverPhoto && images.coverPhoto.length > 0) {
+      const location = await this.s3.uploadFile(
+        images?.coverPhoto[0],
+        `coverPhotos`,
+        images?.coverPhoto[0].originalname,
+      );
+      dto.coverPhotoUrl =
+        location + `?lastModified=${new Date().toISOString()}`;
     }
     const user = await this.prisma.user.update({
       where: {
