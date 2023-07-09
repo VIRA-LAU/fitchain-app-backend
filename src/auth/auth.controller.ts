@@ -34,6 +34,6 @@ export class AuthController {
 
     @Patch('resendEmailCode')
     resendEmailCode(@Body() dto: ResendEmailCodeDto) {
-        return this.authService.resendEmailCode(dto.userId, dto.isVenue);
+        return this.authService.resendEmailCode(dto.userId, dto.isBranch);
     }
 }

@@ -88,7 +88,7 @@ export class AuthService {
     }
 
     async signin(dto: AuthSigninDto) {
-        let isVenue = false;
+        let isBranch = false;
         let user: User | (Branch & {
             venue: {
                 name: string
@@ -112,7 +112,7 @@ export class AuthService {
                     }
                 }
             });
-            isVenue = true;
+            isBranch = true;
         }
         if(!user) throw new BadRequestException("CREDENTIALS_INCORRECT")
 
@@ -120,15 +120,15 @@ export class AuthService {
             statusCode: 400,
             message: "EMAIL_NOT_VERIFIED",
             userId: user.id,
-            isVenue
+            isBranch
         })
 
         const pwMatches = await argon.verify(user.hash,dto.password)
         if(!pwMatches) throw new BadRequestException("CREDENTIALS_INCORRECT")
 
-        if (!isVenue)
+        if (!isBranch)
             return {
-                isVenue: false,
+                isBranch: false,
                 access_token: await this.signToken(user.id, user.email),
                 firstName: (user as User).firstName,
                 lastName: (user as User).lastName,
@@ -137,7 +137,7 @@ export class AuthService {
             };
         else
             return {
-                isVenue: true,
+                isBranch: true,
                 access_token: await this.signToken(user.id, user.email),
                 managerFirstName: (user as Branch).managerFirstName,
                 managerLastName: (user as Branch).managerLastName,
@@ -231,12 +231,12 @@ export class AuthService {
         } else throw new BadRequestException('INCORRECT_CODE');
     }
 
-    async resendEmailCode(userId: number, isVenue: boolean) {
+    async resendEmailCode(userId: number, isBranch: boolean) {
         const code = shortid.generate().substring(0, 4).toUpperCase();
 
         let user: User | Branch
 
-        if (!isVenue)
+        if (!isBranch)
             user = await this.prisma.user.update({
                 where: {
                     id: userId

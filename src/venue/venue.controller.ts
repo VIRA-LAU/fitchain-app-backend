@@ -1,24 +1,25 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
-import { GetUser } from '../auth/decorator';
-import { EditVenueDto } from './dto';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { VenueService } from './venue.service';
+import { JwtGaurd } from 'src/auth/gaurd';
 
+@UseGuards(JwtGaurd)
 @Controller('venues')
 export class VenueController {
-    constructor(private venueService: VenueService){}
+  constructor(private venueService: VenueService) {}
 
-    @Get()
-    getVenues(){
-        return this.venueService.getVenues()
-    }
+  @Get()
+  getVenues() {
+    return this.venueService.getVenues();
+  }
 
-    @Get(':id')
-    getVenueById(@Param('id', ParseIntPipe) venueId:number){
-        return this.venueService.getVenueById(venueId)
-    }
-
-    // @Patch()
-    // editVenue(@GetUser('id') venueId: number,@Body() dto:EditVenueDto){
-    //     return this.venueService.editVenue(venueId,dto)
-    // }
+  @Get(':id')
+  getVenueById(@Param('id', ParseIntPipe) venueId: number) {
+    return this.venueService.getVenueById(venueId);
+  }
 }

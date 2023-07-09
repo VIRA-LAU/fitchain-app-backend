@@ -8,6 +8,6 @@ export class ResendEmailCodeDto {
 
     @IsBoolean()
     @IsNotEmpty()
-    isVenue: boolean;
+    isBranch: boolean;
 
 }
