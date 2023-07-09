@@ -11,253 +11,210 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  email String @unique
-  emailCode String?
-  emailVerified Boolean @default(false)
-  phoneNumber String? @unique
-  hash String @unique
-
-  firstName String?
-  lastName String?
-  description String?
-  profilePhotoUrl String?
-  coverPhotoUrl String?
-
-  gender String?
-  height Int?
-  weight Int?
-  age Int?
-  nationality String?
-  position String?
-  rating Int?
-
-  invitationsSent           InviteToGame[]  @relation("sender")
-  invitationsReceived       InviteToGame[]  @relation("receiver")
-
-  friendRequestsSent        AddFriend[]  @relation("sender")
-  friendRequestsReceived    AddFriend[]  @relation("receiver")
-
-  joinRequestsSent          RequestToJoinGame[]
-
+  id                     Int                 @id @default(autoincrement())
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  email                  String              @unique
+  emailCode              String?
+  emailVerified          Boolean             @default(false)
+  phoneNumber            String?             @unique
+  hash                   String              @unique
+  firstName              String?
+  lastName               String?
+  description            String?
+  profilePhotoUrl        String?
+  coverPhotoUrl          String?
+  gender                 String?
+  height                 Int?
+  weight                 Int?
+  age                    Int?
+  nationality            String?
+  position               String?
+  rating                 Int?
+  invitationsSent        InviteToGame[]      @relation("sender")
+  invitationsReceived    InviteToGame[]      @relation("receiver")
+  friendRequestsSent     AddFriend[]         @relation("sender")
+  friendRequestsReceived AddFriend[]         @relation("receiver")
+  joinRequestsSent       RequestToJoinGame[]
   userStatistics         HasStatistics[]
-  playerRated PlayerRating[] @relation("player")
-  playerRater PlayerRating[] @relation("rater")
-  gamesFollowed FollowsGame[]
-
-  games Game[]          @relation("createdGames")
+  playerRated            PlayerRating[]      @relation("player")
+  playerRater            PlayerRating[]      @relation("rater")
+  gamesFollowed          FollowsGame[]
+  games                  Game[]              @relation("createdGames")
 }
 
 model Venue {
-
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  name String
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String
   description String?
-  branches Branch[]
-
+  branches    Branch[]
 }
 
 model Branch {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  location String?
-  latitude Float
-  longitude Float
-  venueId Int
+  id                Int      @id @default(autoincrement())
+  createdAt         DateTime @default(now())
+  location          String?
+  latitude          Float
+  longitude         Float
+  venueId           Int
   photoDirectoryUrl String?
-  coverPhotoUrl String?
-
-  email String @unique
-  emailCode String?
-  emailVerified Boolean @default(false)
-  phoneNumber String? @unique
-  managerFirstName String
-  managerLastName String
-  hash  String @unique
-
-  courts Court[]
-  venue  Venue    @relation(fields: [venueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
-
+  coverPhotoUrl     String?
+  email             String   @unique
+  emailCode         String?
+  emailVerified     Boolean  @default(false)
+  phoneNumber       String?  @unique
+  managerFirstName  String
+  managerLastName   String
+  hash              String   @unique
+  courts            Court[]
+  venue             Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Game {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  courtId Int
-  adminId Int
-  date DateTime
-  type gameType @default(Basketball)
-  adminTeam teamType @default(HOME)
-  winnerTeam winnerTeamType @default(DRAW)
-  highlights String[]
-  status gameStatus @default(PENDING)
-  isRecording Boolean @default(false)
-
+  id             Int                 @id @default(autoincrement())
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  courtId        Int
+  adminId        Int
+  date           DateTime
+  type           gameType            @default(Basketball)
+  adminTeam      teamType            @default(HOME)
+  winnerTeam     winnerTeamType      @default(DRAW)
+  highlights     String[]
+  status         gameStatus          @default(PENDING)
+  isRecording    Boolean             @default(false)
   gamestatistics HasStatistics[]
-  gameRequests  RequestToJoinGame[]
+  gameRequests   RequestToJoinGame[]
   gameInvitation InviteToGame[]
-  followers FollowsGame[]
-  gameTimeSlots GameTimeSlots[]
-  playerRating PlayerRating[]
-
-  homeScore Int? @default(0)
-  awayScore Int? @default(0)
-  
-  court     Court     @relation(fields: [courtId],references: [id],onDelete: Cascade,onUpdate: Cascade)
-  admin     User      @relation(name: "createdGames", fields: [adminId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  followers      FollowsGame[]
+  gameTimeSlots  GameTimeSlots[]
+  playerRating   PlayerRating[]
+  homeScore      Int?                @default(0)
+  awayScore      Int?                @default(0)
+  court          Court               @relation(fields: [courtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  admin          User                @relation(name: "createdGames", fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model FollowsGame {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-
-  userId Int
-  gameId Int
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade,onUpdate: Cascade)
-  game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  userId    Int
+  gameId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([userId, gameId])
 }
 
 model InviteToGame {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-
-  userId Int
-  friendId Int
-  gameId Int
-  team teamType @default(HOME)
-  status invitationApproval @default(PENDING)
-
-  user User @relation(name:"sender",fields: [userId], references: [id], onDelete: Cascade,onUpdate: Cascade)
-  friend User @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade,onUpdate: Cascade)
-  game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  id        Int                @id @default(autoincrement())
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  userId    Int
+  friendId  Int
+  gameId    Int
+  team      teamType           @default(HOME)
+  status    invitationApproval @default(PENDING)
+  user      User               @relation(name: "sender", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  friend    User               @relation(name: "receiver", fields: [friendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game      Game               @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([userId, friendId, gameId])
-
 }
 
 model AddFriend {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userId Int
-  friendId Int
-  status invitationApproval @default(PENDING)
-
-  user User @relation(name:"sender",fields: [userId], references: [id], onDelete: Cascade,onUpdate: Cascade)
-  friend User @relation(name:"receiver", fields: [friendId], references: [id], onDelete: Cascade,onUpdate: Cascade)
+  id        Int                @id @default(autoincrement())
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  userId    Int
+  friendId  Int
+  status    invitationApproval @default(PENDING)
+  user      User               @relation(name: "sender", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  friend    User               @relation(name: "receiver", fields: [friendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([userId, friendId])
-
 }
 
 model RequestToJoinGame {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userId Int
-  gameId Int
-  team teamType @default(HOME)
-  status invitationApproval @default(PENDING)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade,onUpdate: Cascade)
-  game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  id        Int                @id @default(autoincrement())
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  userId    Int
+  gameId    Int
+  team      teamType           @default(HOME)
+  status    invitationApproval @default(PENDING)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game      Game               @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([userId, gameId])
-
 }
 
-
 model HasStatistics {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  userId Int
-  gameId Int
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  game  Game    @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  userId    Int
+  gameId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([userId, gameId])
-
 }
 
 model TimeSlot {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  startTime String
-  endTime String
-
+  id             Int              @id @default(autoincrement())
+  createdAt      DateTime         @default(now())
+  startTime      String
+  endTime        String
   courtTimeSlots CourtTimeSlots[]
-  gameTimeSlots GameTimeSlots[]
+  gameTimeSlots  GameTimeSlots[]
 }
 
 model GameTimeSlots {
-  id Int @id @default(autoincrement())
-
-  gameId Int
+  id         Int      @id @default(autoincrement())
+  gameId     Int
   timeSlotId Int
-
-  game Game @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
-  timeSlot TimeSlot @relation(fields: [timeSlotId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  game       Game     @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  timeSlot   TimeSlot @relation(fields: [timeSlotId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Court {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  name String
-  courtType String
-  nbOfPlayers Int
-  branchId Int
-  price Int
-  rating Float? @default(0.0)
+  id             Int              @id @default(autoincrement())
+  createdAt      DateTime         @default(now())
+  name           String
+  courtType      String
+  nbOfPlayers    Int
+  branchId       Int
+  price          Int
+  rating         Float?           @default(0.0)
   courtTimeSlots CourtTimeSlots[]
-  
-  games   Game[]
-  branch  Branch  @relation(fields: [branchId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  games          Game[]
+  branch         Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model CourtTimeSlots {
-  id Int @id @default(autoincrement())
-
-  courtId Int
+  id         Int      @id @default(autoincrement())
+  courtId    Int
   timeSlotId Int
-
-  court Court @relation(fields: [courtId],references: [id],onDelete: Cascade,onUpdate: Cascade)
-  timeSlot TimeSlot @relation(fields: [timeSlotId],references: [id],onDelete: Cascade,onUpdate: Cascade)
+  court      Court    @relation(fields: [courtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  timeSlot   TimeSlot @relation(fields: [timeSlotId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model PlayerRating {
-  id Int @id @default(autoincrement())
-
-  gameId Int
-  raterId Int
-  playerId Int
+  id          Int   @id @default(autoincrement())
+  gameId      Int
+  raterId     Int
+  playerId    Int
   performance Float
   punctuality Float
-  teamPlayer Float
-  fairplay Float
-  game Game @relation(fields: [gameId],references: [id],onDelete: Cascade,onUpdate: Cascade)
-  player User @relation(name:"player",fields: [playerId], references: [id], onDelete: Cascade,onUpdate: Cascade)
-  rater User @relation(name:"rater", fields: [raterId], references: [id], onDelete: Cascade,onUpdate: Cascade)
-
+  teamPlayer  Float
+  fairplay    Float
+  game        Game  @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  player      User  @relation(name: "player", fields: [playerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  rater       User  @relation(name: "rater", fields: [raterId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 enum invitationApproval {
