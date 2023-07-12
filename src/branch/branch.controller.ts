@@ -45,7 +45,7 @@ export class BranchController {
     @Query('startTime') startTime?: string,
     @Query('endTime') endTime?: string,
     @Query('gameType') gameType?: gameType,
-    @Query('venueId') venueId?: string,
+    @Query('branchId') branchId?: string,
     @Query('nbOfPlayers', ParseIntPipe) nbOfPlayers?: number,
   ) {
     return this.branchService.searchForBranches(
@@ -54,7 +54,7 @@ export class BranchController {
       nbOfPlayers,
       startTime,
       endTime,
-      parseInt(venueId),
+      parseInt(branchId),
     );
   }
 

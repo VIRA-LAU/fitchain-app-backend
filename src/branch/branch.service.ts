@@ -10,14 +10,19 @@ export class BranchService {
 
   async getBranches() {
     let branches = await this.prisma.branch.findMany({
+      where: {
+        courts: {
+          some: {},
+        },
+      },
       select: {
+        id: true,
         location: true,
         latitude: true,
         longitude: true,
         coverPhotoUrl: true,
         venue: {
           select: {
-            id: true,
             name: true,
           },
         },
@@ -51,6 +56,7 @@ export class BranchService {
         id: branchId,
       },
       select: {
+        id: true,
         location: true,
         latitude: true,
         longitude: true,
@@ -59,6 +65,7 @@ export class BranchService {
           select: {
             id: true,
             name: true,
+            description: true,
           },
         },
         courts: {
@@ -172,7 +179,7 @@ export class BranchService {
     nbOfPlayers: number,
     startTime?: string,
     endTime?: string,
-    venueId?: number,
+    branchId?: number,
   ) {
     if (startTime) {
       const timeSlots = await this.prisma.timeSlot.findMany({
@@ -256,10 +263,11 @@ export class BranchService {
                 },
               },
             },
-            venueId ? { venueId } : {},
+            branchId ? { id: branchId } : {},
           ],
         },
         select: {
+          id: true,
           location: true,
           latitude: true,
           longitude: true,
@@ -355,10 +363,11 @@ export class BranchService {
                 },
               },
             },
-            venueId ? { venueId } : {},
+            branchId ? { id: branchId } : {},
           ],
         },
         select: {
+          id: true,
           location: true,
           latitude: true,
           longitude: true,
