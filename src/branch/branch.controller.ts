@@ -17,10 +17,7 @@ import { gameType } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
 import { BranchService } from './branch.service';
 import { EditBranchDto } from './dto';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { JwtGaurd } from 'src/auth/gaurd';
 
 @UseGuards(JwtGaurd)
