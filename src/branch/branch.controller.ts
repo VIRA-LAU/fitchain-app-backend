@@ -66,6 +66,7 @@ export class BranchController {
   @Patch()
   @UseInterceptors(
     FileFieldsInterceptor([
+      { name: 'profilePhoto', maxCount: 1 },
       { name: 'coverPhoto', maxCount: 1 },
       { name: 'branchPhotos', maxCount: 2 },
     ]),
@@ -75,6 +76,7 @@ export class BranchController {
     @Body() dto: EditBranchDto,
     @UploadedFiles()
     images?: {
+      profilePhoto?: Express.Multer.File[];
       coverPhoto?: Express.Multer.File[];
       branchPhotos?: Express.Multer.File[];
     },

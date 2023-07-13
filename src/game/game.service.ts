@@ -316,6 +316,7 @@ export class GameService {
                 location: true,
                 latitude: true,
                 longitude: true,
+                profilePhotoUrl: true,
                 venue: {
                   select: {
                     name: true,

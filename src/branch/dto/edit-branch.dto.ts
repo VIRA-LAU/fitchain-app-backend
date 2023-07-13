@@ -1,20 +1,23 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class EditBranchDto{
+export class EditBranchDto {
+  @IsString()
+  @IsOptional()
+  location?: string;
 
-    @IsString()
-    @IsOptional()
-    location?: string;
+  @IsString()
+  @IsOptional()
+  profilePhotoUrl?: string;
 
-    @IsString()
-    @IsOptional()
-    photoDirectoryUrl?: string;
-    
-    @IsString()
-    @IsOptional()
-    coverPhotoUrl?: string;
+  @IsString()
+  @IsOptional()
+  coverPhotoUrl?: string;
 
-    @IsNumber()
-    @IsOptional()
-    rating?: number;
+  @IsString()
+  @IsOptional()
+  photoDirectoryUrl?: string;
+
+  @IsNumber()
+  @IsOptional()
+  rating?: number;
 }

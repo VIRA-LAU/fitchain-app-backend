@@ -20,6 +20,7 @@ export class BranchService {
         location: true,
         latitude: true,
         longitude: true,
+        profilePhotoUrl: true,
         coverPhotoUrl: true,
         venue: {
           select: {
@@ -60,6 +61,7 @@ export class BranchService {
         location: true,
         latitude: true,
         longitude: true,
+        profilePhotoUrl: true,
         coverPhotoUrl: true,
         venue: {
           select: {
@@ -98,6 +100,7 @@ export class BranchService {
         location: true,
         latitude: true,
         longitude: true,
+        profilePhotoUrl: true,
         coverPhotoUrl: true,
         venue: {
           select: {
@@ -271,6 +274,7 @@ export class BranchService {
           location: true,
           latitude: true,
           longitude: true,
+          profilePhotoUrl: true,
           venue: {
             select: {
               id: true,
@@ -371,6 +375,7 @@ export class BranchService {
           location: true,
           latitude: true,
           longitude: true,
+          profilePhotoUrl: true,
           venue: {
             select: {
               id: true,
@@ -439,11 +444,20 @@ export class BranchService {
     branchId: number,
     dto: EditBranchDto,
     images?: {
+      profilePhoto?: Express.Multer.File[];
       coverPhoto?: Express.Multer.File[];
       branchPhotos?: Express.Multer.File[];
     },
   ) {
-    if (images?.coverPhoto && images?.coverPhoto.length > 0) {
+    if (images?.profilePhoto && images?.profilePhoto.length > 0) {
+      const location = await this.s3.uploadFile(
+        images.profilePhoto[0],
+        `branchProfilePhotos`,
+        images.profilePhoto[0].originalname,
+      );
+      dto.profilePhotoUrl =
+        location + `?lastModified=${new Date().toISOString()}`;
+    } else if (images?.coverPhoto && images?.coverPhoto.length > 0) {
       const location = await this.s3.uploadFile(
         images.coverPhoto[0],
         `branchCoverPhotos`,
