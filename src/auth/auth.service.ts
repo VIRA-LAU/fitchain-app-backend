@@ -1,7 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon from 'argon2';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuthSigninDto, AuthSignupDto, BranchAuthSignupDto } from './dto';
@@ -19,91 +18,86 @@ export class AuthService {
   ) {}
 
   async signupAsUser(dto: AuthSignupDto) {
-    const existingBranch = await this.prisma.branch.findUnique({
-      where: {
-        email: dto.email,
-      },
-    });
-    if (existingBranch) throw new BadRequestException('CREDENTIALS_TAKEN');
+    await this.checkExisting(dto.email);
 
     const hash = await argon.hash(dto.password);
     const code = uuidv4().substring(0, 4).toUpperCase();
-    try {
-      const user = await this.prisma.user.create({
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        hash,
+        emailCode: code,
+      },
+    });
+    setTimeout(async () => {
+      await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
         data: {
-          email: dto.email,
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-          hash,
-          emailCode: code,
+          emailCode: null,
         },
       });
-      setTimeout(async () => {
-        await this.prisma.user.update({
-          where: {
-            id: user.id,
-          },
-          data: {
-            emailCode: null,
-          },
-        });
-      }, 60 * 60 * 1000);
-      this.emailService.sendEmail(user.email, code.split(''));
-      return user.id;
-    } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new BadRequestException('CREDENTIALS_TAKEN');
-        }
-      }
-      throw error;
-    }
+    }, 60 * 60 * 1000);
+    this.emailService.sendEmail(user.email, code.split(''));
+    return user.id;
   }
 
   async signupAsBranch(dto: BranchAuthSignupDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: {
-        email: dto.email,
-      },
-    });
-    if (existingUser) throw new BadRequestException('CREDENTIALS_TAKEN');
+    await this.checkExisting(dto.email);
 
     const hash = await argon.hash(dto.password);
     const code = uuidv4().substring(0, 4).toUpperCase();
-    try {
-      const branch = await this.prisma.branch.create({
+
+    const venue = await this.prisma.venue.create({
+      data: {
+        name: dto.venueName,
+        description: dto.description,
+      },
+    });
+    const branch = await this.prisma.branch.create({
+      data: {
+        venueId: venue.id,
+        email: dto.email,
+        managerFirstName: dto.managerFirstName,
+        managerLastName: dto.managerLastName,
+        location: dto.location,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        hash,
+        emailCode: code,
+      },
+    });
+    setTimeout(async () => {
+      await this.prisma.branch.update({
+        where: {
+          id: branch.id,
+        },
         data: {
-          email: dto.email,
-          managerFirstName: dto.managerFirstName,
-          managerLastName: dto.managerLastName,
-          venueId: dto.venueId,
-          location: dto.location,
-          latitude: dto.latitude,
-          longitude: dto.longitude,
-          hash,
-          emailCode: code,
+          emailCode: null,
         },
       });
-      setTimeout(async () => {
-        await this.prisma.branch.update({
-          where: {
-            id: branch.id,
-          },
-          data: {
-            emailCode: null,
-          },
-        });
-      }, 60 * 60 * 1000);
-      this.emailService.sendEmail(branch.email, code.split(''));
-      return branch.id;
-    } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new BadRequestException('CREDENTIALS_TAKEN');
-        }
-      }
-      throw error;
-    }
+    }, 60 * 60 * 1000);
+    this.emailService.sendEmail(branch.email, code.split(''));
+    return branch.id;
+  }
+
+  async checkExisting(email: string) {
+    var existingUser: User | Branch = await this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    if (!existingUser)
+      existingUser = await this.prisma.branch.findUnique({
+        where: {
+          email: email,
+        },
+      });
+    if (existingUser) throw new BadRequestException('CREDENTIALS_TAKEN');
   }
 
   async signin(dto: AuthSigninDto) {

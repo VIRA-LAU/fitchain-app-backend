@@ -1,37 +1,44 @@
-import { IsEmail, IsNotEmpty, IsString, IsBoolean, IsNumber } from "class-validator";
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  IsBoolean,
+  IsNumber,
+} from 'class-validator';
 
 export class BranchAuthSignupDto {
+  @IsString()
+  @IsNotEmpty()
+  venueName: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    venueId: number;
+  @IsString()
+  @IsNotEmpty()
+  location: string;
 
-    @IsString()
-    @IsNotEmpty()
-    location: string;
-    
-    @IsNumber()
-    @IsNotEmpty()
-    latitude: number;
-    
-    @IsNumber()
-    @IsNotEmpty()
-    longitude: number;
+  @IsNumber()
+  @IsNotEmpty()
+  latitude: number;
 
-    @IsEmail()
-    @IsNotEmpty()
-    email: string;
+  @IsNumber()
+  @IsNotEmpty()
+  longitude: number;
 
-    @IsString()
-    @IsNotEmpty()
-    managerFirstName: string;
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
 
-    @IsString()
-    @IsNotEmpty()
-    managerLastName: string;
+  @IsString()
+  description?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    password: string;
+  @IsString()
+  @IsNotEmpty()
+  managerFirstName: string;
 
+  @IsString()
+  @IsNotEmpty()
+  managerLastName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
 }
