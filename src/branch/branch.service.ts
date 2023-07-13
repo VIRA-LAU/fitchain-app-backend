@@ -63,6 +63,7 @@ export class BranchService {
         longitude: true,
         profilePhotoUrl: true,
         coverPhotoUrl: true,
+        branchPhotoUrl: true,
         venue: {
           select: {
             id: true,
@@ -275,6 +276,7 @@ export class BranchService {
           latitude: true,
           longitude: true,
           profilePhotoUrl: true,
+          coverPhotoUrl: true,
           venue: {
             select: {
               id: true,
@@ -376,6 +378,7 @@ export class BranchService {
           latitude: true,
           longitude: true,
           profilePhotoUrl: true,
+          coverPhotoUrl: true,
           venue: {
             select: {
               id: true,
@@ -465,7 +468,30 @@ export class BranchService {
       );
       dto.coverPhotoUrl =
         location + `?lastModified=${new Date().toISOString()}`;
+    } else if (images?.branchPhotos && images?.branchPhotos.length > 0) {
+      const imageUrls = [];
+      for (var image of images.branchPhotos) {
+        const location = await this.s3.uploadFile(
+          image,
+          `branchPhotos`,
+          image.originalname,
+        );
+        imageUrls.push(location + `?lastModified=${new Date().toISOString()}`);
+      }
+
+      var existingPhotos = [];
+      const existing = await this.prisma.branch.findUnique({
+        where: {
+          id: branchId,
+        },
+        select: { branchPhotoUrl: true },
+      });
+      if (existing.branchPhotoUrl)
+        existingPhotos = existing.branchPhotoUrl.split(',');
+
+      dto.branchPhotoUrl = [...existingPhotos, ...imageUrls].join(',');
     }
+
     return await this.prisma.branch.update({
       where: {
         id: branchId,

@@ -15,7 +15,7 @@ export class EditBranchDto {
 
   @IsString()
   @IsOptional()
-  photoDirectoryUrl?: string;
+  branchPhotoUrl?: string;
 
   @IsNumber()
   @IsOptional()

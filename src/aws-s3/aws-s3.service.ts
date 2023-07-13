@@ -19,6 +19,7 @@ export class AWSS3Service {
     )}`;
   }
 
+  // TODO: Don't save full url in the database in case S3 bucket was changed -> Save relative path.
   async uploadFile(
     file: Express.Multer.File,
     directoryName: string,
@@ -42,6 +43,7 @@ export class AWSS3Service {
       .promise()
       .then((data) => {
         return data.Location;
+        // return `/${this.config.get('NODE_ENV')}/${directoryName}/${fileName}`;
       });
   }
 

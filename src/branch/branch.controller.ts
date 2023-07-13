@@ -68,7 +68,7 @@ export class BranchController {
     FileFieldsInterceptor([
       { name: 'profilePhoto', maxCount: 1 },
       { name: 'coverPhoto', maxCount: 1 },
-      { name: 'branchPhotos', maxCount: 2 },
+      { name: 'branchPhotos', maxCount: 5 },
     ]),
   )
   editBranch(

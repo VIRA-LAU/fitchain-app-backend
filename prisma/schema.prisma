@@ -53,24 +53,24 @@ model Venue {
 }
 
 model Branch {
-  id                Int      @id @default(autoincrement())
-  createdAt         DateTime @default(now())
-  location          String?
-  latitude          Float
-  longitude         Float
-  venueId           Int
-  photoDirectoryUrl String?
-  profilePhotoUrl   String?
-  coverPhotoUrl     String?
-  email             String   @unique
-  emailCode         String?
-  emailVerified     Boolean  @default(false)
-  phoneNumber       String?  @unique
-  managerFirstName  String
-  managerLastName   String
-  hash              String   @unique
-  courts            Court[]
-  venue             Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id               Int      @id @default(autoincrement())
+  createdAt        DateTime @default(now())
+  location         String?
+  latitude         Float
+  longitude        Float
+  venueId          Int
+  branchPhotoUrl   String?
+  profilePhotoUrl  String?
+  coverPhotoUrl    String?
+  email            String   @unique
+  emailCode        String?
+  emailVerified    Boolean  @default(false)
+  phoneNumber      String?  @unique
+  managerFirstName String
+  managerLastName  String
+  hash             String   @unique
+  courts           Court[]
+  venue            Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Game {
