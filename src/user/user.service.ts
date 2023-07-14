@@ -50,7 +50,7 @@ export class UserService {
       rate.length > 0
         ? ratingCategories.reduce((a, b) => a + b, 0) / (4 * rate.length)
         : 0;
-    user['faiplay'] = ratingCategories[0] / rate.length;
+    user['fairplay'] = ratingCategories[0] / rate.length;
     user['performance'] = ratingCategories[1] / rate.length;
     user['punctuality'] = ratingCategories[2] / rate.length;
     user['teamPlayer'] = ratingCategories[3] / rate.length;

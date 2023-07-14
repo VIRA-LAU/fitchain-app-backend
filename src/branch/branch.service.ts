@@ -517,4 +517,33 @@ export class BranchService {
       },
     });
   }
+
+  async deleteBranchPhoto(branchId: number, photoName: string) {
+    const branch = await this.prisma.branch.findUnique({
+      where: {
+        id: branchId,
+      },
+      select: {
+        branchPhotoUrl: true,
+      },
+    });
+
+    if (!branch) throw new ForbiddenException('Access to edit denied');
+
+    await this.s3.deleteFile('branchPhotos', photoName);
+
+    var photoArr = branch.branchPhotoUrl.split(',');
+    photoArr = photoArr.filter(
+      (photo) => !photo.includes(photoName.split(':').join('%3A')),
+    );
+
+    await this.prisma.branch.update({
+      where: {
+        id: branchId,
+      },
+      data: {
+        branchPhotoUrl: photoArr.join(','),
+      },
+    });
+  }
 }

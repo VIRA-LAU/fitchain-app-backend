@@ -89,4 +89,10 @@ export class BranchController {
   deleteBranchById(@GetUser('id') branchId: number) {
     return this.branchService.deleteBranchById(branchId);
   }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete("photo/:photoName")
+  deleteBranchPhoto(@GetUser('id') branchId: number, @Param("photoName") photoName: string) {
+    return this.branchService.deleteBranchPhoto(branchId, photoName);
+  }
 }
