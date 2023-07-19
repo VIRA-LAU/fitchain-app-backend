@@ -6,7 +6,6 @@ import {
   HttpStatus,
   Patch,
   Post,
-  Query,
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -14,7 +13,9 @@ import {
   AuthSigninDto,
   AuthSignupDto,
   BranchAuthSignupDto,
+  ForgotPasswordDto,
   ResendEmailCodeDto,
+  UpdatePasswordDto,
   VerifyBranchEmailDto,
   VerifyEmailDto,
 } from './dto';
@@ -57,7 +58,7 @@ export class AuthController {
   }
 
   @Patch('forgotPassword')
-  forgotPassword(@Body() dto: { email: string }) {
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
     // this.authService.
   }
 
@@ -69,10 +70,7 @@ export class AuthController {
   }
 
   @Patch('updatePassword')
-  updatePassword(
-    @Body() dto: { token: string; password: string },
-    @Res() res: Response,
-  ) {
+  updatePassword(@Body() dto: UpdatePasswordDto, @Res() res: Response) {
     console.log(dto);
     res.status(200).json(dto);
   }
