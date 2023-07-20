@@ -7,18 +7,27 @@ import { AuthSigninDto, AuthSignupDto, BranchAuthSignupDto } from './dto';
 import { Branch, User } from '@prisma/client';
 import { EmailService } from './email.service';
 import { v4 as uuidv4 } from 'uuid';
+import { app } from 'src/main';
 
 @Injectable()
 export class AuthService {
+  private jwt_secret: string;
+
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
     private readonly emailService: EmailService,
-  ) {}
+  ) {
+    this.jwt_secret = this.config.get('JWT_SECRET');
+  }
+
+  isBranch(user: User | Branch): user is Branch {
+    return (user as Branch).venueId !== undefined;
+  }
 
   async signupAsUser(dto: AuthSignupDto) {
-    await this.checkExisting(dto.email);
+    await this.getUser(dto.email, 'check-existing');
 
     const hash = await argon.hash(dto.password);
     const code = uuidv4().substring(0, 4).toUpperCase();
@@ -42,12 +51,12 @@ export class AuthService {
         },
       });
     }, 60 * 60 * 1000);
-    this.emailService.sendEmail(user.email, code.split(''));
+    this.emailService.sendEmailVerificationEmail(user.email, code.split(''));
     return user.id;
   }
 
   async signupAsBranch(dto: BranchAuthSignupDto) {
-    await this.checkExisting(dto.email);
+    await this.getUser(dto.email, 'check-existing');
 
     const hash = await argon.hash(dto.password);
     const code = uuidv4().substring(0, 4).toUpperCase();
@@ -81,11 +90,11 @@ export class AuthService {
         },
       });
     }, 60 * 60 * 1000);
-    this.emailService.sendEmail(branch.email, code.split(''));
+    this.emailService.sendEmailVerificationEmail(branch.email, code.split(''));
     return branch.id;
   }
 
-  async checkExisting(email: string) {
+  async getUser(email: string, purpose: 'check-existing' | 'return') {
     var existingUser: User | Branch = await this.prisma.user.findUnique({
       where: {
         email: email,
@@ -97,7 +106,12 @@ export class AuthService {
           email: email,
         },
       });
-    if (existingUser) throw new BadRequestException('CREDENTIALS_TAKEN');
+    if (purpose === 'check-existing' && existingUser)
+      throw new BadRequestException('CREDENTIALS_TAKEN');
+    else if (purpose === 'return') {
+      if (existingUser) return existingUser;
+      else throw new BadRequestException('INVALID_EMAIL');
+    }
   }
 
   async signin(dto: AuthSigninDto) {
@@ -184,10 +198,9 @@ export class AuthService {
       sub: userId,
       email,
     };
-    const secret = this.config.get('JWT_SECRET');
     const token = await this.jwt.signAsync(payload, {
       expiresIn: '10d',
-      secret: secret,
+      secret: this.jwt_secret,
     });
     return token;
   }
@@ -299,6 +312,61 @@ export class AuthService {
       }, 60 * 60 * 1000);
     }
 
-    this.emailService.sendEmail(user.email, code.split(''));
+    this.emailService.sendEmailVerificationEmail(user.email, code.split(''));
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.getUser(email, 'return');
+    if (!user.emailVerified)
+      throw new BadRequestException('EMAIL_NOT_VERIFIED');
+    else {
+      const token = await this.jwt.signAsync(
+        { sub: user.id, email },
+        {
+          expiresIn: '30m',
+          secret: this.jwt_secret.concat(user.hash),
+        },
+      );
+      const url = await app.getUrl();
+      await this.emailService.sendPasswordResetEmail(
+        email,
+        `${url}/auth/resetPassword?token=${token}&email=${email}`,
+      );
+      return {status: 'success'};
+    }
+  }
+
+  async resetPassword(token: string, email: string) {
+    const user = await this.getUser(email, 'return');
+    return this.jwt.verify(token, {
+      secret: this.jwt_secret.concat(user.hash),
+    });
+  }
+
+  async updatePassword(token: string, email: string, password: string) {
+    const user = await this.getUser(email, 'return');
+    await this.jwt.verify(token, {
+      secret: this.jwt_secret.concat(user.hash),
+    });
+    const newHash = await argon.hash(password);
+    if (this.isBranch(user))
+      await this.prisma.branch.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          hash: newHash,
+        },
+      });
+    else
+      await this.prisma.user.update({
+        where: {
+          id: user.id, 
+        },
+        data: {
+          hash: newHash,
+        },
+      });
+    return {status: 'success'};
   }
 }

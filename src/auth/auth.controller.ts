@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Query,
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -59,19 +60,32 @@ export class AuthController {
 
   @Patch('forgotPassword')
   forgotPassword(@Body() dto: ForgotPasswordDto) {
-    // this.authService.
+    return this.authService.forgotPassword(dto.email);
   }
 
   @Get('resetPassword')
-  resetPassword(@Res() res: Response) {
-    res
-      .status(200)
-      .sendFile(path.join(__dirname, './html-templates/password-reset.html'));
+  async resetPassword(
+    @Res() res: Response,
+    @Query('token') token: string,
+    @Query('email') email: string,
+  ) {
+    if (!token || !email) res.status(401).send('Invalid token.');
+    else
+      try {
+        await this.authService.resetPassword(token, email);
+        res
+          .status(200)
+          .sendFile(
+            path.join(__dirname, './html-templates/password-reset.html'),
+          );
+      } catch (e) {
+        console.error(e);
+        res.status(401).send('Invalid token.');
+      }
   }
 
   @Patch('updatePassword')
-  updatePassword(@Body() dto: UpdatePasswordDto, @Res() res: Response) {
-    console.log(dto);
-    res.status(200).json(dto);
+  updatePassword(@Body() dto: UpdatePasswordDto) {
+    return this.authService.updatePassword(dto.token, dto.email, dto.password);
   }
 }

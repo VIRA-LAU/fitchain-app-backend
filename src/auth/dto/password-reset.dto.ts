@@ -13,6 +13,10 @@ export class UpdatePasswordDto {
   token: string;
 
   @IsString()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
   @Validate(PasswordValidator)
   @IsNotEmpty()
   password: string;
