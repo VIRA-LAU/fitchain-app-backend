@@ -695,19 +695,19 @@ export class GameService {
     const userStatus = {
       hasRequestedtoJoin:
         gameStatus?.gameRequests?.length > 0
-          ? gameStatus.gameRequests[0].status
+          ? gameStatus.gameRequests.slice().pop().status
           : false,
       hasBeenInvited:
         gameStatus?.gameInvitation?.length > 0
-          ? gameStatus.gameInvitation[0].status
+          ? gameStatus.gameInvitation.slice().pop().status
           : false,
       requestId:
         gameStatus?.gameRequests?.length > 0
-          ? gameStatus.gameRequests[0].id
+          ? gameStatus.gameRequests.slice().pop().id
           : false,
       invitationId:
         gameStatus?.gameInvitation?.length > 0
-          ? gameStatus.gameInvitation[0].id
+          ? gameStatus.gameInvitation.slice().pop().id
           : false,
       isAdmin: gameStatus.adminId === userId,
     };
@@ -914,12 +914,14 @@ export class GameService {
             coverPhotoUrl: true,
           },
         },
+        updatedAt: true,
         adminTeam: true,
         gameRequests: {
           select: {
             userId: true,
             team: true,
             status: true,
+            updatedAt: true,
             user: {
               select: {
                 firstName: true,
@@ -935,6 +937,7 @@ export class GameService {
             friendId: true,
             team: true,
             status: true,
+            updatedAt: true,
             friend: {
               select: {
                 firstName: true,
@@ -957,28 +960,41 @@ export class GameService {
         lastName: game.admin.lastName,
         profilePhotoUrl: game.admin.profilePhotoUrl,
         coverPhotoUrl: game.admin.coverPhotoUrl,
+        updatedAt: game.updatedAt,
       },
     ];
     players = players.concat(
-      game.gameRequests.map((player) => ({
-        id: player.userId,
-        team: player.team,
-        status: player.status,
-        firstName: player.user.firstName,
-        lastName: player.user.lastName,
-        profilePhotoUrl: player.user.profilePhotoUrl,
-        coverPhotoUrl: player.user.coverPhotoUrl,
-      })),
-      game.gameInvitation.map((player) => ({
-        id: player.friendId,
-        team: player.team,
-        status: player.status,
-        firstName: player.friend.firstName,
-        lastName: player.friend.lastName,
-        profilePhotoUrl: player.friend.profilePhotoUrl,
-        coverPhotoUrl: player.friend.coverPhotoUrl,
+      game.gameRequests.map((request) => ({
+        id: request.userId,
+        team: request.team,
+        status: request.status,
+        firstName: request.user.firstName,
+        lastName: request.user.lastName,
+        profilePhotoUrl: request.user.profilePhotoUrl,
+        coverPhotoUrl: request.user.coverPhotoUrl,
+        updatedAt: request.updatedAt,
       })),
     );
+    players = players.concat(
+      game.gameInvitation.map((invitation) => ({
+        id: invitation.friendId,
+        team: invitation.team,
+        status: invitation.status,
+        firstName: invitation.friend.firstName,
+        lastName: invitation.friend.lastName,
+        profilePhotoUrl: invitation.friend.profilePhotoUrl,
+        coverPhotoUrl: invitation.friend.coverPhotoUrl,
+        updatedAt: invitation.updatedAt,
+      })),
+    );
+
+    players = players
+      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+      .filter(
+        (player, index) =>
+          players.findIndex((user) => user.id === player.id) === index,
+      )
+      .reverse();
 
     players = await Promise.all(
       players.map(async (player) => {

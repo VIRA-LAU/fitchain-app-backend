@@ -7,7 +7,6 @@ import { AuthSigninDto, AuthSignupDto, BranchAuthSignupDto } from './dto';
 import { Branch, User } from '@prisma/client';
 import { EmailService } from './email.service';
 import { v4 as uuidv4 } from 'uuid';
-import { app } from 'src/main';
 
 @Injectable()
 export class AuthService {
@@ -39,6 +38,7 @@ export class AuthService {
         lastName: dto.lastName,
         hash,
         emailCode: code,
+        notificationsToken: dto.notificationsToken || undefined,
       },
     });
     setTimeout(async () => {
@@ -78,6 +78,7 @@ export class AuthService {
         longitude: dto.longitude,
         hash,
         emailCode: code,
+        notificationsToken: dto.notificationsToken || undefined,
       },
     });
     setTimeout(async () => {
@@ -156,7 +157,16 @@ export class AuthService {
     const pwMatches = await argon.verify(user.hash, dto.password);
     if (!pwMatches) throw new BadRequestException('CREDENTIALS_INCORRECT');
 
-    if (!isBranch)
+    if (!isBranch) {
+      if (dto.notificationsToken !== user.notificationsToken)
+        await this.prisma.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            notificationsToken: dto.notificationsToken,
+          },
+        });
       return {
         isBranch: false,
         access_token: await this.signToken(user.id, user.email),
@@ -165,7 +175,16 @@ export class AuthService {
         email: user.email,
         userId: user.id,
       };
-    else
+    } else {
+      if (dto.notificationsToken !== user.notificationsToken)
+        await this.prisma.branch.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            notificationsToken: dto.notificationsToken,
+          },
+        });
       return {
         isBranch: true,
         access_token: await this.signToken(user.id, user.email),
@@ -191,6 +210,7 @@ export class AuthService {
         ).venue.name,
         branchLocation: (user as Branch).location,
       };
+    }
   }
 
   async signToken(userId: number, email: string): Promise<string> {
@@ -327,12 +347,13 @@ export class AuthService {
           secret: this.jwt_secret.concat(user.hash),
         },
       );
-      const url = await app.getUrl();
       await this.emailService.sendPasswordResetEmail(
         email,
-        `${url}/auth/resetPassword?token=${token}&email=${email}`,
+        `${this.config.get(
+          'SERVER_URL',
+        )}:3000/auth/resetPassword?token=${token}&email=${email}`,
       );
-      return {status: 'success'};
+      return { status: 'success' };
     }
   }
 
@@ -361,12 +382,12 @@ export class AuthService {
     else
       await this.prisma.user.update({
         where: {
-          id: user.id, 
+          id: user.id,
         },
         data: {
           hash: newHash,
         },
       });
-    return {status: 'success'};
+    return { status: 'success' };
   }
 }

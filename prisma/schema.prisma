@@ -31,6 +31,7 @@ model User {
   nationality            String?
   position               String?
   rating                 Int?
+  notificationsToken     String?
   invitationsSent        InviteToGame[]      @relation("sender")
   invitationsReceived    InviteToGame[]      @relation("receiver")
   friendRequestsSent     AddFriend[]         @relation("sender")
@@ -53,24 +54,25 @@ model Venue {
 }
 
 model Branch {
-  id               Int      @id @default(autoincrement())
-  createdAt        DateTime @default(now())
-  location         String?
-  latitude         Float
-  longitude        Float
-  venueId          Int
-  branchPhotoUrl   String?
-  profilePhotoUrl  String?
-  coverPhotoUrl    String?
-  email            String   @unique
-  emailCode        String?
-  emailVerified    Boolean  @default(false)
-  phoneNumber      String?  @unique
-  managerFirstName String
-  managerLastName  String
-  hash             String   @unique
-  courts           Court[]
-  venue            Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                 Int      @id @default(autoincrement())
+  createdAt          DateTime @default(now())
+  location           String?
+  latitude           Float
+  longitude          Float
+  venueId            Int
+  branchPhotoUrl     String?
+  profilePhotoUrl    String?
+  coverPhotoUrl      String?
+  email              String   @unique
+  emailCode          String?
+  emailVerified      Boolean  @default(false)
+  phoneNumber        String?  @unique
+  managerFirstName   String
+  managerLastName    String
+  hash               String   @unique
+  notificationsToken String?
+  courts             Court[]
+  venue              Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Game {
@@ -122,8 +124,6 @@ model InviteToGame {
   user      User               @relation(name: "sender", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   friend    User               @relation(name: "receiver", fields: [friendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   game      Game               @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@unique([userId, friendId, gameId])
 }
 
 model AddFriend {
@@ -149,8 +149,6 @@ model RequestToJoinGame {
   status    invitationApproval @default(PENDING)
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   game      Game               @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@unique([userId, gameId])
 }
 
 model HasStatistics {

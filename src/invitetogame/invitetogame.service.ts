@@ -2,10 +2,14 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvitationDto } from './dto';
 import { EditInvitationDto } from './dto/edit-invitation.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class InvitetogameService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async getSentInvitations(userId: number) {
     return this.prisma.inviteToGame.findMany({
@@ -148,7 +152,34 @@ export class InvitetogameService {
         userId,
         ...dto,
       },
+      select: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+        friend: {
+          select: {
+            notificationsToken: true,
+          },
+        },
+        game: {
+          select: {
+            id: true,
+            type: true,
+          },
+        },
+      },
     });
+    this.notificationsService.sendNotification(
+      [invitation.friend.notificationsToken],
+      'Game Invitation',
+      `${invitation.user.firstName} ${
+        invitation.user.lastName
+      } invited you to join their ${invitation.game.type.toLowerCase()} game.`,
+      `game/${invitation.game.id}`,
+    );
     return invitation;
   }
 
@@ -165,14 +196,40 @@ export class InvitetogameService {
 
     if (!invitation) throw new ForbiddenException('Access to edit denied');
 
-    return this.prisma.inviteToGame.update({
+    const invitationResponse = await this.prisma.inviteToGame.update({
       where: {
         id: invitationId,
       },
       data: {
         ...dto,
       },
+      select: {
+        user: {
+          select: {
+            notificationsToken: true,
+          },
+        },
+        friend: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+        game: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
+    if (dto.status && dto.status === 'APPROVED')
+      this.notificationsService.sendNotification(
+        [invitationResponse.user.notificationsToken],
+        'Invitation Accepted',
+        `${invitationResponse.friend.firstName} ${invitationResponse.friend.lastName} accepted your game invitation.`,
+        `game/${invitationResponse.game.id}`,
+      );
+    return { result: 'success' };
   }
 
   async deleteInvitationById(userId: number, invitationId: number) {

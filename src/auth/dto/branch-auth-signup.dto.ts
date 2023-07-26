@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class BranchAuthSignupDto {
   @IsString()
@@ -35,4 +35,8 @@ export class BranchAuthSignupDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsString()
+  @IsOptional()
+  notificationsToken?: string;
 }
