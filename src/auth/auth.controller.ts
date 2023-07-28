@@ -43,6 +43,12 @@ export class AuthController {
     return this.authService.signin(dto);
   }
 
+  @HttpCode(HttpStatus.OK)
+  @Patch('signout')
+  signout(@Body() dto: { userId: number; isBranch: boolean }) {
+    return this.authService.signout(dto.userId, dto.isBranch);
+  }
+
   @Patch('verifyEmail/user')
   verifyUserEmail(@Body() dto: VerifyEmailDto) {
     return this.authService.verifyUserEmail(dto.userId, dto.code);

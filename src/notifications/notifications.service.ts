@@ -20,18 +20,14 @@ export class NotificationsService {
     // Create the messages that you want to send to clients
     let messages = [];
     for (let pushToken of pushTokens) {
-      if (!Expo.isExpoPushToken(pushToken)) {
-        console.error(`Push token ${pushToken} is not a valid Expo push token`);
-        continue;
-      }
-
-      messages.push({
-        to: pushToken,
-        sound: 'default',
-        title,
-        body,
-        data: { url },
-      });
+      if (Expo.isExpoPushToken(pushToken))
+        messages.push({
+          to: pushToken,
+          sound: 'default',
+          title,
+          body,
+          data: { url },
+        });
     }
     let chunks = this.expo.chunkPushNotifications(messages);
     let tickets = [];

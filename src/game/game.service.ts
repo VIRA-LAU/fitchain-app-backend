@@ -678,6 +678,7 @@ export class GameService {
           select: {
             status: true,
             id: true,
+            updatedAt: true,
           },
         },
         gameInvitation: {
@@ -687,27 +688,33 @@ export class GameService {
           select: {
             status: true,
             id: true,
+            updatedAt: true,
           },
         },
       },
     });
-
+    gameStatus.gameInvitation.sort(
+      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
+    );
+    gameStatus.gameRequests.sort(
+      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
+    );
     const userStatus = {
       hasRequestedtoJoin:
         gameStatus?.gameRequests?.length > 0
-          ? gameStatus.gameRequests.slice().pop().status
+          ? gameStatus.gameRequests[0].status
           : false,
       hasBeenInvited:
         gameStatus?.gameInvitation?.length > 0
-          ? gameStatus.gameInvitation.slice().pop().status
+          ? gameStatus.gameInvitation[0].status
           : false,
       requestId:
         gameStatus?.gameRequests?.length > 0
-          ? gameStatus.gameRequests.slice().pop().id
+          ? gameStatus.gameRequests[0].id
           : false,
       invitationId:
         gameStatus?.gameInvitation?.length > 0
-          ? gameStatus.gameInvitation.slice().pop().id
+          ? gameStatus.gameInvitation[0].id
           : false,
       isAdmin: gameStatus.adminId === userId,
     };

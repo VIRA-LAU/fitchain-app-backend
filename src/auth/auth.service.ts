@@ -213,6 +213,27 @@ export class AuthService {
     }
   }
 
+  async signout(userId: number, isBranch: boolean) {
+    if (!isBranch)
+      await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          notificationsToken: null,
+        },
+      });
+    else
+      await this.prisma.branch.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          notificationsToken: null,
+        },
+      });
+  }
+
   async signToken(userId: number, email: string): Promise<string> {
     const payload = {
       sub: userId,
