@@ -25,11 +25,8 @@ export class RequesttojoingameService {
             type: true,
             date: true,
             createdAt: true,
-            gameTimeSlots: {
-              select: {
-                timeSlot: true,
-              },
-            },
+            startTime: true,
+            endTime: true,
             court: {
               select: {
                 branch: {
@@ -79,11 +76,8 @@ export class RequesttojoingameService {
             type: true,
             date: true,
             createdAt: true,
-            gameTimeSlots: {
-              select: {
-                timeSlot: true,
-              },
-            },
+            startTime: true,
+            endTime: true,
             court: {
               select: {
                 branch: {

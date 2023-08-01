@@ -1,25 +1,24 @@
-import { IsArray, IsNumber, IsOptional, IsString } from "class-validator";
+import { TimeSlot } from '@prisma/client';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class EditCourtDto{
+export class EditCourtDto {
+  @IsString()
+  @IsOptional()
+  name?: string;
 
-    @IsString()
-    @IsOptional()
-    name?: string;
+  @IsNumber()
+  @IsOptional()
+  price?: number;
 
-    @IsNumber()
-    @IsOptional()
-    price?: number;
+  @IsString()
+  @IsOptional()
+  courtType?: string;
 
-    @IsString()
-    @IsOptional()
-    courtType?: string;
+  @IsNumber()
+  @IsOptional()
+  nbOfPlayers?: number;
 
-    @IsNumber()
-    @IsOptional()
-    nbOfPlayers?: number;
-
-    @IsArray()
-    @IsOptional()
-    timeSlots: number[];
-
+  @IsArray()
+  @IsOptional()
+  timeSlots: TimeSlot[];
 }

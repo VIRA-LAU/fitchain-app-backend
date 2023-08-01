@@ -13,6 +13,6 @@ export class SocketGateway {
     client: Socket,
     ...args: any[]
   ) {
-    console.log(`Client ${client.id} connected`);
+    console.info(`Client ${client.id} connected`);
   }
 }

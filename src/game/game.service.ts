@@ -69,11 +69,8 @@ export class GameService {
         id: true,
         date: true,
         adminTeam: true,
-        gameTimeSlots: {
-          select: {
-            timeSlot: true,
-          },
-        },
+        startTime: true,
+        endTime: true,
         homeScore: true,
         awayScore: true,
         winnerTeam: true,
@@ -178,8 +175,8 @@ export class GameService {
     gameType: gameType,
     nbOfPlayers: number,
     date?: string,
-    startTime?: string,
-    endTime?: string,
+    startTime?: number,
+    endTime?: number,
   ) {
     const games = await this.prisma.game.findMany({
       where: {
@@ -196,26 +193,12 @@ export class GameService {
           },
           startTime
             ? {
-                gameTimeSlots: {
-                  some: {
-                    timeSlot: {
-                      startTime: {
-                        lte: startTime,
-                      },
-                    },
-                  },
-                },
+                startTime: { lte: startTime },
               }
             : {},
           endTime
             ? {
-                gameTimeSlots: {
-                  some: {
-                    timeSlot: {
-                      endTime: { gte: endTime },
-                    },
-                  },
-                },
+                endTime: { gte: endTime },
               }
             : {},
         ],
@@ -225,11 +208,8 @@ export class GameService {
         id: true,
         date: true,
         adminTeam: true,
-        gameTimeSlots: {
-          select: {
-            timeSlot: true,
-          },
-        },
+        startTime: true,
+        endTime: true,
         type: true,
         court: {
           select: {
@@ -301,11 +281,8 @@ export class GameService {
         date: true,
         type: true,
         adminTeam: true,
-        gameTimeSlots: {
-          select: {
-            timeSlot: true,
-          },
-        },
+        startTime: true,
+        endTime: true,
         homeScore: true,
         awayScore: true,
         winnerTeam: true,
@@ -369,12 +346,7 @@ export class GameService {
     return this.prisma.game.findMany({
       where: {
         AND: [
-          {
-            OR: [
-              { status: gameStatus.APPROVED },
-              { date: { lte: new Date() } },
-            ],
-          },
+          { status: gameStatus.APPROVED },
           type === 'upcoming'
             ? {
                 date: { gt: new Date() },
@@ -397,11 +369,8 @@ export class GameService {
         date: true,
         type: true,
         adminTeam: true,
-        gameTimeSlots: {
-          select: {
-            timeSlot: true,
-          },
-        },
+        startTime: true,
+        endTime: true,
         court: {
           select: {
             courtType: true,
@@ -455,32 +424,12 @@ export class GameService {
   }
 
   async createBooking(userId: number, dto: createBookingDto) {
-    const timeSlots = await this.prisma.timeSlot.findMany({
-      where: {
-        id: { in: dto.timeSlotIds },
-      },
-      select: {
-        id: true,
-        startTime: true,
-      },
-    });
-    const dateStr = new Date(dto.date).toISOString();
-    const bookingDate = new Date(
-      `${dateStr.substring(0, dateStr.indexOf('T'))} ${timeSlots[0].startTime}`,
-    );
-    const { timeSlotIds, ...dtoData } = dto;
     const booking = await this.prisma.game.create({
       data: {
         adminId: userId,
         status: 'APPROVED',
-        ...dtoData,
-        date: bookingDate,
-
-        gameTimeSlots: {
-          create: timeSlots.map((slot) => ({
-            timeSlotId: slot.id,
-          })),
-        },
+        ...dto,
+        date: new Date(JSON.parse(dto.date)),
       },
     });
     return booking;
@@ -580,11 +529,8 @@ export class GameService {
             date: true,
             type: true,
             adminTeam: true,
-            gameTimeSlots: {
-              select: {
-                timeSlot: true,
-              },
-            },
+            startTime: true,
+            endTime: true,
             court: {
               select: {
                 courtType: true,

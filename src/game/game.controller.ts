@@ -1,4 +1,17 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { gameType } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
 import { JwtGaurd } from '../auth/gaurd';
@@ -11,96 +24,143 @@ import { SocketGateway } from 'src/socket.gateway';
 @UseGuards(JwtGaurd)
 @Controller('games')
 export class GameController {
-    constructor(private gameService: GameService,
-        private readonly socketGateway: SocketGateway){}
+  constructor(
+    private gameService: GameService,
+    private readonly socketGateway: SocketGateway,
+  ) {}
 
-    @Get()
-    getGames(@GetUser('id') userId: number, @Query('limit') limit?: string, @Query('type') type?: string) {
-        return this.gameService.getGames(userId, parseInt(limit),type);
-    }
+  @Get()
+  getGames(
+    @GetUser('id') userId: number,
+    @Query('limit') limit?: string,
+    @Query('type') type?: string,
+  ) {
+    return this.gameService.getGames(userId, parseInt(limit), type);
+  }
 
-    @Get('search')
-    searchGames(@GetUser('id') userId: number, @Query('gameType') gameType: gameType,
-        @Query('nbOfPlayers', ParseIntPipe) nbOfPlayers: number, @Query('date') date?: string,
-        @Query('startTime') startTime?: string, @Query('endTime') endTime?: string) {
-            return this.gameService.searchGames(userId, gameType, nbOfPlayers, date, startTime, endTime);
-    }
-    
-    @Get('getTeam')
-    getPlayerTeam(@GetUser('id') userId: number, @Query('gameId') gameId: string) {
-        return this.gameService.getPlayerTeam(userId, gameId);
-    }
+  @Get('search')
+  searchGames(
+    @GetUser('id') userId: number,
+    @Query('gameType') gameType: gameType,
+    @Query('nbOfPlayers', ParseIntPipe) nbOfPlayers: number,
+    @Query('date') date?: string,
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    return this.gameService.searchGames(
+      userId,
+      gameType,
+      nbOfPlayers,
+      date,
+      startTime ? parseInt(startTime) : undefined,
+      endTime ? parseInt(endTime) : undefined,
+    );
+  }
 
-    @Get('bookings')
-    getBookings(@Query('type') type?: string){
-        return this.gameService.getBookings(type)
-    }
+  @Get('getTeam')
+  getPlayerTeam(
+    @GetUser('id') userId: number,
+    @Query('gameId') gameId: string,
+  ) {
+    return this.gameService.getPlayerTeam(userId, gameId);
+  }
 
-    @Get('activities/:userId')
-    getActivities(@Param('userId', ParseIntPipe) userId: number) {
-        return this.gameService.getActivities(userId);
-    }
+  @Get('bookings')
+  getBookings(@Query('type') type?: string) {
+    return this.gameService.getBookings(type);
+  }
 
-    @Get('count/:userId')
-    getGameCount(@Param('userId', ParseIntPipe) userId: number) {
-        return this.gameService.getGameCount(userId);
-    }
+  @Get('activities/:userId')
+  getActivities(@Param('userId', ParseIntPipe) userId: number) {
+    return this.gameService.getActivities(userId);
+  }
 
-    @Get('followed')
-    getFollowedGames(@GetUser('id') userId: number, @Query('type') type?: string){
-        return this.gameService.getFollowedGames(userId, type)
-    }
+  @Get('count/:userId')
+  getGameCount(@Param('userId', ParseIntPipe) userId: number) {
+    return this.gameService.getGameCount(userId);
+  }
 
-    @Get('playerstatus/:gameId')
-    getPlayerGameStatus(@GetUser('id') userId: number, @Param('gameId', ParseIntPipe) gameId: number){
-        return this.gameService.getPlayerGameStatus(userId, gameId)
-    }
+  @Get('followed')
+  getFollowedGames(
+    @GetUser('id') userId: number,
+    @Query('type') type?: string,
+  ) {
+    return this.gameService.getFollowedGames(userId, type);
+  }
 
-    @Get('players/:id')
-    getPlayersOfGame(@GetUser('id') userId: number, @Param('id', ParseIntPipe) gameId:number) {
-        return this.gameService.getPlayers(gameId, userId);
-    }
+  @Get('playerstatus/:gameId')
+  getPlayerGameStatus(
+    @GetUser('id') userId: number,
+    @Param('gameId', ParseIntPipe) gameId: number,
+  ) {
+    return this.gameService.getPlayerGameStatus(userId, gameId);
+  }
 
-    @Get('updates/:id')
-    getUpdates(@Param('id', ParseIntPipe) gameId:number) {
-        return this.gameService.getUpdates(gameId);
-    }
+  @Get('players/:id')
+  getPlayersOfGame(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) gameId: number,
+  ) {
+    return this.gameService.getPlayers(gameId, userId);
+  }
 
-    @Get('/:id')
-    getGameById(@Param('id', ParseIntPipe) upcomingId:number ){
-        return this.gameService.getGameById(upcomingId)
-    }
+  @Get('updates/:id')
+  getUpdates(@Param('id', ParseIntPipe) gameId: number) {
+    return this.gameService.getUpdates(gameId);
+  }
 
-    @Post("followed")
-    createFollowGame(@GetUser('id') userId:number, @Body() dto:createFollowGameDto){
-        return this.gameService.createFollowGame(userId,dto)
-    }
+  @Get('/:id')
+  getGameById(@Param('id', ParseIntPipe) upcomingId: number) {
+    return this.gameService.getGameById(upcomingId);
+  }
 
-    @HttpCode(HttpStatus.NO_CONTENT)
-    @Delete('followed')
-    deleteFollowById(@GetUser('id') userId:number, @Query('gameId') gameId:string){
-        return this.gameService.deleteFollowById(userId,parseInt(gameId))
-    }
+  @Post('followed')
+  createFollowGame(
+    @GetUser('id') userId: number,
+    @Body() dto: createFollowGameDto,
+  ) {
+    return this.gameService.createFollowGame(userId, dto);
+  }
 
-    @Post("")
-    createBooking(@GetUser('id') userId:number, @Body() dto:createBookingDto){
-        return this.gameService.createBooking(userId,dto)
-    }
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('followed')
+  deleteFollowById(
+    @GetUser('id') userId: number,
+    @Query('gameId') gameId: string,
+  ) {
+    return this.gameService.deleteFollowById(userId, parseInt(gameId));
+  }
 
-    @Patch('recording/:gameId')
-    startRecording(@GetUser('id') userId:number, @Param('gameId', ParseIntPipe) gameId: number, @Body() dto: editBookingDto) {
-        this.socketGateway.server.emit(`${dto.recordingMode}_recording`)
-        return this.gameService.editBookingById(userId, gameId, dto)
-    }
+  @Post('')
+  createBooking(@GetUser('id') userId: number, @Body() dto: createBookingDto) {
+    return this.gameService.createBooking(userId, dto);
+  }
 
-    @Patch(':id')
-    editBookingById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) bookingId: number, @Body() dto: editBookingDto){
-        return this.gameService.editBookingById(userId,bookingId,dto)
-    }
+  @Patch('recording/:gameId')
+  startRecording(
+    @GetUser('id') userId: number,
+    @Param('gameId', ParseIntPipe) gameId: number,
+    @Body() dto: editBookingDto,
+  ) {
+    this.socketGateway.server.emit(`${dto.recordingMode}_recording`);
+    return this.gameService.editBookingById(userId, gameId, dto);
+  }
 
-    @HttpCode(HttpStatus.NO_CONTENT)
-    @Delete(':id')
-    deleteBookingById(@GetUser('id') userId:number, @Param('id', ParseIntPipe) bookingId:number){
-        return this.gameService.deleteBookingById(userId,bookingId)   
-    }
+  @Patch(':id')
+  editBookingById(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) bookingId: number,
+    @Body() dto: editBookingDto,
+  ) {
+    return this.gameService.editBookingById(userId, bookingId, dto);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  deleteBookingById(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) bookingId: number,
+  ) {
+    return this.gameService.deleteBookingById(userId, bookingId);
+  }
 }

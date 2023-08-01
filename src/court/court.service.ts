@@ -1,155 +1,169 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCourtDto, EditCourtDto } from './dto';
+import { TimeSlot } from '@prisma/client';
 
 @Injectable()
 export class CourtService {
-    constructor(private prisma:PrismaService){}
+  constructor(private prisma: PrismaService) {}
 
-    getCourts(branchId?: number, venueId?: number){
-        return this.prisma.court.findMany({
-            where: {
-                AND: [
-                    branchId ? {
-                        branchId
-                    } : {},
-                    venueId ? {
-                        branch: {
-                            venueId
-                        } 
-                    } : {}
-                ]
-            },
-            include: {
+  getCourts(branchId?: number, venueId?: number) {
+    return this.prisma.court.findMany({
+      where: {
+        AND: [
+          branchId
+            ? {
+                branchId,
+              }
+            : {},
+          venueId
+            ? {
                 branch: {
-                    select: {
-                        location: true,
-                        latitude: true,
-                        longitude: true,
-                        venue: {
-                            select: {
-                                name: true
-                            }
-                        }
-                    }
+                  venueId,
                 },
-                courtTimeSlots: true
-            }
-        })
-
-    }
-
-    async getCourtById(courtId:number){
-        const court = await this.prisma.court.findFirst({ 
-            where:{
-                id:courtId,                
-            }
-        })
-        return court; 
-    }
-
-    async createCourt(branchId: number, dto: CreateCourtDto){
-        const timeSlots = dto.timeSlots
-        delete dto.timeSlots
-
-        const court = await this.prisma.court.create({ 
-            data:{
-                ...dto,
-                branchId
-            }
-        })
-        await this.prisma.courtTimeSlots.createMany({
-            data: timeSlots.map(slot => ({
-                courtId: court.id,
-                timeSlotId: slot
-            }))
-        })
-        return court; 
-    }
-
-    async editCourtById(courtId:number, dto: EditCourtDto){
-        const dtoTimeSlots = dto.timeSlots
-        delete dto.timeSlots
-
-        const court = await this.prisma.court.findUnique({
-            where:{
-                id:courtId
+              }
+            : {},
+        ],
+      },
+      include: {
+        branch: {
+          select: {
+            location: true,
+            latitude: true,
+            longitude: true,
+            venue: {
+              select: {
+                name: true,
+              },
             },
-            include: {
-                courtTimeSlots: {
-                    select: {
-                        timeSlotId: true
-                    }
-                }
-            }
-        })
+          },
+        },
+        timeSlots: true,
+      },
+    });
+  }
 
-        if(!court) throw new ForbiddenException("Access to edit denied")
-        else {
-            const existingTimeSlots = court.courtTimeSlots.map(courtTimeSlot => courtTimeSlot.timeSlotId)
-            const toAdd: number[] = []
-            const toDelete: number[] = []
-    
-            dtoTimeSlots.forEach(slot => {
-                if (existingTimeSlots.indexOf(slot) === -1) {
-                    toAdd.push(slot)
-                }
-            })
-    
-            existingTimeSlots.forEach(slot => {
-                if (dtoTimeSlots.indexOf(slot) === -1) {
-                    toDelete.push(slot)
-                }
-            })
+  async getCourtById(courtId: number) {
+    const court = await this.prisma.court.findFirst({
+      where: {
+        id: courtId,
+      },
+    });
+    return court;
+  }
 
-            await this.prisma.courtTimeSlots.deleteMany({
-                where: {
-                    timeSlotId: {
-                        in: toDelete
-                    }
-                }
-            })
-            
-            await this.prisma.courtTimeSlots.createMany({
-                data: toAdd.map(timeSlotId => ({
-                    courtId: courtId,
-                    timeSlotId
-                }))
-            })
+  async createCourt(branchId: number, dto: CreateCourtDto) {
+    const timeSlots = dto.timeSlots;
+    delete dto.timeSlots;
 
-            return this.prisma.court.update({
-                where: {
-                    id: courtId
-                },
-                data: {
-                    ...dto
-                }
-             })
+    const court = await this.prisma.court.create({
+      data: {
+        ...(dto as Omit<CreateCourtDto, 'timeSlots'>),
+        branchId,
+      },
+    });
+
+    await this.prisma.timeSlot.createMany({
+      data: timeSlots.map((slot) => ({
+        courtId: court.id,
+        ...slot,
+      })),
+    });
+
+    return court;
+  }
+
+  async editCourtById(courtId: number, dto: EditCourtDto) {
+    const dtoTimeSlots = dto.timeSlots;
+    delete dto.timeSlots;
+
+    const court = await this.prisma.court.findUnique({
+      where: {
+        id: courtId,
+      },
+      include: {
+        timeSlots: true,
+      },
+    });
+
+    if (!court) throw new ForbiddenException('Access to edit denied');
+    else {
+      const toAdd: TimeSlot[] = [];
+      const toDelete: number[] = [];
+
+      for (var slot of dtoTimeSlots) {
+        const existingSlot = court.timeSlots.find(
+          (existingSlot) => existingSlot.id === slot.id,
+        );
+        if (existingSlot) {
+          if (
+            existingSlot.startTime !== slot.startTime ||
+            existingSlot.endTime !== slot.endTime
+          )
+            await this.prisma.timeSlot.update({
+              where: {
+                id: slot.id,
+              },
+              data: {
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+              },
+            });
+        } else toAdd.push(slot);
+      }
+
+      court.timeSlots.forEach((existingSlot) => {
+        if (!dtoTimeSlots.map((slot) => slot.id).includes(existingSlot.id)) {
+          toDelete.push(existingSlot.id);
         }
+      });
+
+      await this.prisma.timeSlot.deleteMany({
+        where: {
+          id: {
+            in: toDelete,
+          },
+        },
+      });
+
+      await this.prisma.timeSlot.createMany({
+        data: toAdd.map((slot) => ({
+          courtId: court.id,
+          ...slot,
+        })),
+      });
+
+      return this.prisma.court.update({
+        where: {
+          id: courtId,
+        },
+        data: {
+          ...(dto as Omit<EditCourtDto, 'timeSlots'>),
+        },
+      });
     }
+  }
 
-    async deleteCourtById(venueId:number,courtId:number){
-        const court = await this.prisma.court.findUnique({
-            where:{
-                id:courtId
-            }
-        })
+  async deleteCourtById(venueId: number, courtId: number) {
+    const court = await this.prisma.court.findUnique({
+      where: {
+        id: courtId,
+      },
+    });
 
-        const branch = await this.prisma.branch.findFirst({
-            where: {
-                id: court.branchId,
-            }
-        })
+    const branch = await this.prisma.branch.findFirst({
+      where: {
+        id: court.branchId,
+      },
+    });
 
-        if(!branch || branch.venueId != venueId)
-        throw new ForbiddenException("Access to edit denied")
+    if (!branch || branch.venueId != venueId)
+      throw new ForbiddenException('Access to edit denied');
 
-        await this.prisma.court.delete({
-            where:{
-                id:courtId
-            }
-        })
-        
-    }
-
+    await this.prisma.court.delete({
+      where: {
+        id: courtId,
+      },
+    });
+  }
 }

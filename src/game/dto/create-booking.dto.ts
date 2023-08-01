@@ -1,22 +1,24 @@
-import { gameType } from "@prisma/client"
-import { IsArray, IsDateString, IsNotEmpty, IsNumber, IsString } from "class-validator"
+import { gameType } from '@prisma/client';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class createBookingDto{
+export class createBookingDto {
+  @IsString()
+  @IsNotEmpty()
+  type: gameType;
 
-    @IsString()
-    @IsNotEmpty()
-    type: gameType
+  @IsNumber()
+  @IsNotEmpty()
+  courtId: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    courtId:number
+  @IsString()
+  @IsNotEmpty()
+  date: string;
 
-    @IsDateString() 
-    @IsNotEmpty()
-    date:Date
+  @IsNumber()
+  @IsNotEmpty()
+  startTime: number;
 
-    @IsArray()
-    @IsNotEmpty()
-    timeSlotIds:number[]
-
+  @IsNumber()
+  @IsNotEmpty()
+  endTime: number;
 }

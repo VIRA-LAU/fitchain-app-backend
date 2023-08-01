@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { gameType } from '@prisma/client';
+import { Game, gameType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EditBranchDto } from './dto';
 import { AWSS3Service } from 'src/aws-s3/aws-s3.service';
@@ -35,10 +35,20 @@ export class BranchService {
             nbOfPlayers: true,
             rating: true,
             branchId: true,
+            timeSlots: true,
           },
         },
       },
     });
+    branches = branches
+      .map((branch) => {
+        branch.courts = branch.courts.filter(
+          (court) => court.timeSlots.length !== 0,
+        );
+        return branch;
+      })
+      .filter((branch) => branch.courts.length !== 0);
+
     branches = branches.map((branch) => ({
       ...branch,
       rating:
@@ -136,30 +146,21 @@ export class BranchService {
   async getBookingsInBranch(branchId: number, date: Date) {
     return this.prisma.game.findMany({
       where: {
-        AND: [
-          {
-            court: {
-              branchId,
-            },
-          },
-          {
-            date: {
-              gte: new Date(date),
-              lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
-            },
-          },
-        ],
+        court: {
+          branchId,
+        },
+        date: {
+          gte: new Date(date),
+          lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
+        },
       },
       orderBy: { date: 'asc' },
       select: {
         id: true,
         date: true,
         type: true,
-        gameTimeSlots: {
-          select: {
-            timeSlot: true,
-          },
-        },
+        startTime: true,
+        endTime: true,
         court: {
           select: {
             id: true,
@@ -181,89 +182,82 @@ export class BranchService {
     date: string,
     gameType: gameType,
     nbOfPlayers: number,
-    startTime?: string,
-    endTime?: string,
+    startTime?: number,
+    endTime?: number,
     branchId?: number,
   ) {
-    if (startTime) {
+    if (typeof startTime !== 'undefined') {
       const timeSlots = await this.prisma.timeSlot.findMany({
         where: {
-          AND: [
+          OR: [
             {
-              OR: [
-                {
-                  AND: [
-                    { startTime: { lte: startTime } },
-                    { endTime: { gte: endTime } },
-                  ],
-                },
-                {
-                  AND: [
-                    { startTime: { lte: startTime } },
-                    { endTime: { lte: endTime } },
-                    { endTime: { gte: startTime } },
-                  ],
-                },
-                {
-                  AND: [
-                    { startTime: { gte: startTime } },
-                    { startTime: { lte: endTime } },
-                    { endTime: { gte: endTime } },
-                  ],
-                },
+              startTime: { lte: startTime },
+              endTime: { gte: endTime },
+            },
+            {
+              AND: [
+                { startTime: { lte: startTime } },
+                { endTime: { lte: endTime } },
+                { endTime: { gte: startTime } },
               ],
-              courtTimeSlots: {
-                some: {
-                  court: {
-                    courtType: gameType,
-                  },
-                },
-              },
-            },
-          ],
-        },
-      });
-      let timeSlotIds = timeSlots.map((timeSlot) => timeSlot.id);
-      const gamesInTimeSlots = await this.prisma.game.findMany({
-        where: {
-          AND: [
-            {
-              gameTimeSlots: {
-                some: {
-                  timeSlotId: { in: timeSlotIds },
-                },
-              },
             },
             {
-              date: {
-                gte: new Date(date),
-                lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
-              },
+              AND: [
+                { startTime: { gte: startTime } },
+                { startTime: { lte: endTime } },
+                { endTime: { gte: endTime } },
+              ],
             },
           ],
+          court: {
+            courtType: gameType,
+          },
         },
       });
-      const occupiedCourtIds = gamesInTimeSlots.map((game) => game.courtId);
+      const gamesInTimeSlots: Game[] = [];
+      for (var timeSlot of timeSlots) {
+        const gamesInTimeSlot = await this.prisma.game.findMany({
+          where: {
+            startTime: { gte: timeSlot.startTime },
+            endTime: { lte: timeSlot.endTime },
+            type: gameType,
+            date: {
+              gte: new Date(date),
+              lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
+            },
+          },
+        });
+        gamesInTimeSlot.forEach((game) => {
+          if (
+            gamesInTimeSlots.findIndex(
+              (existingGame) => existingGame.id === game.id,
+            ) === -1
+          )
+            gamesInTimeSlots.push(game);
+        });
+      }
+      const occupiedTimes = gamesInTimeSlots.map(
+        ({ startTime, endTime, courtId }) => ({
+          startTime,
+          endTime,
+          courtId,
+        }),
+      );
       let branches = await this.prisma.branch.findMany({
         where: {
           AND: [
             {
               courts: {
                 some: {
-                  AND: [
-                    {
-                      courtTimeSlots: {
-                        some: {
-                          timeSlotId: {
-                            in: timeSlotIds,
-                          },
-                        },
+                  timeSlots: {
+                    some: {
+                      id: {
+                        in: timeSlots.map((slot) => slot.id),
                       },
                     },
-                    { NOT: { id: { in: occupiedCourtIds } } },
-                    { courtType: gameType },
-                    { nbOfPlayers: { gte: nbOfPlayers } },
-                  ],
+                  },
+                  courtType: gameType,
+                  nbOfPlayers: { gte: nbOfPlayers },
                 },
               },
             },
@@ -285,20 +279,15 @@ export class BranchService {
           },
           courts: {
             where: {
-              AND: [
-                {
-                  courtTimeSlots: {
-                    some: {
-                      timeSlotId: {
-                        in: timeSlotIds,
-                      },
-                    },
+              timeSlots: {
+                some: {
+                  id: {
+                    in: timeSlots.map((slot) => slot.id),
                   },
                 },
-                { NOT: { id: { in: occupiedCourtIds } } },
-                { courtType: gameType },
-                { nbOfPlayers: { gte: nbOfPlayers } },
-              ],
+              },
+              courtType: gameType,
+              nbOfPlayers: { gte: nbOfPlayers },
             },
             select: {
               id: true,
@@ -308,18 +297,25 @@ export class BranchService {
               price: true,
               rating: true,
               branchId: true,
-              courtTimeSlots: {
+              timeSlots: {
                 where: {
-                  timeSlotId: { in: timeSlotIds },
-                },
-                select: {
-                  timeSlot: true,
+                  id: { in: timeSlots.map((slot) => slot.id) },
                 },
               },
             },
           },
         },
       });
+      branches = branches.map((branch) => {
+        branch.courts = branch.courts.map((court) => ({
+          ...court,
+          occupiedTimes: occupiedTimes.filter(
+            ({ courtId }) => court.id === courtId,
+          ),
+        }));
+        return branch;
+      });
+
       branches = branches.map((branch) => ({
         ...branch,
         rating:
@@ -333,39 +329,33 @@ export class BranchService {
     } else {
       const gamesInDate = await this.prisma.game.findMany({
         where: {
-          AND: [
-            {
-              date: {
-                gte: new Date(date),
-                lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
-              },
-            },
-            { type: gameType },
-          ],
+          date: {
+            gte: new Date(date),
+            lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
+          },
+          type: gameType,
         },
         select: {
-          gameTimeSlots: {
-            select: {
-              timeSlot: true,
-            },
-          },
+          startTime: true,
+          endTime: true,
           courtId: true,
         },
       });
-      const existingGames = gamesInDate.map((game) => ({
-        courtId: game.courtId,
-        timeSlotIds: game.gameTimeSlots.map((slot) => slot.timeSlot.id),
-      }));
+      const occupiedTimes = gamesInDate.map(
+        ({ startTime, endTime, courtId }) => ({
+          startTime,
+          endTime,
+          courtId,
+        }),
+      );
       let branches = await this.prisma.branch.findMany({
         where: {
           AND: [
             {
               courts: {
                 some: {
-                  AND: [
-                    { courtType: gameType },
-                    { nbOfPlayers: { gte: nbOfPlayers } },
-                  ],
+                  courtType: gameType,
+                  nbOfPlayers: { gte: nbOfPlayers },
                 },
               },
             },
@@ -387,10 +377,8 @@ export class BranchService {
           },
           courts: {
             where: {
-              AND: [
-                { courtType: gameType },
-                { nbOfPlayers: { gte: nbOfPlayers } },
-              ],
+              courtType: gameType,
+              nbOfPlayers: { gte: nbOfPlayers },
             },
             select: {
               id: true,
@@ -400,36 +388,26 @@ export class BranchService {
               nbOfPlayers: true,
               rating: true,
               branchId: true,
-              courtTimeSlots: {
-                select: {
-                  timeSlot: true,
-                  courtId: true,
-                  timeSlotId: true,
-                },
-              },
+              timeSlots: true,
             },
           },
         },
       });
       branches = branches
         .map((branch) => {
-          branch.courts = branch.courts.map((court) => {
-            court.courtTimeSlots = court.courtTimeSlots.filter(
-              ({ timeSlotId, courtId }) =>
-                !existingGames.some(
-                  (existing) =>
-                    existing.timeSlotIds.includes(timeSlotId) &&
-                    courtId === existing.courtId,
-                ),
-            );
-            return court;
-          });
           branch.courts = branch.courts.filter(
-            (court) => court.courtTimeSlots.length !== 0,
+            (court) => court.timeSlots.length !== 0,
           );
+          branch.courts = branch.courts.map((court) => ({
+            ...court,
+            occupiedTimes: occupiedTimes.filter(
+              ({ courtId }) => court.id === courtId,
+            ),
+          }));
           return branch;
         })
         .filter((branch) => branch.courts.length !== 0);
+
       branches = branches.map((branch) => ({
         ...branch,
         rating:

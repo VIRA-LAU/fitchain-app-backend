@@ -52,8 +52,8 @@ export class BranchController {
       date,
       gameType,
       nbOfPlayers,
-      startTime,
-      endTime,
+      startTime ? parseInt(startTime) : undefined,
+      endTime ? parseInt(endTime) : undefined,
       parseInt(branchId),
     );
   }
@@ -91,8 +91,11 @@ export class BranchController {
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete("photo/:photoName")
-  deleteBranchPhoto(@GetUser('id') branchId: number, @Param("photoName") photoName: string) {
+  @Delete('photo/:photoName')
+  deleteBranchPhoto(
+    @GetUser('id') branchId: number,
+    @Param('photoName') photoName: string,
+  ) {
     return this.branchService.deleteBranchPhoto(branchId, photoName);
   }
 }
