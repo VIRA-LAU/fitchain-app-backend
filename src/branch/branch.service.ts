@@ -143,21 +143,21 @@ export class BranchService {
     return branches;
   }
 
-  async getBookingsInBranch(branchId: number, date: Date) {
+  async getBookingsInBranch(branchId: number, dateStr: Date) {
+    const date = new Date(dateStr);
     return this.prisma.game.findMany({
       where: {
         court: {
           branchId,
         },
-        date: {
-          gte: new Date(date),
-          lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
+        startTime: {
+          gte: date,
+          lte: new Date(date.getTime() + 24 * 60 * 60 * 1000),
         },
       },
-      orderBy: { date: 'asc' },
+      orderBy: { startTime: 'asc' },
       select: {
         id: true,
-        date: true,
         type: true,
         startTime: true,
         endTime: true,
@@ -179,14 +179,41 @@ export class BranchService {
   }
 
   async searchForBranches(
-    date: string,
+    dateStr: string,
     gameType: gameType,
     nbOfPlayers: number,
-    startTime?: number,
-    endTime?: number,
+    startTimeStr?: string,
+    endTimeStr?: string,
     branchId?: number,
   ) {
-    if (typeof startTime !== 'undefined') {
+    const date = new Date(dateStr);
+
+    const gamesInDate = await this.prisma.game.findMany({
+      where: {
+        startTime: {
+          gte: date,
+          lte: new Date(date.getTime() + 24 * 60 * 60 * 1000),
+        },
+        type: gameType,
+      },
+      select: {
+        startTime: true,
+        endTime: true,
+        courtId: true,
+      },
+    });
+    const occupiedTimes = gamesInDate.map(
+      ({ startTime, endTime, courtId }) => ({
+        startTime,
+        endTime,
+        courtId,
+      }),
+    );
+
+    if (startTimeStr) {
+      const startTime = new Date(startTimeStr);
+      const endTime = new Date(endTimeStr);
+
       const timeSlots = await this.prisma.timeSlot.findMany({
         where: {
           OR: [
@@ -214,35 +241,6 @@ export class BranchService {
           },
         },
       });
-      const gamesInTimeSlots: Game[] = [];
-      for (var timeSlot of timeSlots) {
-        const gamesInTimeSlot = await this.prisma.game.findMany({
-          where: {
-            startTime: { gte: timeSlot.startTime },
-            endTime: { lte: timeSlot.endTime },
-            type: gameType,
-            date: {
-              gte: new Date(date),
-              lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
-            },
-          },
-        });
-        gamesInTimeSlot.forEach((game) => {
-          if (
-            gamesInTimeSlots.findIndex(
-              (existingGame) => existingGame.id === game.id,
-            ) === -1
-          )
-            gamesInTimeSlots.push(game);
-        });
-      }
-      const occupiedTimes = gamesInTimeSlots.map(
-        ({ startTime, endTime, courtId }) => ({
-          startTime,
-          endTime,
-          courtId,
-        }),
-      );
       let branches = await this.prisma.branch.findMany({
         where: {
           AND: [
@@ -297,11 +295,7 @@ export class BranchService {
               price: true,
               rating: true,
               branchId: true,
-              timeSlots: {
-                where: {
-                  id: { in: timeSlots.map((slot) => slot.id) },
-                },
-              },
+              timeSlots: true,
             },
           },
         },
@@ -327,27 +321,6 @@ export class BranchService {
       }));
       return branches;
     } else {
-      const gamesInDate = await this.prisma.game.findMany({
-        where: {
-          date: {
-            gte: new Date(date),
-            lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
-          },
-          type: gameType,
-        },
-        select: {
-          startTime: true,
-          endTime: true,
-          courtId: true,
-        },
-      });
-      const occupiedTimes = gamesInDate.map(
-        ({ startTime, endTime, courtId }) => ({
-          startTime,
-          endTime,
-          courtId,
-        }),
-      );
       let branches = await this.prisma.branch.findMany({
         where: {
           AND: [

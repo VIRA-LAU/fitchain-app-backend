@@ -81,9 +81,8 @@ model Game {
   updatedAt      DateTime            @updatedAt
   courtId        Int
   adminId        Int
-  date           DateTime
-  startTime      Int                 @default(0)
-  endTime        Int                 @default(60)
+  startTime      DateTime
+  endTime        DateTime
   type           gameType            @default(Basketball)
   adminTeam      teamType            @default(HOME)
   winnerTeam     winnerTeamType      @default(DRAW)
@@ -167,8 +166,8 @@ model HasStatistics {
 model TimeSlot {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  startTime Int
-  endTime   Int
+  startTime DateTime
+  endTime   DateTime
   courtId   Int
   court     Court    @relation(fields: [courtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }

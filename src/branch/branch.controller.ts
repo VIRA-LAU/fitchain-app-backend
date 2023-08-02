@@ -52,8 +52,8 @@ export class BranchController {
       date,
       gameType,
       nbOfPlayers,
-      startTime ? parseInt(startTime) : undefined,
-      endTime ? parseInt(endTime) : undefined,
+      startTime,
+      endTime,
       parseInt(branchId),
     );
   }

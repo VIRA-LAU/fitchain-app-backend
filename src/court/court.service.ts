@@ -66,7 +66,8 @@ export class CourtService {
     await this.prisma.timeSlot.createMany({
       data: timeSlots.map((slot) => ({
         courtId: court.id,
-        ...slot,
+        startTime: new Date(slot.startTime),
+        endTime: new Date(slot.endTime),
       })),
     });
 

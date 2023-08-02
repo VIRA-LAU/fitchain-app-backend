@@ -23,7 +23,6 @@ export class RequesttojoingameService {
           select: {
             id: true,
             type: true,
-            date: true,
             createdAt: true,
             startTime: true,
             endTime: true,
@@ -74,7 +73,6 @@ export class RequesttojoingameService {
           select: {
             id: true,
             type: true,
-            date: true,
             createdAt: true,
             startTime: true,
             endTime: true,

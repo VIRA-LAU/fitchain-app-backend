@@ -44,17 +44,6 @@ async function main() {
     });
   }
 
-  // Create time slots
-  for (const timeSlotData of timeSlots) {
-    await prisma.timeSlot.create({
-      data: {
-        startTime: timeSlotData.startTime,
-        endTime: timeSlotData.endTime,
-        courtId: timeSlotData.courtId,
-      },
-    });
-  }
-
   // Create courts
   for (const courtData of courts) {
     await prisma.court.create({
@@ -69,12 +58,22 @@ async function main() {
     });
   }
 
+  // Create time slots
+  for (const timeSlotData of timeSlots) {
+    await prisma.timeSlot.create({
+      data: {
+        startTime: timeSlotData.startTime,
+        endTime: timeSlotData.endTime,
+        courtId: timeSlotData.courtId,
+      },
+    });
+  }
+
   // Create games
   for (const gameData of games) {
     await prisma.game.create({
       data: {
         admin: { connect: { id: gameData.adminId } },
-        date: new Date(gameData.date),
         court: { connect: { id: gameData.courtId } },
         status: 'APPROVED',
         startTime: gameData.startTime,

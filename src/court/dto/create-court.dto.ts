@@ -20,5 +20,5 @@ export class CreateCourtDto {
 
   @IsArray()
   @IsNotEmpty()
-  timeSlots: { startTime: number; endTime: number }[];
+  timeSlots: { startTime: string; endTime: string }[];
 }

@@ -12,13 +12,9 @@ export class createBookingDto {
 
   @IsString()
   @IsNotEmpty()
-  date: string;
+  startTime: string;
 
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  startTime: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  endTime: number;
+  endTime: string;
 }

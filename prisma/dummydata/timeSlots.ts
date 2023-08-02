@@ -1,12 +1,52 @@
 export const timeSlots = [
-  { startTime: 360, endTime: 720, courtId: 1 },
-  { startTime: 840, endTime: 1200, courtId: 1 },
-  { startTime: 240, endTime: 600, courtId: 2 },
-  { startTime: 720, endTime: 960, courtId: 2 },
-  { startTime: 1200, endTime: 1440, courtId: 2 },
-  { startTime: 360, endTime: 720, courtId: 3 },
-  { startTime: 840, endTime: 1200, courtId: 3 },
-  { startTime: 240, endTime: 600, courtId: 4 },
-  { startTime: 720, endTime: 960, courtId: 4 },
-  { startTime: 1200, endTime: 1440, courtId: 4 },
+  {
+    startTime: new Date('2000-01-01T06:00:00.000Z'),
+    endTime: new Date('2000-01-01T12:00:00.000Z'),
+    courtId: 1,
+  },
+  {
+    startTime: new Date('2000-01-01T14:00:00.000Z'),
+    endTime: new Date('2000-01-01T20:00:00.000Z'),
+    courtId: 1,
+  },
+  {
+    startTime: new Date('2000-01-01T02:00:00.000Z'),
+    endTime: new Date('2000-01-01T10:00:00.000Z'),
+    courtId: 2,
+  },
+  {
+    startTime: new Date('2000-01-01T12:00:00.000Z'),
+    endTime: new Date('2000-01-01T16:00:00.000Z'),
+    courtId: 2,
+  },
+  {
+    startTime: new Date('2000-01-01T20:00:00.000Z'),
+    endTime: new Date('2000-01-01T24:00:00.000Z'),
+    courtId: 2,
+  },
+  {
+    startTime: new Date('2000-01-01T06:00:00.000Z'),
+    endTime: new Date('2000-01-01T12:00:00.000Z'),
+    courtId: 3,
+  },
+  {
+    startTime: new Date('2000-01-01T14:00:00.000Z'),
+    endTime: new Date('2000-01-01T20:00:00.000Z'),
+    courtId: 3,
+  },
+  {
+    startTime: new Date('2000-01-01T02:00:00.000Z'),
+    endTime: new Date('2000-01-01T10:00:00.000Z'),
+    courtId: 4,
+  },
+  {
+    startTime: new Date('2000-01-01T12:00:00.000Z'),
+    endTime: new Date('2000-01-01T16:00:00.000Z'),
+    courtId: 4,
+  },
+  {
+    startTime: new Date('2000-01-01T20:00:00.000Z'),
+    endTime: new Date('2000-01-01T24:00:00.000Z'),
+    courtId: 4,
+  },
 ];

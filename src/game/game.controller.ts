@@ -52,8 +52,8 @@ export class GameController {
       gameType,
       nbOfPlayers,
       date,
-      startTime ? parseInt(startTime) : undefined,
-      endTime ? parseInt(endTime) : undefined,
+      startTime,
+      endTime,
     );
   }
 

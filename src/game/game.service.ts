@@ -47,11 +47,11 @@ export class GameService {
         },
         type === 'upcoming'
           ? {
-              date: { gt: new Date() },
+              endTime: { gt: new Date() },
             }
           : type === 'previous'
           ? {
-              date: { lt: new Date() },
+              endTime: { lt: new Date() },
             }
           : {},
       ],
@@ -60,14 +60,13 @@ export class GameService {
       where: whereClause,
       orderBy:
         type === 'upcoming'
-          ? { date: 'asc' }
+          ? { startTime: 'asc' }
           : type === 'previous'
-          ? { date: 'desc' }
+          ? { startTime: 'desc' }
           : undefined,
       take: limit ? limit : undefined,
       select: {
         id: true,
-        date: true,
         adminTeam: true,
         startTime: true,
         endTime: true,
@@ -174,20 +173,41 @@ export class GameService {
     userId: number,
     gameType: gameType,
     nbOfPlayers: number,
-    date?: string,
-    startTime?: number,
-    endTime?: number,
+    dateStr?: string,
+    startTimeStr?: string,
+    endTimeStr?: string,
   ) {
+    const date = dateStr ? new Date(dateStr) : undefined;
+    var startTime: Date = undefined;
+    var endTime: Date = undefined;
+
+    if (startTimeStr && endTimeStr) {
+      startTime = new Date(dateStr);
+      startTime.setHours(
+        new Date(startTimeStr).getHours(),
+        new Date(startTimeStr).getMinutes(),
+        0,
+        0,
+      );
+      endTime = new Date(dateStr);
+      endTime.setHours(
+        new Date(endTimeStr).getHours(),
+        new Date(endTimeStr).getMinutes(),
+        0,
+        0,
+      );
+    }
+
     const games = await this.prisma.game.findMany({
       where: {
         AND: [
           { type: gameType },
           { NOT: { adminId: userId } },
           {
-            date: date
+            startTime: date
               ? {
-                  gte: new Date(date),
-                  lte: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
+                  gte: date,
+                  lte: new Date(date.getTime() + 24 * 60 * 60 * 1000),
                 }
               : { gt: new Date() },
           },
@@ -203,10 +223,9 @@ export class GameService {
             : {},
         ],
       },
-      orderBy: { date: 'asc' },
+      orderBy: { startTime: 'asc' },
       select: {
         id: true,
-        date: true,
         adminTeam: true,
         startTime: true,
         endTime: true,
@@ -278,7 +297,6 @@ export class GameService {
       },
       select: {
         id: true,
-        date: true,
         type: true,
         adminTeam: true,
         startTime: true,
@@ -349,24 +367,23 @@ export class GameService {
           { status: gameStatus.APPROVED },
           type === 'upcoming'
             ? {
-                date: { gt: new Date() },
+                endTime: { gt: new Date() },
               }
             : type === 'previous'
             ? {
-                date: { lt: new Date() },
+                endTime: { lt: new Date() },
               }
             : {},
         ],
       },
       orderBy:
         type === 'upcoming'
-          ? { date: 'asc' }
+          ? { startTime: 'asc' }
           : type === 'previous'
-          ? { date: 'desc' }
+          ? { startTime: 'desc' }
           : undefined,
       select: {
         id: true,
-        date: true,
         type: true,
         adminTeam: true,
         startTime: true,
@@ -429,7 +446,8 @@ export class GameService {
         adminId: userId,
         status: 'APPROVED',
         ...dto,
-        date: new Date(JSON.parse(dto.date)),
+        startTime: new Date(dto.startTime),
+        endTime: new Date(dto.endTime),
       },
     });
     return booking;
@@ -504,13 +522,13 @@ export class GameService {
           type === 'upcoming'
             ? {
                 game: {
-                  date: { gt: new Date() },
+                  endTime: { gt: new Date() },
                 },
               }
             : type === 'previous'
             ? {
                 game: {
-                  date: { lt: new Date() },
+                  endTime: { lt: new Date() },
                 },
               }
             : {},
@@ -518,15 +536,14 @@ export class GameService {
       },
       orderBy:
         type === 'upcoming'
-          ? { game: { date: 'asc' } }
+          ? { game: { startTime: 'asc' } }
           : type === 'previous'
-          ? { game: { date: 'desc' } }
+          ? { game: { startTime: 'desc' } }
           : undefined,
       select: {
         game: {
           select: {
             id: true,
-            date: true,
             type: true,
             adminTeam: true,
             startTime: true,
@@ -670,23 +687,25 @@ export class GameService {
   async getActivities(userId: number) {
     const selectedFields = {
       id: true,
-      date: true,
       type: true,
       winnerTeam: true,
+      startTime: true,
+      endTime: true,
     };
     const adminActivities = (
       await this.prisma.game.findMany({
         where: {
-          AND: [{ adminId: userId }, { date: { lte: new Date() } }],
+          AND: [{ adminId: userId }, { endTime: { lte: new Date() } }],
         },
         select: {
           ...selectedFields,
           adminTeam: true,
         },
       })
-    ).map(({ id, date, type, winnerTeam, adminTeam }) => ({
+    ).map(({ id, startTime, endTime, type, winnerTeam, adminTeam }) => ({
       gameId: id,
-      date,
+      startTime,
+      endTime,
       type,
       isWinner: winnerTeam === 'DRAW' ? 'DRAW' : winnerTeam === adminTeam,
     }));
@@ -701,7 +720,7 @@ export class GameService {
                 },
               },
             },
-            { date: { lte: new Date() } },
+            { endTime: { lte: new Date() } },
           ],
         },
         select: {
@@ -713,9 +732,10 @@ export class GameService {
           },
         },
       })
-    ).map(({ id, date, type, winnerTeam, gameInvitation }) => ({
+    ).map(({ id, startTime, endTime, type, winnerTeam, gameInvitation }) => ({
       gameId: id,
-      date,
+      startTime,
+      endTime,
       type,
       isWinner:
         winnerTeam === 'DRAW'
@@ -733,7 +753,7 @@ export class GameService {
                 },
               },
             },
-            { date: { lte: new Date() } },
+            { endTime: { lte: new Date() } },
           ],
         },
         select: {
@@ -745,9 +765,10 @@ export class GameService {
           },
         },
       })
-    ).map(({ id, date, type, winnerTeam, gameRequests }) => ({
+    ).map(({ id, startTime, endTime, type, winnerTeam, gameRequests }) => ({
       gameId: id,
-      date,
+      startTime,
+      endTime,
       type,
       isWinner:
         winnerTeam === 'DRAW' ? 'DRAW' : winnerTeam === gameRequests.pop().team,
@@ -759,14 +780,15 @@ export class GameService {
   async getGameCount(userId: number) {
     const adminGameCount = await this.prisma.game.count({
       where: {
-        AND: [{ date: { lte: new Date() } }, { adminId: userId }],
+        AND: [{ endTime: { lte: new Date() } }, { adminId: userId }],
       },
     });
     const invitedGameCount = await this.prisma.inviteToGame.count({
       where: {
         AND: [
           {
-            game: { date: { lte: new Date() } },
+            game: { endTime: { lte: new Date() } },
+            status: 'APPROVED',
           },
           { friendId: userId },
         ],
@@ -776,7 +798,8 @@ export class GameService {
       where: {
         AND: [
           {
-            game: { date: { lte: new Date() } },
+            game: { endTime: { lte: new Date() } },
+            status: 'APPROVED',
           },
           { userId },
         ],
