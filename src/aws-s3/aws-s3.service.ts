@@ -6,6 +6,7 @@ import * as S3 from 'aws-sdk/clients/s3.js';
 export class AWSS3Service {
   private s3: S3;
   private bucketName: string;
+  private nodeEnv: string;
 
   constructor(private config: ConfigService) {
     this.s3 = new S3({
@@ -14,9 +15,8 @@ export class AWSS3Service {
       region: this.config.get('S3_REGION'),
     });
 
-    this.bucketName = `${this.config.get('S3_BUCKET')}/${this.config.get(
-      'NODE_ENV',
-    )}`;
+    this.bucketName = this.config.get('S3_BUCKET');
+    this.nodeEnv = this.config.get('NODE_ENV');
   }
 
   // TODO: Don't save full url in the database in case S3 bucket was changed -> Save relative path.
@@ -26,8 +26,8 @@ export class AWSS3Service {
     fileName: string,
   ) {
     const params = {
-      Bucket: `${this.bucketName}/${directoryName}`,
-      Key: fileName,
+      Bucket: this.bucketName,
+      Key: `${this.nodeEnv}/${directoryName}/${fileName}`,
       Body: file.buffer,
       ACL: 'public-read-write',
     };
@@ -49,21 +49,29 @@ export class AWSS3Service {
 
   async checkExisting(directoryName: string, fileName: string) {
     const params = {
-      Bucket: `${this.bucketName}/${directoryName}`,
-      Key: fileName,
+      Bucket: this.bucketName,
+      Prefix: `${this.nodeEnv}/${directoryName}/${fileName}`,
     };
 
     return await this.s3
-      .headObject(params, async (err, metadata) => {
-        if (!err && metadata) return metadata;
+      .listObjects(params, (err, data) => {
+        if (err) console.error(err);
       })
-      .promise();
+      .promise()
+      .then(async (data) => {
+        const existingFiles = data.Contents.map((obj) => obj.Key);
+        if (existingFiles && existingFiles.length > 0) {
+          for (var file of existingFiles) {
+            await this.deleteFile(file.split('/')[1], file.split('/')[2]);
+          }
+        }
+      });
   }
 
   async deleteFile(directoryName: string, fileName: string) {
     const params = {
-      Bucket: `${this.bucketName}/${directoryName}`,
-      Key: fileName,
+      Bucket: this.bucketName,
+      Key: `${this.nodeEnv}/${directoryName}/${fileName}`,
     };
 
     return await this.s3.deleteObject(params).promise();

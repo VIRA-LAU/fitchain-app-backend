@@ -67,6 +67,13 @@ export class UserService {
     },
   ) {
     if (images?.profilePhoto && images.profilePhoto.length > 0) {
+      await this.s3.checkExisting(
+        'profilePhotos',
+        images?.profilePhoto[0].originalname.substring(
+          0,
+          images?.profilePhoto[0].originalname.indexOf('.'),
+        ),
+      );
       const location = await this.s3.uploadFile(
         images?.profilePhoto[0],
         `profilePhotos`,
@@ -75,6 +82,13 @@ export class UserService {
       dto.profilePhotoUrl =
         location + `?lastModified=${new Date().toISOString()}`;
     } else if (images?.coverPhoto && images.coverPhoto.length > 0) {
+      await this.s3.checkExisting(
+        'coverPhotos',
+        images?.coverPhoto[0].originalname.substring(
+          0,
+          images?.coverPhoto[0].originalname.indexOf('.'),
+        ),
+      );
       const location = await this.s3.uploadFile(
         images?.coverPhoto[0],
         `coverPhotos`,

@@ -404,6 +404,13 @@ export class BranchService {
     },
   ) {
     if (images?.profilePhoto && images?.profilePhoto.length > 0) {
+      await this.s3.checkExisting(
+        'branchProfilePhotos',
+        images?.profilePhoto[0].originalname.substring(
+          0,
+          images?.profilePhoto[0].originalname.indexOf('.'),
+        ),
+      );
       const location = await this.s3.uploadFile(
         images.profilePhoto[0],
         `branchProfilePhotos`,
@@ -412,6 +419,13 @@ export class BranchService {
       dto.profilePhotoUrl =
         location + `?lastModified=${new Date().toISOString()}`;
     } else if (images?.coverPhoto && images?.coverPhoto.length > 0) {
+      await this.s3.checkExisting(
+        'branchCoverPhotos',
+        images?.coverPhoto[0].originalname.substring(
+          0,
+          images?.coverPhoto[0].originalname.indexOf('.'),
+        ),
+      );
       const location = await this.s3.uploadFile(
         images.coverPhoto[0],
         `branchCoverPhotos`,
