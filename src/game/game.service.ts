@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { gameStatus, gameType, invitationApproval } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { createBookingDto } from './dto/create-booking.dto';
@@ -441,16 +445,50 @@ export class GameService {
   }
 
   async createBooking(userId: number, dto: createBookingDto) {
-    const booking = await this.prisma.game.create({
-      data: {
-        adminId: userId,
-        status: 'APPROVED',
-        ...dto,
-        startTime: new Date(dto.startTime),
-        endTime: new Date(dto.endTime),
+    const startTime = new Date(dto.startTime);
+    const endTime = new Date(dto.endTime);
+
+    const existingBooking = await this.prisma.game.findFirst({
+      where: {
+        OR: [
+          {
+            startTime: { lte: startTime },
+            endTime: { gte: endTime },
+          },
+          {
+            startTime: { gte: startTime },
+            endTime: { lte: endTime },
+          },
+          {
+            AND: [
+              { startTime: { lte: startTime } },
+              { endTime: { lte: endTime } },
+              { endTime: { gt: startTime } },
+            ],
+          },
+          {
+            AND: [
+              { startTime: { gte: startTime } },
+              { startTime: { lt: endTime } },
+              { endTime: { gte: endTime } },
+            ],
+          },
+        ],
+        courtId: dto.courtId,
       },
     });
-    return booking;
+    if (!existingBooking) {
+      const booking = await this.prisma.game.create({
+        data: {
+          adminId: userId,
+          status: 'APPROVED',
+          ...dto,
+          startTime,
+          endTime,
+        },
+      });
+      return booking;
+    } else throw new BadRequestException('EXISTING_GAME_OVERLAP');
   }
 
   async editBookingById(

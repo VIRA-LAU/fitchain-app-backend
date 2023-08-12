@@ -222,6 +222,10 @@ export class BranchService {
               endTime: { gte: endTime },
             },
             {
+              startTime: { gte: startTime },
+              endTime: { lte: endTime },
+            },
+            {
               AND: [
                 { startTime: { lte: startTime } },
                 { endTime: { lte: endTime } },
