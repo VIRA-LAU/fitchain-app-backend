@@ -17,7 +17,7 @@
           margin-bottom: 30px;
         "
       >
-        Your verification code is:
+        Please verify your email to proceed to the app.
       </p>
       <table
         style="
@@ -28,11 +28,23 @@
         "
         align="center"
       >
-        <tr style="height: 80px; background-color: #3b3a42;">
-          <td style="width: 80px;">${code[0]}</td>
-          <td style="width: 80px;">${code[1]}</td>
-          <td style="width: 80px;">${code[2]}</td>
-          <td style="width: 80px;">${code[3]}</td>
+        <tr style="height: 60px; background-color: #f29c1f;">
+          <td style="border-radius: 7px;">
+            <a
+              href="${link}"
+              target="_blank"
+              style="
+                display: block;
+                width: 300px;
+                padding-left: 20px;
+                padding-right: 20px;
+                text-decoration: none;
+                color: black;
+              "
+            >
+              Verify Email
+            </a>
+          </td>
         </tr>
       </table>
     </td>

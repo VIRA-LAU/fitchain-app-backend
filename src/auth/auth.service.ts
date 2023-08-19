@@ -29,7 +29,6 @@ export class AuthService {
     await this.getUser(dto.email, 'check-existing');
 
     const hash = await argon.hash(dto.password);
-    const code = uuidv4().substring(0, 4).toUpperCase();
 
     const user = await this.prisma.user.create({
       data: {
@@ -37,21 +36,23 @@ export class AuthService {
         firstName: dto.firstName,
         lastName: dto.lastName,
         hash,
-        emailCode: code,
         notificationsToken: dto.notificationsToken || undefined,
+        emailVerified: false,
       },
     });
-    setTimeout(async () => {
-      await this.prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          emailCode: null,
-        },
-      });
-    }, 60 * 60 * 1000);
-    this.emailService.sendEmailVerificationEmail(user.email, code.split(''));
+
+    const token = await this.jwt.signAsync(
+      { email: user.email, isBranch: false },
+      {
+        expiresIn: '30m',
+        secret: this.jwt_secret.concat('false'),
+      },
+    );
+
+    this.emailService.sendVerificationEmail(
+      user.email,
+      `${this.config.get('SERVER_URL')}:3000/auth/verifyEmail?token=${token}`,
+    );
     return user.id;
   }
 
@@ -59,7 +60,6 @@ export class AuthService {
     await this.getUser(dto.email, 'check-existing');
 
     const hash = await argon.hash(dto.password);
-    const code = uuidv4().substring(0, 4).toUpperCase();
 
     const venue = await this.prisma.venue.create({
       data: {
@@ -77,21 +77,22 @@ export class AuthService {
         latitude: dto.latitude,
         longitude: dto.longitude,
         hash,
-        emailCode: code,
         notificationsToken: dto.notificationsToken || undefined,
       },
     });
-    setTimeout(async () => {
-      await this.prisma.branch.update({
-        where: {
-          id: branch.id,
-        },
-        data: {
-          emailCode: null,
-        },
-      });
-    }, 60 * 60 * 1000);
-    this.emailService.sendEmailVerificationEmail(branch.email, code.split(''));
+
+    const token = await this.jwt.signAsync(
+      { email: branch.email, isBranch: true },
+      {
+        expiresIn: '30m',
+        secret: this.jwt_secret.concat('false'),
+      },
+    );
+
+    this.emailService.sendVerificationEmail(
+      branch.email,
+      `${this.config.get('SERVER_URL')}:3000/auth/verifyEmail?token=${token}`,
+    );
     return branch.id;
   }
 
@@ -246,114 +247,66 @@ export class AuthService {
     return token;
   }
 
-  async verifyUserEmail(userId: number, code: string) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-    if (code.match(user.emailCode)) {
-      await this.prisma.user.update({
+  async verifyEmail(token: string) {
+    const decodedToken = this.jwt.decode(token) as {
+      email: string;
+      isBranch: boolean;
+    };
+    var user: User | Branch;
+    if (!decodedToken.isBranch) {
+      user = await this.prisma.user.findUnique({
         where: {
-          id: userId,
-        },
-        data: {
-          emailVerified: true,
+          email: decodedToken.email,
         },
       });
-      return {
-        access_token: await this.signToken(user.id, user.email),
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        userId: user.id,
-      };
-    } else throw new BadRequestException('INCORRECT_CODE');
-  }
-
-  async verifyBranchEmail(branchId: number, code: string) {
-    const branch = await this.prisma.branch.findUnique({
-      where: {
-        id: branchId,
-      },
-      include: {
-        venue: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    if (code.match(branch.emailCode)) {
-      await this.prisma.branch.update({
+    } else {
+      user = await this.prisma.branch.findUnique({
         where: {
-          id: branchId,
-        },
-        data: {
-          emailVerified: true,
+          email: decodedToken.email,
         },
       });
-      return {
-        access_token: await this.signToken(branch.id, branch.email),
-        managerFirstName: branch.managerFirstName,
-        managerLastName: branch.managerLastName,
-        email: branch.email,
-        branchId: branch.id,
-        venueId: branch.venue.id,
-        venueName: branch.venue.name,
-        branchLocation: branch.location,
-      };
-    } else throw new BadRequestException('INCORRECT_CODE');
-  }
-
-  async resendEmailCode(userId: number, isBranch: boolean) {
-    const code = uuidv4().substring(0, 4).toUpperCase();
-
-    let user: User | Branch;
-
-    if (!isBranch) {
+    }
+    await this.jwt.verifyAsync(token, {
+      secret: this.jwt_secret.concat(user.emailVerified.toString()),
+    });
+    if (!decodedToken.isBranch) {
       user = await this.prisma.user.update({
         where: {
-          id: userId,
+          email: decodedToken.email,
         },
         data: {
-          emailCode: code,
+          emailVerified: true,
         },
       });
-      setTimeout(async () => {
-        await this.prisma.user.update({
-          where: {
-            id: userId,
-          },
-          data: {
-            emailCode: null,
-          },
-        });
-      }, 60 * 60 * 1000);
     } else {
       user = await this.prisma.branch.update({
         where: {
-          id: userId,
+          email: decodedToken.email,
         },
         data: {
-          emailCode: code,
+          emailVerified: true,
         },
       });
-      setTimeout(async () => {
-        await this.prisma.branch.update({
-          where: {
-            id: userId,
-          },
-          data: {
-            emailCode: null,
-          },
-        });
-      }, 60 * 60 * 1000);
     }
+    return 'success';
+  }
 
-    this.emailService.sendEmailVerificationEmail(user.email, code.split(''));
+  async resendVerificationEmail(email: string, isBranch: boolean) {
+    const { emailVerified } = await this.getUser(email, 'return');
+    if (!emailVerified) {
+      const token = await this.jwt.signAsync(
+        { email, isBranch },
+        {
+          expiresIn: '30m',
+          secret: this.jwt_secret.concat('false'),
+        },
+      );
+
+      this.emailService.sendVerificationEmail(
+        email,
+        `${this.config.get('SERVER_URL')}:3000/auth/verifyEmail?token=${token}`,
+      );
+    }
   }
 
   async forgotPassword(email: string) {
@@ -362,7 +315,7 @@ export class AuthService {
       throw new BadRequestException('EMAIL_NOT_VERIFIED');
     else {
       const token = await this.jwt.signAsync(
-        { sub: user.id, email },
+        { email, hash: user.hash },
         {
           expiresIn: '30m',
           secret: this.jwt_secret.concat(user.hash),
@@ -372,23 +325,29 @@ export class AuthService {
         email,
         `${this.config.get(
           'SERVER_URL',
-        )}:3000/auth/resetPassword?token=${token}&email=${email}`,
+        )}:3000/auth/resetPassword?token=${token}`,
       );
       return { status: 'success' };
     }
   }
 
-  async resetPassword(token: string, email: string) {
-    const user = await this.getUser(email, 'return');
-    return this.jwt.verify(token, {
-      secret: this.jwt_secret.concat(user.hash),
+  async resetPassword(token: string) {
+    const decodedToken = this.jwt.decode(token) as {
+      hash: string;
+    };
+    return await this.jwt.verifyAsync(token, {
+      secret: this.jwt_secret.concat(decodedToken.hash),
     });
   }
 
-  async updatePassword(token: string, email: string, password: string) {
-    const user = await this.getUser(email, 'return');
-    await this.jwt.verify(token, {
-      secret: this.jwt_secret.concat(user.hash),
+  async updatePassword(token: string, password: string) {
+    const decodedToken = this.jwt.decode(token) as {
+      email: string;
+      hash: string;
+    };
+    const user = await this.getUser(decodedToken.email, 'return');
+    await this.jwt.verifyAsync(token, {
+      secret: this.jwt_secret.concat(decodedToken.hash),
     });
     const newHash = await argon.hash(password);
     if (this.isBranch(user))

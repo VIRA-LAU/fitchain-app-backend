@@ -15,10 +15,7 @@ import {
   AuthSignupDto,
   BranchAuthSignupDto,
   ForgotPasswordDto,
-  ResendEmailCodeDto,
   UpdatePasswordDto,
-  VerifyBranchEmailDto,
-  VerifyEmailDto,
 } from './dto';
 import * as path from 'path';
 import { Response } from 'express';
@@ -49,19 +46,29 @@ export class AuthController {
     return this.authService.signout(dto.userId, dto.isBranch);
   }
 
-  @Patch('verifyEmail/user')
-  verifyUserEmail(@Body() dto: VerifyEmailDto) {
-    return this.authService.verifyUserEmail(dto.userId, dto.code);
+  @Get('verifyEmail')
+  async verifyUserEmail(@Res() res: Response, @Query('token') token: string) {
+    if (!token) res.status(401).send('Invalid token.');
+    else
+      try {
+        await this.authService.verifyEmail(token);
+        res
+          .status(200)
+          .sendFile(
+            path.join(
+              __dirname,
+              './html-templates/email-verification-success.html',
+            ),
+          );
+      } catch (e) {
+        console.error(e);
+        res.status(401).send('Invalid token.');
+      }
   }
 
-  @Patch('verifyEmail/branch')
-  verifyBranchEmail(@Body() dto: VerifyBranchEmailDto) {
-    return this.authService.verifyBranchEmail(dto.branchId, dto.code);
-  }
-
-  @Patch('resendEmailCode')
-  resendEmailCode(@Body() dto: ResendEmailCodeDto) {
-    return this.authService.resendEmailCode(dto.userId, dto.isBranch);
+  @Patch('resendVerificationEmail')
+  resendVerificationEmail(@Body() dto: { email: string; isBranch: boolean }) {
+    return this.authService.resendVerificationEmail(dto.email, dto.isBranch);
   }
 
   @Patch('forgotPassword')
@@ -70,15 +77,11 @@ export class AuthController {
   }
 
   @Get('resetPassword')
-  async resetPassword(
-    @Res() res: Response,
-    @Query('token') token: string,
-    @Query('email') email: string,
-  ) {
-    if (!token || !email) res.status(401).send('Invalid token.');
+  async resetPassword(@Res() res: Response, @Query('token') token: string) {
+    if (!token) res.status(401).send('Invalid token.');
     else
       try {
-        await this.authService.resetPassword(token, email);
+        await this.authService.resetPassword(token);
         res
           .status(200)
           .sendFile(
@@ -92,6 +95,6 @@ export class AuthController {
 
   @Patch('updatePassword')
   updatePassword(@Body() dto: UpdatePasswordDto) {
-    return this.authService.updatePassword(dto.token, dto.email, dto.password);
+    return this.authService.updatePassword(dto.token, dto.password);
   }
 }
