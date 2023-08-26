@@ -1,4 +1,4 @@
-import { teamType } from '@prisma/client';
+import { TeamType } from '@prisma/client';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateRequestToJoinDto {
@@ -7,5 +7,5 @@ export class CreateRequestToJoinDto {
   gameId: number;
 
   @IsNotEmpty()
-  team: teamType;
+  team: TeamType;
 }

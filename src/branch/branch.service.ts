@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Game, gameType } from '@prisma/client';
+import { GameType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EditBranchDto } from './dto';
 import { AWSS3Service } from 'src/aws-s3/aws-s3.service';
@@ -180,7 +180,7 @@ export class BranchService {
 
   async searchForBranches(
     dateStr: string,
-    gameType: gameType,
+    gameType: GameType,
     nbOfPlayers: number,
     startTimeStr?: string,
     endTimeStr?: string,
@@ -408,7 +408,7 @@ export class BranchService {
     },
   ) {
     if (images?.profilePhoto && images?.profilePhoto.length > 0) {
-      await this.s3.checkExisting(
+      await this.s3.deleteExistingImages(
         'branchProfilePhotos',
         images?.profilePhoto[0].originalname.substring(
           0,
@@ -423,7 +423,7 @@ export class BranchService {
       dto.profilePhotoUrl =
         location + `?lastModified=${new Date().toISOString()}`;
     } else if (images?.coverPhoto && images?.coverPhoto.length > 0) {
-      await this.s3.checkExisting(
+      await this.s3.deleteExistingImages(
         'branchCoverPhotos',
         images?.coverPhoto[0].originalname.substring(
           0,

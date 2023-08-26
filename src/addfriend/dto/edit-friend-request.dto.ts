@@ -1,14 +1,11 @@
-import { invitationApproval } from "@prisma/client";
-import { IsNumber, IsOptional } from "class-validator"
+import { InvitationApproval } from '@prisma/client';
+import { IsNumber, IsOptional } from 'class-validator';
 
-export class EditFriendRequestDto{  
-  
+export class EditFriendRequestDto {
+  @IsNumber()
+  @IsOptional()
+  friendId?: number;
 
-    @IsNumber()
-    @IsOptional()
-    friendId?: number
-
-    @IsOptional()
-    status?: invitationApproval;
-    
+  @IsOptional()
+  status?: InvitationApproval;
 }

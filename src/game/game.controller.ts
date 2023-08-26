@@ -12,16 +12,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { gameType } from '@prisma/client';
+import { GameType } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
 import { JwtGaurd } from '../auth/gaurd';
-import { createBookingDto } from './dto/create-booking.dto';
-import { createFollowGameDto } from './dto/create-follow-game.dto';
-import { editBookingDto } from './dto/edit-booking.dto';
+import { createBookingDto, editBookingDto, GameStatisticsDto } from './dto';
 import { GameService } from './game.service';
 import { SocketGateway } from 'src/socket.gateway';
 
-@UseGuards(JwtGaurd)
+// @UseGuards(JwtGaurd)
 @Controller('games')
 export class GameController {
   constructor(
@@ -41,7 +39,7 @@ export class GameController {
   @Get('search')
   searchGames(
     @GetUser('id') userId: number,
-    @Query('gameType') gameType: gameType,
+    @Query('gameType') gameType: GameType,
     @Query('nbOfPlayers', ParseIntPipe) nbOfPlayers: number,
     @Query('date') date?: string,
     @Query('startTime') startTime?: string,
@@ -57,10 +55,10 @@ export class GameController {
     );
   }
 
-  @Get('getTeam')
+  @Get('getTeam/:id')
   getPlayerTeam(
     @GetUser('id') userId: number,
-    @Query('gameId') gameId: string,
+    @Param('id', ParseIntPipe) gameId: number,
   ) {
     return this.gameService.getPlayerTeam(userId, gameId);
   }
@@ -88,10 +86,10 @@ export class GameController {
     return this.gameService.getFollowedGames(userId, type);
   }
 
-  @Get('playerstatus/:gameId')
+  @Get('playerstatus/:id')
   getPlayerGameStatus(
     @GetUser('id') userId: number,
-    @Param('gameId', ParseIntPipe) gameId: number,
+    @Param('id', ParseIntPipe) gameId: number,
   ) {
     return this.gameService.getPlayerGameStatus(userId, gameId);
   }
@@ -114,12 +112,20 @@ export class GameController {
     return this.gameService.getGameById(upcomingId);
   }
 
-  @Post('followed')
+  @Patch('video_processed/:id')
+  updateGameStatistics(
+    @Param('id', ParseIntPipe) gameId: number,
+    @Body() dto: GameStatisticsDto,
+  ) {
+    return this.gameService.updateGameStatistics(gameId, dto);
+  }
+
+  @Post('follow/:id')
   createFollowGame(
     @GetUser('id') userId: number,
-    @Body() dto: createFollowGameDto,
+    @Param('id', ParseIntPipe) gameId: number,
   ) {
-    return this.gameService.createFollowGame(userId, dto);
+    return this.gameService.createFollowGame(userId, gameId);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -131,7 +137,7 @@ export class GameController {
     return this.gameService.deleteFollowById(userId, parseInt(gameId));
   }
 
-  @Post('')
+  @Post()
   createBooking(@GetUser('id') userId: number, @Body() dto: createBookingDto) {
     return this.gameService.createBooking(userId, dto);
   }

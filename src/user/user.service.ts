@@ -67,7 +67,7 @@ export class UserService {
     },
   ) {
     if (images?.profilePhoto && images.profilePhoto.length > 0) {
-      await this.s3.checkExisting(
+      await this.s3.deleteExistingImages(
         'profilePhotos',
         images?.profilePhoto[0].originalname.substring(
           0,
@@ -82,7 +82,7 @@ export class UserService {
       dto.profilePhotoUrl =
         location + `?lastModified=${new Date().toISOString()}`;
     } else if (images?.coverPhoto && images.coverPhoto.length > 0) {
-      await this.s3.checkExisting(
+      await this.s3.deleteExistingImages(
         'coverPhotos',
         images?.coverPhoto[0].originalname.substring(
           0,

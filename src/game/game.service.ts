@@ -3,65 +3,70 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { gameStatus, gameType, invitationApproval } from '@prisma/client';
+import { GameStatus, GameType, InvitationApproval } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { createBookingDto } from './dto/create-booking.dto';
-import { createFollowGameDto } from './dto/create-follow-game.dto';
-import { editBookingDto } from './dto/edit-booking.dto';
+import { createBookingDto, editBookingDto, GameStatisticsDto } from './dto';
+import { HttpService } from '@nestjs/axios';
+import { AWSS3Service } from 'src/aws-s3/aws-s3.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class GameService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private httpService: HttpService,
+    private notificationsService: NotificationsService,
+    private s3: AWSS3Service,
+  ) {}
 
   async getGames(userId: number, limit?: number, type?: string) {
-    const whereClause = {
-      AND: [
-        {
-          OR: [
-            { adminId: userId },
-            {
-              gameInvitation: {
-                some: {
-                  AND: [
-                    { friendId: userId },
-                    {
-                      NOT: {
-                        status: invitationApproval.REJECTED,
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-            {
-              gameRequests: {
-                some: {
-                  AND: [
-                    { userId },
-                    {
-                      NOT: {
-                        status: invitationApproval.REJECTED,
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          ],
-        },
-        type === 'upcoming'
-          ? {
-              endTime: { gt: new Date() },
-            }
-          : type === 'previous'
-          ? {
-              endTime: { lt: new Date() },
-            }
-          : {},
-      ],
-    };
     const games = await this.prisma.game.findMany({
-      where: whereClause,
+      where: {
+        AND: [
+          {
+            OR: [
+              { adminId: userId },
+              {
+                gameInvitation: {
+                  some: {
+                    AND: [
+                      { friendId: userId },
+                      {
+                        NOT: {
+                          status: InvitationApproval.REJECTED,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                gameRequests: {
+                  some: {
+                    AND: [
+                      { userId },
+                      {
+                        NOT: {
+                          status: InvitationApproval.REJECTED,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+          type === 'upcoming'
+            ? {
+                endTime: { gt: new Date() },
+              }
+            : type === 'previous'
+            ? {
+                endTime: { lt: new Date() },
+              }
+            : {},
+        ],
+      },
       orderBy:
         type === 'upcoming'
           ? { startTime: 'asc' }
@@ -74,8 +79,6 @@ export class GameService {
         adminTeam: true,
         startTime: true,
         endTime: true,
-        homeScore: true,
-        awayScore: true,
         type: true,
         court: {
           select: {
@@ -116,13 +119,10 @@ export class GameService {
     return games;
   }
 
-  async getPlayerTeam(userId: number, gameID: string) {
-    let gameId = parseInt(gameID);
+  async getPlayerTeam(userId: number, gameId: number) {
     const game = await this.prisma.game.findFirst({
       where: {
-        id: {
-          equals: gameId,
-        },
+        id: gameId,
       },
     });
     if (game.adminId == userId) return { team: game.adminTeam };
@@ -174,7 +174,7 @@ export class GameService {
 
   async searchGames(
     userId: number,
-    gameType: gameType,
+    gameType: GameType,
     nbOfPlayers: number,
     dateStr?: string,
     startTimeStr?: string,
@@ -304,8 +304,13 @@ export class GameService {
         adminTeam: true,
         startTime: true,
         endTime: true,
-        homeScore: true,
-        awayScore: true,
+        homePoints: true,
+        homePossession: true,
+        updatedHomePoints: true,
+        awayPoints: true,
+        awayPossession: true,
+        updatedAwayPoints: true,
+        highlights: true,
         court: {
           include: {
             branch: {
@@ -325,7 +330,7 @@ export class GameService {
         },
         gameRequests: {
           where: {
-            status: invitationApproval.APPROVED,
+            status: InvitationApproval.APPROVED,
           },
           select: {
             team: true,
@@ -338,7 +343,7 @@ export class GameService {
         },
         gameInvitation: {
           where: {
-            status: invitationApproval.APPROVED,
+            status: InvitationApproval.APPROVED,
           },
           select: {
             team: true,
@@ -359,14 +364,20 @@ export class GameService {
         isRecording: true,
       },
     });
-    return game;
+    const playerStatistics = await this.prisma.playerStatistics.findMany({
+      where: {
+        gameId,
+      },
+    });
+
+    return { ...game, playerStatistics };
   }
 
   async getBookings(type?: string) {
-    return this.prisma.game.findMany({
+    return await this.prisma.game.findMany({
       where: {
         AND: [
-          { status: gameStatus.APPROVED },
+          { status: GameStatus.APPROVED },
           type === 'upcoming'
             ? {
                 endTime: { gt: new Date() },
@@ -407,7 +418,7 @@ export class GameService {
         },
         gameRequests: {
           where: {
-            status: invitationApproval.APPROVED,
+            status: InvitationApproval.APPROVED,
           },
           select: {
             team: true,
@@ -420,7 +431,7 @@ export class GameService {
         },
         gameInvitation: {
           where: {
-            status: invitationApproval.APPROVED,
+            status: InvitationApproval.APPROVED,
           },
           select: {
             team: true,
@@ -506,15 +517,16 @@ export class GameService {
     if (dto.recordingMode) {
       dto['isRecording'] = dto.recordingMode === 'start';
       delete dto.recordingMode;
+      this.httpService.post(
+        `http://ai-url/Inference/Run_Inference_In_Background/${bookingId}`,
+      );
     }
 
     return this.prisma.game.update({
       where: {
         id: bookingId,
       },
-      data: {
-        ...dto,
-      },
+      data: dto,
     });
   }
 
@@ -588,7 +600,7 @@ export class GameService {
             },
             gameRequests: {
               where: {
-                status: invitationApproval.APPROVED,
+                status: InvitationApproval.APPROVED,
               },
               select: {
                 team: true,
@@ -601,7 +613,7 @@ export class GameService {
             },
             gameInvitation: {
               where: {
-                status: invitationApproval.APPROVED,
+                status: InvitationApproval.APPROVED,
               },
               select: {
                 team: true,
@@ -625,11 +637,11 @@ export class GameService {
     });
   }
 
-  async createFollowGame(userId: number, dto: createFollowGameDto) {
+  async createFollowGame(userId: number, gameId: number) {
     return this.prisma.followsGame.create({
       data: {
-        userId: userId,
-        ...dto,
+        userId,
+        gameId,
       },
     });
   }
@@ -713,8 +725,12 @@ export class GameService {
       type: true,
       startTime: true,
       endTime: true,
-      homeScore: true,
-      awayScore: true,
+      homePoints: true,
+      homePossession: true,
+      updatedHomePoints: true,
+      awayPoints: true,
+      awayPossession: true,
+      updatedAwayPoints: true,
     };
     const adminActivities = (
       await this.prisma.game.findMany({
@@ -727,15 +743,23 @@ export class GameService {
         },
       })
     ).map(
-      ({ id, startTime, endTime, type, adminTeam, homeScore, awayScore }) => ({
+      ({
+        id,
+        startTime,
+        endTime,
+        type,
+        adminTeam,
+        updatedHomePoints,
+        updatedAwayPoints,
+      }) => ({
         gameId: id,
         startTime,
         endTime,
         type,
         isWinner:
-          homeScore === awayScore
+          updatedHomePoints === updatedAwayPoints
             ? 'DRAW'
-            : adminTeam === 'HOME' && homeScore > awayScore,
+            : adminTeam === 'HOME' && updatedHomePoints > updatedAwayPoints,
       }),
     );
     const invitedActivities = (
@@ -767,8 +791,8 @@ export class GameService {
         startTime,
         endTime,
         type,
-        homeScore,
-        awayScore,
+        updatedHomePoints,
+        updatedAwayPoints,
         gameInvitation,
       }) => ({
         gameId: id,
@@ -776,9 +800,10 @@ export class GameService {
         endTime,
         type,
         isWinner:
-          homeScore === awayScore
+          updatedHomePoints === updatedAwayPoints
             ? 'DRAW'
-            : gameInvitation.pop().team === 'HOME' && homeScore > awayScore,
+            : gameInvitation.pop().team === 'HOME' &&
+              updatedHomePoints > updatedAwayPoints,
       }),
     );
     const requestedActivities = (
@@ -810,8 +835,8 @@ export class GameService {
         startTime,
         endTime,
         type,
-        homeScore,
-        awayScore,
+        updatedHomePoints,
+        updatedAwayPoints,
         gameRequests,
       }) => ({
         gameId: id,
@@ -819,9 +844,10 @@ export class GameService {
         endTime,
         type,
         isWinner:
-          homeScore === awayScore
+          updatedHomePoints === updatedAwayPoints
             ? 'DRAW'
-            : gameRequests.pop().team === 'HOME' && homeScore > awayScore,
+            : gameRequests.pop().team === 'HOME' &&
+              updatedHomePoints > updatedAwayPoints,
       }),
     );
 
@@ -925,7 +951,7 @@ export class GameService {
     return updates;
   }
 
-  async getPlayers(gameId: number, userId: number) {
+  async getPlayers(gameId: number, userId?: number) {
     const game = await this.prisma.game.findUnique({
       where: {
         id: gameId,
@@ -938,6 +964,7 @@ export class GameService {
             lastName: true,
             profilePhotoUrl: true,
             coverPhotoUrl: true,
+            notificationsToken: true,
           },
         },
         updatedAt: true,
@@ -954,6 +981,7 @@ export class GameService {
                 lastName: true,
                 profilePhotoUrl: true,
                 coverPhotoUrl: true,
+                notificationsToken: true,
               },
             },
           },
@@ -970,6 +998,7 @@ export class GameService {
                 lastName: true,
                 profilePhotoUrl: true,
                 coverPhotoUrl: true,
+                notificationsToken: true,
               },
             },
           },
@@ -982,6 +1011,7 @@ export class GameService {
         id: game.admin.id,
         team: game.adminTeam,
         status: 'APPROVED',
+        notificationsToken: game.admin.notificationsToken,
         firstName: game.admin.firstName,
         lastName: game.admin.lastName,
         profilePhotoUrl: game.admin.profilePhotoUrl,
@@ -999,6 +1029,7 @@ export class GameService {
         profilePhotoUrl: request.user.profilePhotoUrl,
         coverPhotoUrl: request.user.coverPhotoUrl,
         updatedAt: request.updatedAt,
+        notificationsToken: request.user.notificationsToken,
       })),
     );
     players = players.concat(
@@ -1011,6 +1042,7 @@ export class GameService {
         profilePhotoUrl: invitation.friend.profilePhotoUrl,
         coverPhotoUrl: invitation.friend.coverPhotoUrl,
         updatedAt: invitation.updatedAt,
+        notificationsToken: invitation.friend.notificationsToken,
       })),
     );
 
@@ -1022,56 +1054,109 @@ export class GameService {
       )
       .reverse();
 
-    players = await Promise.all(
-      players.map(async (player) => {
-        const rate = await this.prisma.playerRating.findMany({
-          where: {
-            raterId: userId,
-            gameId: gameId,
-            playerId: player.id,
-          },
-          select: {
-            raterId: true,
-          },
-        });
-        return {
-          ...player,
-          rated: rate.length >= 1,
-        };
-      }),
-    );
+    if (userId) {
+      players = await Promise.all(
+        players.map(async (player) => {
+          const rate = await this.prisma.playerRating.findMany({
+            where: {
+              raterId: userId,
+              gameId: gameId,
+              playerId: player.id,
+            },
+            select: {
+              raterId: true,
+            },
+          });
+          return {
+            ...player,
+            rated: rate.length >= 1,
+          };
+        }),
+      );
 
-    players = await Promise.all(
-      players.map(async (player) => {
-        const rate = await this.prisma.playerRating.findMany({
-          where: {
-            playerId: player.id,
-          },
-          select: {
-            performance: true,
-            fairplay: true,
-            teamPlayer: true,
-            punctuality: true,
-          },
-        });
-        var overallRating = 0;
-        for (let i = 0; i < rate.length; i++) {
-          overallRating =
-            (rate[i]['fairplay'] +
-              rate[i]['performance'] +
-              rate[i]['punctuality'] +
-              rate[i]['teamPlayer']) /
-            4;
-        }
-        if (rate.length > 0) {
-          overallRating /= rate.length;
-        }
-        return {
-          ...player,
-          rating: overallRating,
-        };
-      }),
-    );
+      players = await Promise.all(
+        players.map(async (player) => {
+          const rate = await this.prisma.playerRating.findMany({
+            where: {
+              playerId: player.id,
+            },
+            select: {
+              performance: true,
+              fairplay: true,
+              teamPlayer: true,
+              punctuality: true,
+            },
+          });
+          var overallRating = 0;
+          for (let i = 0; i < rate.length; i++) {
+            overallRating =
+              (rate[i]['fairplay'] +
+                rate[i]['performance'] +
+                rate[i]['punctuality'] +
+                rate[i]['teamPlayer']) /
+              4;
+          }
+          if (rate.length > 0) {
+            overallRating /= rate.length;
+          }
+          return {
+            ...player,
+            rating: overallRating,
+          };
+        }),
+      );
+    }
+
     return players;
+  }
+
+  async updateGameStatistics(gameId: number, dto: GameStatisticsDto) {
+    const highlights = await this.s3.checkAIVideos(
+      'detection_output/highlights',
+      gameId,
+    );
+    const videoPath = await this.s3.checkAIVideos(
+      'detection_output/concatenated',
+      gameId,
+    );
+    await this.prisma.game.update({
+      where: {
+        id: gameId,
+      },
+      data: {
+        homePoints: dto.team_1.points,
+        awayPoints: dto.team_2.points,
+        updatedHomePoints: dto.team_1.points,
+        updatedAwayPoints: dto.team_2.points,
+        homePossession: dto.team_1.possession,
+        awayPossession: dto.team_2.possession,
+        highlights,
+        videoPath: videoPath.length > 0 ? videoPath[0] : undefined,
+      },
+    });
+    await this.prisma.playerStatistics.createMany({
+      data: dto.team_1.players.map((player, index) => ({
+        ...player,
+        processedId: index + 1,
+        team: 'HOME',
+        gameId,
+      })),
+    });
+    await this.prisma.playerStatistics.createMany({
+      data: dto.team_2.players.map((player, index) => ({
+        ...player,
+        processedId: index + 12,
+        team: 'AWAY',
+        gameId,
+      })),
+    });
+    const players = await this.getPlayers(gameId);
+    this.notificationsService.sendNotification(
+      players.map((player) => player.notificationsToken),
+      'Game Statistics Available!',
+      'Your game footage has been processed, you can now check the results.',
+      `game/${gameId}`,
+    );
+    return 'success';
   }
 }

@@ -6,6 +6,7 @@ import * as S3 from 'aws-sdk/clients/s3.js';
 export class AWSS3Service {
   private s3: S3;
   private bucketName: string;
+  private aiBucketName: string;
   private nodeEnv: string;
 
   constructor(private config: ConfigService) {
@@ -16,6 +17,7 @@ export class AWSS3Service {
     });
 
     this.bucketName = this.config.get('S3_BUCKET');
+    this.aiBucketName = this.config.get('S3_AI_BUCKET');
     this.nodeEnv = this.config.get('NODE_ENV');
   }
 
@@ -47,7 +49,26 @@ export class AWSS3Service {
       });
   }
 
-  async checkExisting(directoryName: string, fileName: string) {
+  async checkAIVideos(directoryName: string, gameId: number) {
+    const params = {
+      Bucket: this.aiBucketName,
+      Prefix: `${directoryName}/${'test'}`,
+    };
+
+    return await this.s3
+      .listObjects(params, (err, data) => {
+        if (err) console.error(err);
+      })
+      .promise()
+      .then((data) =>
+        data.Contents.map(
+          (content) =>
+            `https://${this.aiBucketName}.s3.eu-north-1.amazonaws.com/${directoryName}/${content.Key}`,
+        ),
+      );
+  }
+
+  async deleteExistingImages(directoryName: string, fileName: string) {
     const params = {
       Bucket: this.bucketName,
       Prefix: `${this.nodeEnv}/${directoryName}/${fileName}`,

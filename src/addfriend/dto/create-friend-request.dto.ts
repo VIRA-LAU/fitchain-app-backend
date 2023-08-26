@@ -1,10 +1,7 @@
-import { IsNotEmpty, IsNumber } from "class-validator"
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class CreateFriendRequestDto{
-  
-    @IsNumber()
-    @IsNotEmpty()
-    friendId: number
-
-
+export class CreateFriendRequestDto {
+  @IsNumber()
+  @IsNotEmpty()
+  friendId: number;
 }

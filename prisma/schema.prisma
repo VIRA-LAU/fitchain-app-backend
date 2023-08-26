@@ -36,11 +36,11 @@ model User {
   friendRequestsSent     AddFriend[]         @relation("sender")
   friendRequestsReceived AddFriend[]         @relation("receiver")
   joinRequestsSent       RequestToJoinGame[]
-  userStatistics         HasStatistics[]
-  playerRated            PlayerRating[]      @relation("player")
-  playerRater            PlayerRating[]      @relation("rater")
+  playerStatistics       PlayerStatistics[]
+  playerRatings          PlayerRating[]      @relation("rater")
+  receivedPlayerRatings  PlayerRating[]      @relation("player")
   gamesFollowed          FollowsGame[]
-  games                  Game[]              @relation("createdGames")
+  games                  Game[]
 }
 
 model Venue {
@@ -74,27 +74,32 @@ model Branch {
 }
 
 model Game {
-  id             Int                 @id @default(autoincrement())
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
-  courtId        Int
-  adminId        Int
-  startTime      DateTime
-  endTime        DateTime
-  type           gameType            @default(Basketball)
-  adminTeam      teamType            @default(HOME)
-  highlights     String[]
-  status         gameStatus          @default(PENDING)
-  isRecording    Boolean             @default(false)
-  gamestatistics HasStatistics[]
-  gameRequests   RequestToJoinGame[]
-  gameInvitation InviteToGame[]
-  followers      FollowsGame[]
-  playerRating   PlayerRating[]
-  homeScore      Int?                @default(0)
-  awayScore      Int?                @default(0)
-  court          Court               @relation(fields: [courtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  admin          User                @relation(name: "createdGames", fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                Int                 @id @default(autoincrement())
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  courtId           Int
+  adminId           Int
+  startTime         DateTime
+  endTime           DateTime
+  type              GameType            @default(Basketball)
+  adminTeam         TeamType            @default(HOME)
+  status            GameStatus          @default(PENDING)
+  isRecording       Boolean             @default(false)
+  videoPath         String?
+  highlights        String[]
+  homePoints        Int                 @default(0)
+  updatedHomePoints Int                 @default(0)
+  homePossession    String              @default("0%")
+  awayPoints        Int                 @default(0)
+  updatedAwayPoints Int                 @default(0)
+  awayPossession    String              @default("0%")
+  gameRequests      RequestToJoinGame[]
+  gameInvitation    InviteToGame[]
+  followers         FollowsGame[]
+  playerRating      PlayerRating[]
+  playerStatistics  PlayerStatistics[]
+  court             Court               @relation(fields: [courtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  admin             User                @relation(fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model FollowsGame {
@@ -116,8 +121,8 @@ model InviteToGame {
   userId    Int
   friendId  Int
   gameId    Int
-  team      teamType           @default(HOME)
-  status    invitationApproval @default(PENDING)
+  team      TeamType           @default(HOME)
+  status    InvitationApproval @default(PENDING)
   user      User               @relation(name: "sender", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   friend    User               @relation(name: "receiver", fields: [friendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   game      Game               @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -129,7 +134,7 @@ model AddFriend {
   updatedAt DateTime           @updatedAt
   userId    Int
   friendId  Int
-  status    invitationApproval @default(PENDING)
+  status    InvitationApproval @default(PENDING)
   user      User               @relation(name: "sender", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   friend    User               @relation(name: "receiver", fields: [friendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
@@ -142,22 +147,26 @@ model RequestToJoinGame {
   updatedAt DateTime           @updatedAt
   userId    Int
   gameId    Int
-  team      teamType           @default(HOME)
-  status    invitationApproval @default(PENDING)
+  team      TeamType           @default(HOME)
+  status    InvitationApproval @default(PENDING)
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   game      Game               @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
-model HasStatistics {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    Int
-  gameId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+model PlayerStatistics {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      Int?
+  processedId Int      @default(0)
+  gameId      Int
+  team        TeamType @default(HOME)
+  scored      Int      @default(0)
+  missed      Int      @default(0)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  @@unique([userId, gameId])
+  @@unique([processedId, gameId])
 }
 
 model TimeSlot {
@@ -197,13 +206,13 @@ model PlayerRating {
   rater       User  @relation(name: "rater", fields: [raterId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
-enum invitationApproval {
+enum InvitationApproval {
   PENDING
   APPROVED
   REJECTED
 }
 
-enum gameStatus {
+enum GameStatus {
   PENDING
   APPROVED
   REJECTED
@@ -212,19 +221,13 @@ enum gameStatus {
   FINISHED
 }
 
-enum gameType {
+enum GameType {
   Basketball
   Football
   Tennis
 }
 
-enum teamType {
+enum TeamType {
   HOME
   AWAY
-}
-
-enum winnerTeamType {
-  HOME
-  AWAY
-  DRAW
 }

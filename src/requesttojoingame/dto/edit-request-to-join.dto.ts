@@ -1,4 +1,4 @@
-import { invitationApproval, teamType } from '@prisma/client';
+import { InvitationApproval, TeamType } from '@prisma/client';
 import { IsNumber, IsOptional } from 'class-validator';
 
 export class EditRequestToJoinDto {
@@ -7,8 +7,8 @@ export class EditRequestToJoinDto {
   gameId?: number;
 
   @IsOptional()
-  status?: invitationApproval;
+  status?: InvitationApproval;
 
   @IsOptional()
-  team?: teamType;
+  team?: TeamType;
 }

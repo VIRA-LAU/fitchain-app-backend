@@ -4,6 +4,6 @@ import { InvitetogameController } from './invitetogame.controller';
 
 @Module({
   providers: [InvitetogameService],
-  controllers: [InvitetogameController]
+  controllers: [InvitetogameController],
 })
 export class InvitetogameModule {}

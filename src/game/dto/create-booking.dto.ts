@@ -1,10 +1,10 @@
-import { gameType } from '@prisma/client';
+import { GameType } from '@prisma/client';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class createBookingDto {
   @IsString()
   @IsNotEmpty()
-  type: gameType;
+  type: GameType;
 
   @IsNumber()
   @IsNotEmpty()

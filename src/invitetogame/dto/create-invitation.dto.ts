@@ -1,17 +1,15 @@
-import { teamType } from "@prisma/client"
-import { IsArray, IsNotEmpty, IsNumber } from "class-validator"
+import { TeamType } from '@prisma/client';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class CreateInvitationDto{
-  
-    @IsNumber()
-    @IsNotEmpty()
-    friendId: number
+export class CreateInvitationDto {
+  @IsNumber()
+  @IsNotEmpty()
+  friendId: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    gameId: number
+  @IsNumber()
+  @IsNotEmpty()
+  gameId: number;
 
-    @IsNotEmpty()
-    team: teamType
-  
+  @IsNotEmpty()
+  team: TeamType;
 }

@@ -13,7 +13,7 @@ import {
   UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
-import { gameType } from '@prisma/client';
+import { GameType } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
 import { BranchService } from './branch.service';
 import { EditBranchDto } from './dto';
@@ -44,7 +44,7 @@ export class BranchController {
     @Query('date') date?: string,
     @Query('startTime') startTime?: string,
     @Query('endTime') endTime?: string,
-    @Query('gameType') gameType?: gameType,
+    @Query('gameType') gameType?: GameType,
     @Query('branchId') branchId?: string,
     @Query('nbOfPlayers', ParseIntPipe) nbOfPlayers?: number,
   ) {

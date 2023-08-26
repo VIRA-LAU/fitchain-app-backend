@@ -4,6 +4,6 @@ import { RequesttojoingameService } from './requesttojoingame.service';
 
 @Module({
   controllers: [RequesttojoingameController],
-  providers: [RequesttojoingameService]
+  providers: [RequesttojoingameService],
 })
 export class RequesttojoingameModule {}
