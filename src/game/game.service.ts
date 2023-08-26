@@ -76,7 +76,6 @@ export class GameService {
         endTime: true,
         homeScore: true,
         awayScore: true,
-        winnerTeam: true,
         type: true,
         court: {
           select: {
@@ -307,7 +306,6 @@ export class GameService {
         endTime: true,
         homeScore: true,
         awayScore: true,
-        winnerTeam: true,
         court: {
           include: {
             branch: {
@@ -504,19 +502,6 @@ export class GameService {
 
     if (!booking || booking.adminId != userId)
       throw new ForbiddenException('Access to edit denied');
-
-    if (
-      typeof dto.homeScore !== 'undefined' &&
-      typeof dto.awayScore !== 'undefined'
-    ) {
-      let newWinner =
-        dto.homeScore === dto.awayScore
-          ? 'DRAW'
-          : dto.homeScore > dto.awayScore
-          ? 'HOME'
-          : 'AWAY';
-      dto['winnerTeam'] = newWinner;
-    }
 
     if (dto.recordingMode) {
       dto['isRecording'] = dto.recordingMode === 'start';
@@ -726,9 +711,10 @@ export class GameService {
     const selectedFields = {
       id: true,
       type: true,
-      winnerTeam: true,
       startTime: true,
       endTime: true,
+      homeScore: true,
+      awayScore: true,
     };
     const adminActivities = (
       await this.prisma.game.findMany({
@@ -740,13 +726,18 @@ export class GameService {
           adminTeam: true,
         },
       })
-    ).map(({ id, startTime, endTime, type, winnerTeam, adminTeam }) => ({
-      gameId: id,
-      startTime,
-      endTime,
-      type,
-      isWinner: winnerTeam === 'DRAW' ? 'DRAW' : winnerTeam === adminTeam,
-    }));
+    ).map(
+      ({ id, startTime, endTime, type, adminTeam, homeScore, awayScore }) => ({
+        gameId: id,
+        startTime,
+        endTime,
+        type,
+        isWinner:
+          homeScore === awayScore
+            ? 'DRAW'
+            : adminTeam === 'HOME' && homeScore > awayScore,
+      }),
+    );
     const invitedActivities = (
       await this.prisma.game.findMany({
         where: {
@@ -770,16 +761,26 @@ export class GameService {
           },
         },
       })
-    ).map(({ id, startTime, endTime, type, winnerTeam, gameInvitation }) => ({
-      gameId: id,
-      startTime,
-      endTime,
-      type,
-      isWinner:
-        winnerTeam === 'DRAW'
-          ? 'DRAW'
-          : winnerTeam === gameInvitation.pop().team,
-    }));
+    ).map(
+      ({
+        id,
+        startTime,
+        endTime,
+        type,
+        homeScore,
+        awayScore,
+        gameInvitation,
+      }) => ({
+        gameId: id,
+        startTime,
+        endTime,
+        type,
+        isWinner:
+          homeScore === awayScore
+            ? 'DRAW'
+            : gameInvitation.pop().team === 'HOME' && homeScore > awayScore,
+      }),
+    );
     const requestedActivities = (
       await this.prisma.game.findMany({
         where: {
@@ -803,14 +804,26 @@ export class GameService {
           },
         },
       })
-    ).map(({ id, startTime, endTime, type, winnerTeam, gameRequests }) => ({
-      gameId: id,
-      startTime,
-      endTime,
-      type,
-      isWinner:
-        winnerTeam === 'DRAW' ? 'DRAW' : winnerTeam === gameRequests.pop().team,
-    }));
+    ).map(
+      ({
+        id,
+        startTime,
+        endTime,
+        type,
+        homeScore,
+        awayScore,
+        gameRequests,
+      }) => ({
+        gameId: id,
+        startTime,
+        endTime,
+        type,
+        isWinner:
+          homeScore === awayScore
+            ? 'DRAW'
+            : gameRequests.pop().team === 'HOME' && homeScore > awayScore,
+      }),
+    );
 
     return [...adminActivities, ...invitedActivities, ...requestedActivities];
   }
@@ -861,7 +874,6 @@ export class GameService {
           },
         },
         createdAt: true,
-        winnerTeam: true,
         status: true,
         gameInvitation: {
           orderBy: {
