@@ -6,8 +6,10 @@ export class GameStatisticsDto {
     points: number;
     possession: string;
     players: {
-      scored: number;
-      missed: number;
+      [key: number]: {
+        scored: number;
+        missed: number;
+      };
     }[];
   };
 
@@ -16,8 +18,10 @@ export class GameStatisticsDto {
     points: number;
     possession: string;
     players: {
-      scored: number;
-      missed: number;
+      [key: number]: {
+        scored: number;
+        missed: number;
+      };
     }[];
   };
 }

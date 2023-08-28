@@ -22,6 +22,7 @@ export class AWSS3Service {
   }
 
   // TODO: Don't save full url in the database in case S3 bucket was changed -> Save relative path.
+  // return `/${this.config.get('NODE_ENV')}/${directoryName}/${fileName}`;
   async uploadFile(
     file: Express.Multer.File,
     directoryName: string,
@@ -31,7 +32,7 @@ export class AWSS3Service {
       Bucket: this.bucketName,
       Key: `${this.nodeEnv}/${directoryName}/${fileName}`,
       Body: file.buffer,
-      ACL: 'public-read-write',
+      ACL: 'public-read',
     };
 
     const options = {
@@ -45,14 +46,13 @@ export class AWSS3Service {
       .promise()
       .then((data) => {
         return data.Location;
-        // return `/${this.config.get('NODE_ENV')}/${directoryName}/${fileName}`;
       });
   }
 
   async checkAIVideos(directoryName: string, gameId: number) {
     const params = {
       Bucket: this.aiBucketName,
-      Prefix: `${directoryName}/${'test'}`,
+      Prefix: `${directoryName}/${gameId}`,
     };
 
     return await this.s3

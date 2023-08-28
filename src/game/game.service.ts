@@ -5,18 +5,16 @@ import {
 } from '@nestjs/common';
 import { GameStatus, GameType, InvitationApproval } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { createBookingDto, editBookingDto, GameStatisticsDto } from './dto';
+import { createBookingDto, editBookingDto } from './dto';
 import { HttpService } from '@nestjs/axios';
-import { AWSS3Service } from 'src/aws-s3/aws-s3.service';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class GameService {
   constructor(
     private prisma: PrismaService,
     private httpService: HttpService,
-    private notificationsService: NotificationsService,
-    private s3: AWSS3Service,
+    private config: ConfigService,
   ) {}
 
   async getGames(userId: number, limit?: number, type?: string) {
@@ -518,7 +516,9 @@ export class GameService {
       dto['isRecording'] = dto.recordingMode === 'start';
       delete dto.recordingMode;
       this.httpService.post(
-        `http://ai-url/Inference/Run_Inference_In_Background/${bookingId}`,
+        `${this.config.get(
+          'AI_SERVER_URL',
+        )}/Inference/Run_Inference_In_Background/${bookingId}`,
       );
     }
 
@@ -1108,55 +1108,5 @@ export class GameService {
     }
 
     return players;
-  }
-
-  async updateGameStatistics(gameId: number, dto: GameStatisticsDto) {
-    const highlights = await this.s3.checkAIVideos(
-      'detection_output/highlights',
-      gameId,
-    );
-    const videoPath = await this.s3.checkAIVideos(
-      'detection_output/concatenated',
-      gameId,
-    );
-    await this.prisma.game.update({
-      where: {
-        id: gameId,
-      },
-      data: {
-        homePoints: dto.team_1.points,
-        awayPoints: dto.team_2.points,
-        updatedHomePoints: dto.team_1.points,
-        updatedAwayPoints: dto.team_2.points,
-        homePossession: dto.team_1.possession,
-        awayPossession: dto.team_2.possession,
-        highlights,
-        videoPath: videoPath.length > 0 ? videoPath[0] : undefined,
-      },
-    });
-    await this.prisma.playerStatistics.createMany({
-      data: dto.team_1.players.map((player, index) => ({
-        ...player,
-        processedId: index + 1,
-        team: 'HOME',
-        gameId,
-      })),
-    });
-    await this.prisma.playerStatistics.createMany({
-      data: dto.team_2.players.map((player, index) => ({
-        ...player,
-        processedId: index + 12,
-        team: 'AWAY',
-        gameId,
-      })),
-    });
-    const players = await this.getPlayers(gameId);
-    this.notificationsService.sendNotification(
-      players.map((player) => player.notificationsToken),
-      'Game Statistics Available!',
-      'Your game footage has been processed, you can now check the results.',
-      `game/${gameId}`,
-    );
-    return 'success';
   }
 }

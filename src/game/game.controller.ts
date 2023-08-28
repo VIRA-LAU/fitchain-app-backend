@@ -15,11 +15,11 @@ import {
 import { GameType } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
 import { JwtGaurd } from '../auth/gaurd';
-import { createBookingDto, editBookingDto, GameStatisticsDto } from './dto';
+import { createBookingDto, editBookingDto } from './dto';
 import { GameService } from './game.service';
 import { SocketGateway } from 'src/socket.gateway';
 
-// @UseGuards(JwtGaurd)
+@UseGuards(JwtGaurd)
 @Controller('games')
 export class GameController {
   constructor(
@@ -110,14 +110,6 @@ export class GameController {
   @Get('/:id')
   getGameById(@Param('id', ParseIntPipe) upcomingId: number) {
     return this.gameService.getGameById(upcomingId);
-  }
-
-  @Patch('video_processed/:id')
-  updateGameStatistics(
-    @Param('id', ParseIntPipe) gameId: number,
-    @Body() dto: GameStatisticsDto,
-  ) {
-    return this.gameService.updateGameStatistics(gameId, dto);
   }
 
   @Post('follow/:id')
