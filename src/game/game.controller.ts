@@ -15,7 +15,7 @@ import {
 import { GameType } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
 import { JwtGaurd } from '../auth/gaurd';
-import { createBookingDto, editBookingDto } from './dto';
+import { assignPlayerScoreDto, createBookingDto, editBookingDto } from './dto';
 import { GameService } from './game.service';
 import { SocketGateway } from 'src/socket.gateway';
 
@@ -142,6 +142,14 @@ export class GameController {
   ) {
     this.socketGateway.server.emit(`${dto.recordingMode}_recording`);
     return this.gameService.editBookingById(userId, gameId, dto);
+  }
+
+  @Patch('assignPlayerScore')
+  assignPlayerScore(@Body() dto: assignPlayerScoreDto) {
+    return this.gameService.assignPlayerScore(
+      dto.playerStatisticsId,
+      dto.userId,
+    );
   }
 
   @Patch(':id')

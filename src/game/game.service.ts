@@ -362,13 +362,16 @@ export class GameService {
         isRecording: true,
       },
     });
-    const playerStatistics = await this.prisma.playerStatistics.findMany({
+    const playersStatistics = await this.prisma.playerStatistics.findMany({
       where: {
         gameId,
       },
+      include: {
+        user: true,
+      },
     });
 
-    return { ...game, playerStatistics };
+    return { ...game, playersStatistics };
   }
 
   async getBookings(type?: string) {
@@ -1108,5 +1111,18 @@ export class GameService {
     }
 
     return players;
+  }
+
+  async assignPlayerScore(playerStatisticsId: number, userId: number) {
+    await this.prisma.playerStatistics.update({
+      where: {
+        id: playerStatisticsId,
+      },
+      data: {
+        userId,
+      },
+    });
+
+    return 'success';
   }
 }

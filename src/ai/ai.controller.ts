@@ -11,7 +11,6 @@ export class AIController {
     @Param('id', ParseIntPipe) gameId: number,
     @Body() dto: GameStatisticsDto,
   ) {
-    console.log(dto);
     return this.aiService.updateGameStatistics(gameId, dto);
   }
 }
