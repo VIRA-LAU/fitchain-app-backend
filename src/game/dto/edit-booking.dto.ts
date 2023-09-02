@@ -15,11 +15,11 @@ export class editBookingDto {
 
   @IsOptional()
   @IsNumber()
-  updatedHomeScore?: number;
+  updatedHomePoints?: number;
 
   @IsOptional()
   @IsNumber()
-  updatedAwayScore?: number;
+  updatedAwayPoints?: number;
 
   @IsOptional()
   @IsString()

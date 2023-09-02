@@ -68,6 +68,32 @@ export class AWSS3Service {
       );
   }
 
+  async uploadAIVideo(
+    file: Express.Multer.File,
+    directoryName: string,
+    fileName: string,
+  ) {
+    const params = {
+      Bucket: this.aiBucketName,
+      Key: `${directoryName}/${fileName}`,
+      Body: file.buffer,
+      ACL: 'public-read',
+    };
+
+    const options = {
+      partSize: 100 * 1024 * 1024,
+      queueSize: 1,
+    }; // 100 MB
+
+    // Uploading files to the bucket
+    return await this.s3
+      .upload(params, options)
+      .promise()
+      .then((data) => {
+        return data.Location;
+      });
+  }
+
   async deleteExistingImages(directoryName: string, fileName: string) {
     const params = {
       Bucket: this.bucketName,

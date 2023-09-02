@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { createBookingDto, editBookingDto } from './dto';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { AWSS3Service } from 'src/aws-s3/aws-s3.service';
 
 @Injectable()
 export class GameService {
@@ -15,6 +16,7 @@ export class GameService {
     private prisma: PrismaService,
     private httpService: HttpService,
     private config: ConfigService,
+    private s3: AWSS3Service,
   ) {}
 
   async getGames(userId: number, limit?: number, type?: string) {
@@ -518,11 +520,6 @@ export class GameService {
     if (dto.recordingMode) {
       dto['isRecording'] = dto.recordingMode === 'start';
       delete dto.recordingMode;
-      this.httpService.post(
-        `${this.config.get(
-          'AI_SERVER_URL',
-        )}/Inference/Run_Inference_In_Background/${bookingId}`,
-      );
     }
 
     return this.prisma.game.update({
@@ -1124,5 +1121,15 @@ export class GameService {
     });
 
     return 'success';
+  }
+
+  async uploadVideo(gameId: number, video: Express.Multer.File) {
+    await this.s3.uploadAIVideo(video, 'videos_input', video.originalname);
+
+    this.httpService.post(
+      `${this.config.get(
+        'AI_SERVER_URL',
+      )}/Inference/Run_Inference_In_Background/${gameId}`,
+    );
   }
 }

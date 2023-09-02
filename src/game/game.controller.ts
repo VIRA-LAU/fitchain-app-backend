@@ -10,14 +10,20 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { GameType } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
 import { JwtGaurd } from '../auth/gaurd';
-import { assignPlayerScoreDto, createBookingDto, editBookingDto } from './dto';
+import { createBookingDto, editBookingDto } from './dto';
 import { GameService } from './game.service';
 import { SocketGateway } from 'src/socket.gateway';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 
 @UseGuards(JwtGaurd)
 @Controller('games')
@@ -86,36 +92,36 @@ export class GameController {
     return this.gameService.getFollowedGames(userId, type);
   }
 
-  @Get('playerstatus/:id')
+  @Get('playerstatus/:gameId')
   getPlayerGameStatus(
     @GetUser('id') userId: number,
-    @Param('id', ParseIntPipe) gameId: number,
+    @Param('gameId', ParseIntPipe) gameId: number,
   ) {
     return this.gameService.getPlayerGameStatus(userId, gameId);
   }
 
-  @Get('players/:id')
+  @Get('players/:gameId')
   getPlayersOfGame(
     @GetUser('id') userId: number,
-    @Param('id', ParseIntPipe) gameId: number,
+    @Param('gameId', ParseIntPipe) gameId: number,
   ) {
     return this.gameService.getPlayers(gameId, userId);
   }
 
-  @Get('updates/:id')
-  getUpdates(@Param('id', ParseIntPipe) gameId: number) {
+  @Get('updates/:gameId')
+  getUpdates(@Param('gameId', ParseIntPipe) gameId: number) {
     return this.gameService.getUpdates(gameId);
   }
 
-  @Get('/:id')
-  getGameById(@Param('id', ParseIntPipe) upcomingId: number) {
+  @Get('/:gameId')
+  getGameById(@Param('gameId', ParseIntPipe) upcomingId: number) {
     return this.gameService.getGameById(upcomingId);
   }
 
-  @Post('follow/:id')
+  @Post('follow/:gameId')
   createFollowGame(
     @GetUser('id') userId: number,
-    @Param('id', ParseIntPipe) gameId: number,
+    @Param('gameId', ParseIntPipe) gameId: number,
   ) {
     return this.gameService.createFollowGame(userId, gameId);
   }
@@ -144,12 +150,22 @@ export class GameController {
     return this.gameService.editBookingById(userId, gameId, dto);
   }
 
-  @Patch('assignPlayerScore')
-  assignPlayerScore(@Body() dto: assignPlayerScoreDto) {
-    return this.gameService.assignPlayerScore(
-      dto.playerStatisticsId,
-      dto.userId,
-    );
+  @Patch('uploadVideo/:gameId')
+  @UseInterceptors(FileInterceptor('video'))
+  uploadVideo(
+    @Param('gameId', ParseIntPipe) gameId: number,
+    @UploadedFile()
+    video?: Express.Multer.File,
+  ) {
+    return this.gameService.uploadVideo(gameId, video);
+  }
+
+  @Patch('assignPlayerScore/:playerStatisticsId')
+  assignPlayerScore(
+    @Param('playerStatisticsId', ParseIntPipe) playerStatisticsId: number,
+    @Body() dto: { userId: number },
+  ) {
+    return this.gameService.assignPlayerScore(playerStatisticsId, dto.userId);
   }
 
   @Patch(':id')
