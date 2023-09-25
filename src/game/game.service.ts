@@ -493,7 +493,7 @@ export class GameService {
       const booking = await this.prisma.game.create({
         data: {
           adminId: userId,
-          status: 'APPROVED',
+          status: GameStatus.APPROVED,
           ...dto,
           startTime,
           endTime,
