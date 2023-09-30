@@ -20,11 +20,11 @@ export class EmailService {
     const mailOptions: nodemailer.SendMailOptions = {
       from: this.config.get('NODEMAILER_EMAIL'),
       to,
-      subject: 'FitChain Verification Code',
+      subject: 'FitChain Email Verification',
       attachments: [
         {
           filename: 'FitChain-Logo.png',
-          path: 'https://fitchain-bucket.s3.eu-north-1.amazonaws.com/Logo-Icon.png',
+          path: 'https://fitchain-bucket.s3.eu-north-1.amazonaws.com/logo.png',
           cid: 'fitchain-logo-favicon',
         },
       ],
@@ -59,7 +59,7 @@ export class EmailService {
               "
               align="center"
             >
-              <tr style="height: 60px; background-color: #f29c1f;">
+              <tr style="height: 60px; background-color: #F77E05;">
                 <td style="border-radius: 7px;">
                   <a
                     href="${link}"
@@ -95,7 +95,7 @@ export class EmailService {
       attachments: [
         {
           filename: 'FitChain-Logo.png',
-          path: 'http://gateway.pinata.cloud/ipfs/bafybeib6dpusybm6iwmyp5jfzjk4yknqg6gttw4marpogkqztysgatk3va/Logo-Icon.png',
+          path: 'https://fitchain-bucket.s3.eu-north-1.amazonaws.com/logo.png',
           cid: 'fitchain-logo-favicon',
         },
       ],
@@ -129,7 +129,7 @@ export class EmailService {
             "
             align="center"
           >
-            <tr style="height: 60px; background-color: #f29c1f;">
+            <tr style="height: 60px; background-color: #F77E05;">
               <td style="border-radius: 7px;">
                 <a
                   href="${link}"
