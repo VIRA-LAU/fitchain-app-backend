@@ -49,14 +49,13 @@ export class RequesttojoingameService {
   async getRecievedRequests(userId: number) {
     return this.prisma.requestToJoinGame.findMany({
       where: {
-        AND: [
-          {
-            game: {
-              adminId: userId,
-            },
+        game: {
+          adminId: userId,
+          endTime: {
+            gt: new Date(),
           },
-          { status: 'PENDING' },
-        ],
+        },
+        status: 'PENDING',
       },
       select: {
         id: true,

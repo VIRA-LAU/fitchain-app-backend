@@ -886,7 +886,7 @@ export class GameService {
   }
 
   async getUpdates(gameId: number) {
-    const updates = await this.prisma.game.findUnique({
+    var updates = await this.prisma.game.findUnique({
       where: {
         id: gameId,
       },
@@ -901,7 +901,27 @@ export class GameService {
         },
         createdAt: true,
         status: true,
+        endTime: true,
         gameInvitation: {
+          where: {
+            OR: [
+              {
+                game: {
+                  endTime: {
+                    gt: new Date(),
+                  },
+                },
+              },
+              {
+                game: {
+                  endTime: {
+                    lte: new Date(),
+                  },
+                },
+                status: InvitationApproval.APPROVED,
+              },
+            ],
+          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -928,6 +948,25 @@ export class GameService {
           },
         },
         gameRequests: {
+          where: {
+            OR: [
+              {
+                game: {
+                  endTime: {
+                    gt: new Date(),
+                  },
+                },
+              },
+              {
+                game: {
+                  endTime: {
+                    lte: new Date(),
+                  },
+                },
+                status: InvitationApproval.APPROVED,
+              },
+            ],
+          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -948,6 +987,7 @@ export class GameService {
         },
       },
     });
+
     return updates;
   }
 

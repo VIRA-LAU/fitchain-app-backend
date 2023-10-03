@@ -64,12 +64,13 @@ export class InvitetogameService {
   async getReceivedInvitations(userId: number) {
     return this.prisma.inviteToGame.findMany({
       where: {
-        AND: [
-          {
-            friendId: userId,
+        friendId: userId,
+        status: 'PENDING',
+        game: {
+          endTime: {
+            gt: new Date(),
           },
-          { status: 'PENDING' },
-        ],
+        },
       },
       select: {
         id: true,
