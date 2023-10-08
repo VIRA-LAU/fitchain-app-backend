@@ -97,4 +97,11 @@ export class AuthController {
   updatePassword(@Body() dto: UpdatePasswordDto) {
     return this.authService.updatePassword(dto.token, dto.password);
   }
+
+  @Get('support')
+  async support(@Res() res: Response) {
+    res
+      .status(200)
+      .sendFile(path.join(__dirname, './html-templates/support.html'));
+  }
 }
