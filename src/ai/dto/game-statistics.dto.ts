@@ -4,7 +4,7 @@ export class GameStatisticsDto {
   @IsOptional()
   team_1: {
     points: number;
-    possession: string;
+    // possession: string;
     players: {
       [key: number]: {
         scored: number;
@@ -16,7 +16,7 @@ export class GameStatisticsDto {
   @IsOptional()
   team_2: {
     points: number;
-    possession: string;
+    // possession: string;
     players: {
       [key: number]: {
         scored: number;
