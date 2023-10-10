@@ -33,27 +33,33 @@ export class UserService {
         playerId: userId,
       },
       select: {
-        performance: true,
-        fairplay: true,
-        teamPlayer: true,
+        defense: true,
+        offense: true,
+        general: true,
+        skill: true,
+        teamplay: true,
         punctuality: true,
       },
     });
-    var ratingCategories = [0, 0, 0, 0];
+    var ratingCategories = [0, 0, 0, 0, 0, 0];
     for (let i = 0; i < rate.length; i++) {
-      ratingCategories[0] += rate[i]['fairplay'];
-      ratingCategories[1] += rate[i]['performance'];
-      ratingCategories[2] += rate[i]['punctuality'];
-      ratingCategories[3] += rate[i]['teamPlayer'];
+      ratingCategories[0] += rate[i]['defense'];
+      ratingCategories[1] += rate[i]['offense'];
+      ratingCategories[2] += rate[i]['general'];
+      ratingCategories[3] += rate[i]['skill'];
+      ratingCategories[4] += rate[i]['teamplay'];
+      ratingCategories[5] += rate[i]['punctuality'];
     }
     user['rating'] =
       rate.length > 0
-        ? ratingCategories.reduce((a, b) => a + b, 0) / (4 * rate.length)
+        ? ratingCategories.reduce((a, b) => a + b, 0) / (6 * rate.length)
         : 0;
-    user['fairplay'] = ratingCategories[0] / rate.length;
-    user['performance'] = ratingCategories[1] / rate.length;
-    user['punctuality'] = ratingCategories[2] / rate.length;
-    user['teamPlayer'] = ratingCategories[3] / rate.length;
+    user['defense'] = ratingCategories[0] / rate.length;
+    user['offense'] = ratingCategories[1] / rate.length;
+    user['general'] = ratingCategories[2] / rate.length;
+    user['skill'] = ratingCategories[3] / rate.length;
+    user['teamplay'] = ratingCategories[4] / rate.length;
+    user['punctuality'] = ratingCategories[5] / rate.length;
     delete user.hash;
     return user;
   }

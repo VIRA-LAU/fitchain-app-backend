@@ -1121,20 +1121,24 @@ export class GameService {
               playerId: player.id,
             },
             select: {
-              performance: true,
-              fairplay: true,
-              teamPlayer: true,
+              defense: true,
+              offense: true,
+              general: true,
+              skill: true,
+              teamplay: true,
               punctuality: true,
             },
           });
           var overallRating = 0;
           for (let i = 0; i < rate.length; i++) {
             overallRating =
-              (rate[i]['fairplay'] +
-                rate[i]['performance'] +
-                rate[i]['punctuality'] +
-                rate[i]['teamPlayer']) /
-              4;
+              (rate[i]['defense'] +
+                rate[i]['offense'] +
+                rate[i]['general'] +
+                rate[i]['skill'] +
+                rate[i]['teamplay'] +
+                rate[i]['punctuality']) /
+              6;
           }
           if (rate.length > 0) {
             overallRating /= rate.length;

@@ -193,17 +193,22 @@ model Court {
 }
 
 model PlayerRating {
-  id          Int   @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   gameId      Int
   raterId     Int
   playerId    Int
-  performance Float
+  performance Float? // remove
+  teamPlayer  Float? // remove
+  fairplay    Float? // remove
+  defense     Float
+  offense     Float
+  general     Float
+  skill       Float
+  teamplay    Float
   punctuality Float
-  teamPlayer  Float
-  fairplay    Float
-  game        Game  @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  player      User  @relation(name: "player", fields: [playerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  rater       User  @relation(name: "rater", fields: [raterId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game        Game   @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  player      User   @relation(name: "player", fields: [playerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  rater       User   @relation(name: "rater", fields: [raterId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 enum InvitationApproval {
