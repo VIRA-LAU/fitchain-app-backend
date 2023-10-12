@@ -9,6 +9,7 @@ import { createBookingDto, editBookingDto } from './dto';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { AWSS3Service } from 'src/aws-s3/aws-s3.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class GameService {
@@ -1170,16 +1171,12 @@ export class GameService {
   async uploadVideo(gameId: number, video: Express.Multer.File) {
     await this.s3.uploadAIVideo(video, 'videos_input', video.originalname);
 
-    console.log('uploaded', gameId);
-    console.log(
-      `${this.config.get(
-        'AI_SERVER_URL',
-      )}/Inference/Run_Inference_In_Background/${gameId}`,
+    await firstValueFrom(
+      this.httpService.post(
+        `${this.config.get(
+          'AI_SERVER_URL',
+        )}/Inference/Run_Inference_In_Background/${gameId}`,
+      ),
     );
-    // this.httpService.post(
-    //   `${this.config.get(
-    //     'AI_SERVER_URL',
-    //   )}/Inference/Run_Inference_In_Background/${gameId}`,
-    // );
   }
 }

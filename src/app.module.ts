@@ -14,6 +14,7 @@ import { TimeslotsModule } from './timeslots/timeslots.module';
 import { MapsModule } from './maps/maps.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AWSS3Module } from './aws-s3/aws-s3.module';
+import { AIModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AWSS3Module } from './aws-s3/aws-s3.module';
     MapsModule,
     AWSS3Module,
     NotificationsModule,
+    AIModule
   ],
 })
 export class AppModule {}

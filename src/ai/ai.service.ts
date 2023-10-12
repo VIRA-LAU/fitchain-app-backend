@@ -38,23 +38,29 @@ export class AIService {
         // videoPath: videoPath.length > 0 ? videoPath[0] : undefined,
       },
     });
-    await this.prisma.playerStatistics.createMany({
-      data: dto.team_1.players.map((player, index) => ({
-        ...player[Object.keys(player)[0]],
-        processedId: index + 1,
-        team: 'HOME',
-        gameId,
-      })),
-    });
-    await this.prisma.playerStatistics.createMany({
-      data: dto.team_2.players.map((player, index) => ({
-        ...player[Object.keys(player)[0]],
-        processedId: index + 12,
-        team: 'AWAY',
-        gameId,
-      })),
-    });
+
+    if (dto.team_1.players)
+      await this.prisma.playerStatistics.createMany({
+        data: Object.keys(dto.team_1.players).map((playerKey, index) => ({
+          ...dto.team_1.players[playerKey],
+          processedId: index + 1,
+          team: 'HOME',
+          gameId,
+        })),
+      });
+
+    if (dto.team_2.players)
+      await this.prisma.playerStatistics.createMany({
+        data: Object.keys(dto.team_2.players).map((playerKey, index) => ({
+          ...dto.team_2.players[playerKey],
+          processedId: index + 12,
+          team: 'AWAY',
+          gameId,
+        })),
+      });
+
     const players = await this.gameService.getPlayers(gameId);
+
     this.notificationsService.sendNotification(
       players.map((player) => player.notificationsToken),
       'Game Statistics Available!',

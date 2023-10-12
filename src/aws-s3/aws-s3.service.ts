@@ -63,7 +63,7 @@ export class AWSS3Service {
       .then((data) =>
         data.Contents.map(
           (content) =>
-            `https://${this.aiBucketName}.s3.eu-north-1.amazonaws.com/${directoryName}/${content.Key}`,
+            `https://${this.aiBucketName}.s3.eu-north-1.amazonaws.com/${content.Key}`,
         ),
       );
   }
