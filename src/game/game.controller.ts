@@ -146,7 +146,7 @@ export class GameController {
     @Param('gameId', ParseIntPipe) gameId: number,
     @Body() dto: editBookingDto,
   ) {
-    this.socketGateway.server.emit(`${dto.recordingMode}_recording`);
+    this.socketGateway.server.emit(`${dto.recordingMode}_recording`, {data: gameId});
     return this.gameService.editBookingById(userId, gameId, dto);
   }
 
