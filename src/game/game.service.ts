@@ -1170,13 +1170,15 @@ export class GameService {
 
   async uploadVideo(gameId: number, video: Express.Multer.File) {
     await this.s3.uploadAIVideo(video, 'videos_input', video.originalname);
-
-    await firstValueFrom(
+    
+    const res = await firstValueFrom(
       this.httpService.post(
         `${this.config.get(
           'AI_SERVER_URL',
         )}/Inference/Run_Inference_In_Background/${gameId}`,
       ),
     );
+
+    console.log(res);
   }
 }
