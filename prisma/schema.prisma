@@ -11,13 +11,13 @@ datasource db {
 }
 
 model User {
-  id                     Int                 @id @default(autoincrement())
-  createdAt              DateTime            @default(now())
-  updatedAt              DateTime            @updatedAt
-  email                  String              @unique
-  emailVerified          Boolean             @default(false)
-  phoneNumber            String?             @unique
-  hash                   String              @unique
+  id                     Int                    @id @default(autoincrement())
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+  email                  String                 @unique
+  emailVerified          Boolean                @default(false)
+  phoneNumber            String?                @unique
+  hash                   String                 @unique
   firstName              String?
   lastName               String?
   description            String?
@@ -31,16 +31,18 @@ model User {
   position               String?
   rating                 Int?
   notificationsToken     String?
-  invitationsSent        InviteToGame[]      @relation("sender")
-  invitationsReceived    InviteToGame[]      @relation("receiver")
-  friendRequestsSent     AddFriend[]         @relation("sender")
-  friendRequestsReceived AddFriend[]         @relation("receiver")
+  invitationsSent        InviteToGame[]         @relation("sender")
+  invitationsReceived    InviteToGame[]         @relation("receiver")
+  friendRequestsSent     AddFriend[]            @relation("sender")
+  friendRequestsReceived AddFriend[]            @relation("receiver")
   joinRequestsSent       RequestToJoinGame[]
   playerStatistics       PlayerStatistics[]
-  playerRatings          PlayerRating[]      @relation("rater")
-  receivedPlayerRatings  PlayerRating[]      @relation("player")
+  playerRatings          PlayerRating[]         @relation("rater")
+  receivedPlayerRatings  PlayerRating[]         @relation("player")
   gamesFollowed          FollowsGame[]
   games                  Game[]
+  StatisticsGame         StatisticsGame[]
+  StatisticsGamePlayer   StatisticsGamePlayer[]
 }
 
 model Venue {
@@ -71,6 +73,41 @@ model Branch {
   notificationsToken String?
   courts             Court[]
   venue              Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model StatisticsGame {
+  id               Int                    @id @default(autoincrement())
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  admin            User                   @relation(fields: [adminId], references: [id])
+  startTime        DateTime
+  endTime          DateTime
+  type             GameType               @default(Basketball)
+  courtType        CourtType              @default(FullCourt)
+  status           StatisticsGameStatus   @default(PENDING)
+  playerStatistics StatisticsGamePlayer[]
+  adminId          Int
+}
+
+model StatisticsGamePlayer {
+  id                Int            @id @default(autoincrement())
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  gameNumber        Int            @default(1)
+  name              String         @default("")
+  team              String         @default("")
+  twoPointsMade     Int            @default(0)
+  twoPointsMissed   Int            @default(0)
+  threePointsMade   Int            @default(0)
+  threePointsMissed Int            @default(0)
+  assists           Int            @default(0)
+  blocks            Int            @default(0)
+  rebounds          Int            @default(0)
+  steals            Int            @default(0)
+  game              StatisticsGame @relation(fields: [statisticsGameId], references: [id])
+  user              User?          @relation(fields: [userId], references: [id])
+  statisticsGameId  Int
+  userId            Int?
 }
 
 model Game {
@@ -235,4 +272,15 @@ enum GameType {
 enum TeamType {
   HOME
   AWAY
+}
+
+enum StatisticsGameStatus {
+  PENDING
+  INPROGRESS
+  COMPLETE
+}
+
+enum CourtType {
+  HalfCourt
+  FullCourt
 }

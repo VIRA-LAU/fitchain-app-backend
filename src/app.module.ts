@@ -16,6 +16,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AWSS3Module } from './aws-s3/aws-s3.module';
 import { AIModule } from './ai/ai.module';
 import { BackupModule } from './backup/backup.module';
+import { StatisticsGameModule } from './statistics-game/statistics-game.module';
 
 @Module({
   imports: [
@@ -35,7 +36,8 @@ import { BackupModule } from './backup/backup.module';
     AWSS3Module,
     NotificationsModule,
     AIModule,
-    // BackupModule
+    // BackupModule,
+    StatisticsGameModule,
   ],
 })
 export class AppModule {}
