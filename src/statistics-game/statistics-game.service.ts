@@ -7,10 +7,15 @@ import { CreateStatisticsGameDto, EditStatisticsGameDto } from './dto';
 export class StatisticsGameService {
   constructor(private prisma: PrismaService) {}
 
-  async getGames(status: StatisticsGameStatus) {
+  async getGames(status?: StatisticsGameStatus[]) {
     const games = await this.prisma.statisticsGame.findMany({
       where: {
-        status,
+        status: { in: status },
+      },
+      include: {
+        admin: {
+          select: { firstName: true, lastName: true },
+        },
       },
     });
     return games;
@@ -60,15 +65,17 @@ export class StatisticsGameService {
   async editGame(gameId: number, dto: EditStatisticsGameDto) {
     const { status, playerStatistics } = dto;
 
-    for (const playerData of playerStatistics) {
+    await this.prisma.statisticsGamePlayer.deleteMany({
+      where: {
+        statisticsGameId: gameId,
+      },
+    });
+
+    for await (const playerData of playerStatistics) {
       await this.prisma.statisticsGamePlayer.create({
         data: {
           ...playerData,
-          game: {
-            connect: {
-              id: gameId,
-            },
-          },
+          statisticsGameId: gameId,
         },
       });
     }

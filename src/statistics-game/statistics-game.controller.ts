@@ -21,7 +21,7 @@ export class StatisticsGameController {
   constructor(private statisticsameService: StatisticsGameService) {}
 
   @Get()
-  getGames(@Query('status') status?: StatisticsGameStatus) {
+  getGames(@Query('status') status?: StatisticsGameStatus[]) {
     return this.statisticsameService.getGames(status);
   }
 
@@ -35,9 +35,10 @@ export class StatisticsGameController {
     return this.statisticsameService.getGameById(gameId);
   }
 
-  @Post()
+  @Post('/:userId')
   createGame(
-    @GetUser('id') userId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    // @GetUser('id') userId: number,
     @Body() dto: CreateStatisticsGameDto,
   ) {
     return this.statisticsameService.createGame(userId, dto);
@@ -48,6 +49,6 @@ export class StatisticsGameController {
     @Param('gameId', ParseIntPipe) gameId: number,
     @Body() dto: EditStatisticsGameDto,
   ) {
-    this.statisticsameService.editGame(gameId, dto);
+    return this.statisticsameService.editGame(gameId, dto);
   }
 }
