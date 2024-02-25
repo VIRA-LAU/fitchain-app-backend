@@ -10,11 +10,6 @@ export class BranchService {
 
   async getBranches() {
     let branches = await this.prisma.branch.findMany({
-      where: {
-        courts: {
-          some: {},
-        },
-      },
       select: {
         id: true,
         location: true,
@@ -59,6 +54,9 @@ export class BranchService {
               .reduce((a, b) => a + b, 0) / branch.courts.length
           : 0,
     }));
+
+    branches = branches.sort((a,b) => Number(b.allowsBooking) - Number(a.allowsBooking))
+    
     return branches;
   }
 
