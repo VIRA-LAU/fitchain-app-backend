@@ -30,11 +30,6 @@
 //     return this.statisticsameService.getGamesByUserId(userId);
 //   }
 
-//   @Get('/:gameId')
-//   getGameById(@Param('gameId', ParseIntPipe) gameId: number) {
-//     return this.statisticsameService.getGameById(gameId);
-//   }
-
 //   @Post('/:userId')
 //   createGame(
 //     @Param('userId', ParseIntPipe) userId: number,

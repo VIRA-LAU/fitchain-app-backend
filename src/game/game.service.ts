@@ -3,7 +3,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { GameStatus, GameType, InvitationApproval } from '@prisma/client';
+import { GameType, InvitationApproval } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { createBookingDto, editBookingDto } from './dto';
 import { HttpService } from '@nestjs/axios';
@@ -60,10 +60,18 @@ export class GameService {
           type === 'upcoming'
             ? {
                 endTime: { gt: new Date() },
+                status: { in: ['PENDING', 'APPROVED', 'ACTIVE'] },
               }
             : type === 'previous'
             ? {
-                endTime: { lt: new Date() },
+                OR: [
+                  {
+                    endTime: { lt: new Date() },
+                  },
+                  {
+                    status: { in: ['CANCELLED', 'FINISHED'] },
+                  },
+                ],
               }
             : {},
         ],
@@ -306,12 +314,10 @@ export class GameService {
         startTime: true,
         endTime: true,
         homePoints: true,
-        homePossession: true,
         updatedHomePoints: true,
         awayPoints: true,
-        awayPossession: true,
         updatedAwayPoints: true,
-        highlights: true,
+        status: true,
         court: {
           include: {
             branch: {
@@ -377,18 +383,53 @@ export class GameService {
     return { ...game, playersStatistics };
   }
 
+  async getGameResults(gameId: number) {
+    const game = await this.prisma.game.findFirst({
+      where: {
+        id: gameId,
+      },
+      select: {
+        id: true,
+        type: true,
+        admin: true,
+        adminTeam: true,
+        startTime: true,
+        endTime: true,
+        homePoints: true,
+        homePossession: true,
+        updatedHomePoints: true,
+        awayPoints: true,
+        awayPossession: true,
+        updatedAwayPoints: true,
+        highlights: true,
+        status: true,
+        playerStatistics: true,
+      },
+    });
+
+    return game;
+  }
+
   async getBookings(type?: string) {
     return await this.prisma.game.findMany({
       where: {
         AND: [
-          { status: GameStatus.APPROVED },
+          { status: 'APPROVED' },
           type === 'upcoming'
             ? {
                 endTime: { gt: new Date() },
+                status: { in: ['PENDING', 'APPROVED', 'ACTIVE'] },
               }
             : type === 'previous'
             ? {
-                endTime: { lt: new Date() },
+                OR: [
+                  {
+                    endTime: { lt: new Date() },
+                  },
+                  {
+                    status: { in: ['CANCELLED', 'FINISHED'] },
+                  },
+                ],
               }
             : {},
         ],
@@ -496,7 +537,7 @@ export class GameService {
       const booking = await this.prisma.game.create({
         data: {
           adminId: userId,
-          status: GameStatus.APPROVED,
+          status: 'APPROVED',
           ...dto,
           startTime,
           endTime,
@@ -561,12 +602,20 @@ export class GameService {
             ? {
                 game: {
                   endTime: { gt: new Date() },
+                  status: { in: ['PENDING', 'APPROVED', 'ACTIVE'] },
                 },
               }
             : type === 'previous'
             ? {
                 game: {
-                  endTime: { lt: new Date() },
+                  OR: [
+                    {
+                      endTime: { lt: new Date() },
+                    },
+                    {
+                      status: { in: ['CANCELLED', 'FINISHED'] },
+                    },
+                  ],
                 },
               }
             : {},

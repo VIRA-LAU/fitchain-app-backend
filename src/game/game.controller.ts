@@ -113,6 +113,11 @@ export class GameController {
     return this.gameService.getUpdates(gameId);
   }
 
+  @Get('results/:gameId')
+  getGameResults(@Param('gameId', ParseIntPipe) gameId: number) {
+    return this.gameService.getGameResults(gameId);
+  }
+
   @Get('/:gameId')
   getGameById(@Param('gameId', ParseIntPipe) upcomingId: number) {
     return this.gameService.getGameById(upcomingId);
@@ -146,7 +151,9 @@ export class GameController {
     @Param('gameId', ParseIntPipe) gameId: number,
     @Body() dto: editBookingDto,
   ) {
-    this.socketGateway.server.emit(`${dto.recordingMode}_recording`, {data: gameId});
+    this.socketGateway.server.emit(`${dto.recordingMode}_recording`, {
+      data: gameId,
+    });
     return this.gameService.editBookingById(userId, gameId, dto);
   }
 
