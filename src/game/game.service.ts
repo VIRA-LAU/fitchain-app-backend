@@ -412,28 +412,24 @@ export class GameService {
 
   async getBookings(type?: string) {
     return await this.prisma.game.findMany({
-      where: {
-        AND: [
-          { status: 'APPROVED' },
-          type === 'upcoming'
-            ? {
-                endTime: { gt: new Date() },
-                status: { in: ['PENDING', 'APPROVED', 'ACTIVE'] },
-              }
-            : type === 'previous'
-            ? {
-                OR: [
-                  {
-                    endTime: { lt: new Date() },
-                  },
-                  {
-                    status: { in: ['CANCELLED', 'FINISHED'] },
-                  },
-                ],
-              }
-            : {},
-        ],
-      },
+      where:
+        type === 'upcoming'
+          ? {
+              endTime: { gt: new Date() },
+              status: { in: ['PENDING', 'APPROVED', 'ACTIVE'] },
+            }
+          : type === 'previous'
+          ? {
+              OR: [
+                {
+                  endTime: { lt: new Date() },
+                },
+                {
+                  status: { in: ['CANCELLED', 'FINISHED'] },
+                },
+              ],
+            }
+          : {},
       orderBy:
         type === 'upcoming'
           ? { startTime: 'asc' }
