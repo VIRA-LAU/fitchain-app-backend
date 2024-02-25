@@ -10,6 +10,7 @@ export const branches = [
     managerLastName: 'Doe',
     hash: '123hash',
     emailVerified: true,
+    allowsBooking: true
   },
   {
     location: 'Jnah',
@@ -22,5 +23,6 @@ export const branches = [
     managerLastName: 'Doe',
     hash: '456hash',
     emailVerified: true,
+    allowsBooking: false
   },
 ];

@@ -22,6 +22,7 @@ export class BranchService {
         longitude: true,
         profilePhotoUrl: true,
         coverPhotoUrl: true,
+        allowsBooking: true,
         venue: {
           select: {
             name: true,
@@ -113,6 +114,7 @@ export class BranchService {
         longitude: true,
         profilePhotoUrl: true,
         coverPhotoUrl: true,
+        allowsBooking: true,
         venue: {
           select: {
             id: true,

@@ -40,6 +40,7 @@ async function main() {
         email: branchData.email,
         phoneNumber: branchData.phoneNumber,
         emailVerified: branchData.emailVerified,
+        allowsBooking: branchData.allowsBooking
       },
     });
   }

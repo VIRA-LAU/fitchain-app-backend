@@ -64,6 +64,7 @@ model Branch {
   branchPhotoUrl     String?
   profilePhotoUrl    String?
   coverPhotoUrl      String?
+  allowsBooking      Boolean  @default(false)
   email              String   @unique
   emailVerified      Boolean  @default(false)
   phoneNumber        String?  @unique
