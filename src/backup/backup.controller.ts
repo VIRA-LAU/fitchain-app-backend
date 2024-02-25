@@ -19,6 +19,22 @@ export class BackupController {
       follows: await this.prisma.followsGame.findMany(),
       playerStatistics: await this.prisma.playerStatistics.findMany(),
       playerRatings: await this.prisma.playerRating.findMany(),
-    }
+    };
+  }
+
+  @Get('/restore')
+  async restore() {
+    await this.prisma.user.createMany({ data: [] });
+    await this.prisma.venue.createMany({ data: [] });
+    await this.prisma.branch.createMany({ data: [] });
+    await this.prisma.court.createMany({ data: [] });
+    await this.prisma.timeSlot.createMany({ data: [] });
+    await this.prisma.game.createMany({ data: [] });
+    await this.prisma.inviteToGame.createMany({ data: [] });
+    await this.prisma.requestToJoinGame.createMany({ data: [] });
+    await this.prisma.followsGame.createMany({ data: [] });
+    await this.prisma.playerStatistics.createMany({ data: [] });
+    await this.prisma.playerRating.createMany({ data: [] });
+    return 'success';
   }
 }
