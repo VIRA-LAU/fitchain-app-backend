@@ -1,20 +1,20 @@
-import { CourtType, GameType } from '@prisma/client';
-import { IsNotEmpty, IsString } from 'class-validator';
+// import { CourtType, GameType } from '@prisma/client';
+// import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateStatisticsGameDto {
-  @IsString()
-  @IsNotEmpty()
-  startTime: string;
+// export class CreateStatisticsGameDto {
+//   @IsString()
+//   @IsNotEmpty()
+//   startTime: string;
 
-  @IsString()
-  @IsNotEmpty()
-  endTime: string;
+//   @IsString()
+//   @IsNotEmpty()
+//   endTime: string;
 
-  @IsString()
-  @IsNotEmpty()
-  type: GameType;
+//   @IsString()
+//   @IsNotEmpty()
+//   type: GameType;
 
-  @IsString()
-  @IsNotEmpty()
-  courtType: CourtType;
-}
+//   @IsString()
+//   @IsNotEmpty()
+//   courtType: CourtType;
+// }

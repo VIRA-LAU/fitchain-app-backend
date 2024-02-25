@@ -1,5 +1,11 @@
 import { GameType } from '@prisma/client';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class createBookingDto {
   @IsString()
@@ -7,8 +13,8 @@ export class createBookingDto {
   type: GameType;
 
   @IsNumber()
-  @IsNotEmpty()
-  courtId: number;
+  @IsOptional()
+  courtId?: number;
 
   @IsString()
   @IsNotEmpty()
@@ -17,4 +23,8 @@ export class createBookingDto {
   @IsString()
   @IsNotEmpty()
   endTime: string;
+
+  @IsBoolean()
+  @IsNotEmpty()
+  isBooked: boolean;
 }

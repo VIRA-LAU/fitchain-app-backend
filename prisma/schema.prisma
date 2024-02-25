@@ -41,8 +41,6 @@ model User {
   receivedPlayerRatings  PlayerRating[]         @relation("player")
   gamesFollowed          FollowsGame[]
   games                  Game[]
-  StatisticsGame         StatisticsGame[]
-  StatisticsGamePlayer   StatisticsGamePlayer[]
 }
 
 model Venue {
@@ -76,49 +74,15 @@ model Branch {
   venue              Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
-model StatisticsGame {
-  id               Int                    @id @default(autoincrement())
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
-  admin            User                   @relation(fields: [adminId], references: [id])
-  startTime        DateTime
-  endTime          DateTime
-  type             GameType               @default(Basketball)
-  courtType        CourtType              @default(FullCourt)
-  status           StatisticsGameStatus   @default(PENDING)
-  playerStatistics StatisticsGamePlayer[]
-  adminId          Int
-}
-
-model StatisticsGamePlayer {
-  id                Int            @id @default(autoincrement())
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  gameNumber        Int            @default(1)
-  name              String         @default("")
-  team              String         @default("")
-  twoPointsMade     Int            @default(0)
-  twoPointsMissed   Int            @default(0)
-  threePointsMade   Int            @default(0)
-  threePointsMissed Int            @default(0)
-  assists           Int            @default(0)
-  blocks            Int            @default(0)
-  rebounds          Int            @default(0)
-  steals            Int            @default(0)
-  game              StatisticsGame @relation(fields: [statisticsGameId], references: [id])
-  user              User?          @relation(fields: [userId], references: [id])
-  statisticsGameId  Int
-  userId            Int?
-}
-
 model Game {
   id                Int                 @id @default(autoincrement())
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
-  courtId           Int
+  courtId           Int?
   adminId           Int
   startTime         DateTime
   endTime           DateTime
+  isBooked          Boolean
   type              GameType            @default(Basketball)
   adminTeam         TeamType            @default(HOME)
   status            GameStatus          @default(PENDING)
@@ -136,7 +100,7 @@ model Game {
   followers         FollowsGame[]
   playerRating      PlayerRating[]
   playerStatistics  PlayerStatistics[]
-  court             Court               @relation(fields: [courtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  court             Court?              @relation(fields: [courtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   admin             User                @relation(fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
@@ -192,17 +156,27 @@ model RequestToJoinGame {
 }
 
 model PlayerStatistics {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  userId      Int?
-  processedId Int      @default(0)
-  gameId      Int
-  team        TeamType @default(HOME)
-  scored      Int      @default(0)
-  missed      Int      @default(0)
-  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                Int      @id @default(autoincrement())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  userId            Int?
+  processedId       Int      @default(0)
+  gameId            Int
+  team              TeamType @default(HOME)
+  scored            Int      @default(0)
+  missed            Int      @default(0)
+  gameNumber        Int      @default(1)
+  name              String   @default("")
+  twoPointsMade     Int      @default(0)
+  twoPointsMissed   Int      @default(0)
+  threePointsMade   Int      @default(0)
+  threePointsMissed Int      @default(0)
+  assists           Int      @default(0)
+  blocks            Int      @default(0)
+  rebounds          Int      @default(0)
+  steals            Int      @default(0)
+  user              User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game              Game     @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([processedId, gameId])
 }

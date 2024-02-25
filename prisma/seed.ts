@@ -40,7 +40,7 @@ async function main() {
         email: branchData.email,
         phoneNumber: branchData.phoneNumber,
         emailVerified: branchData.emailVerified,
-        allowsBooking: branchData.allowsBooking
+        allowsBooking: branchData.allowsBooking,
       },
     });
   }
@@ -79,6 +79,7 @@ async function main() {
         status: 'APPROVED',
         startTime: gameData.startTime,
         endTime: gameData.endTime,
+        isBooked: gameData.isBooked,
       },
     });
   }

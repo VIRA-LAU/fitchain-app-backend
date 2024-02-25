@@ -461,35 +461,37 @@ export class GameService {
     const startTime = new Date(dto.startTime);
     const endTime = new Date(dto.endTime);
 
-    const existingBooking = await this.prisma.game.findFirst({
-      where: {
-        OR: [
-          {
-            startTime: { lte: startTime },
-            endTime: { gte: endTime },
-          },
-          {
-            startTime: { gte: startTime },
-            endTime: { lte: endTime },
-          },
-          {
-            AND: [
-              { startTime: { lte: startTime } },
-              { endTime: { lte: endTime } },
-              { endTime: { gt: startTime } },
+    const existingBooking = dto.courtId
+      ? await this.prisma.game.findFirst({
+          where: {
+            OR: [
+              {
+                startTime: { lte: startTime },
+                endTime: { gte: endTime },
+              },
+              {
+                startTime: { gte: startTime },
+                endTime: { lte: endTime },
+              },
+              {
+                AND: [
+                  { startTime: { lte: startTime } },
+                  { endTime: { lte: endTime } },
+                  { endTime: { gt: startTime } },
+                ],
+              },
+              {
+                AND: [
+                  { startTime: { gte: startTime } },
+                  { startTime: { lt: endTime } },
+                  { endTime: { gte: endTime } },
+                ],
+              },
             ],
+            courtId: dto.courtId,
           },
-          {
-            AND: [
-              { startTime: { gte: startTime } },
-              { startTime: { lt: endTime } },
-              { endTime: { gte: endTime } },
-            ],
-          },
-        ],
-        courtId: dto.courtId,
-      },
-    });
+        })
+      : undefined;
     if (!existingBooking) {
       const booking = await this.prisma.game.create({
         data: {
@@ -1170,7 +1172,7 @@ export class GameService {
 
   async uploadVideo(gameId: number, video: Express.Multer.File) {
     await this.s3.uploadAIVideo(video, 'videos_input', video.originalname);
-    
+
     const res = await firstValueFrom(
       this.httpService.post(
         `${this.config.get(
