@@ -11,13 +11,13 @@ datasource db {
 }
 
 model User {
-  id                     Int                    @id @default(autoincrement())
-  createdAt              DateTime               @default(now())
-  updatedAt              DateTime               @updatedAt
-  email                  String                 @unique
-  emailVerified          Boolean                @default(false)
-  phoneNumber            String?                @unique
-  hash                   String                 @unique
+  id                     Int                 @id @default(autoincrement())
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  email                  String              @unique
+  emailVerified          Boolean             @default(false)
+  phoneNumber            String?             @unique
+  hash                   String              @unique
   firstName              String?
   lastName               String?
   description            String?
@@ -31,14 +31,14 @@ model User {
   position               String?
   rating                 Int?
   notificationsToken     String?
-  invitationsSent        InviteToGame[]         @relation("sender")
-  invitationsReceived    InviteToGame[]         @relation("receiver")
-  friendRequestsSent     AddFriend[]            @relation("sender")
-  friendRequestsReceived AddFriend[]            @relation("receiver")
+  invitationsSent        InviteToGame[]      @relation("sender")
+  invitationsReceived    InviteToGame[]      @relation("receiver")
+  friendRequestsSent     AddFriend[]         @relation("sender")
+  friendRequestsReceived AddFriend[]         @relation("receiver")
   joinRequestsSent       RequestToJoinGame[]
   playerStatistics       PlayerStatistics[]
-  playerRatings          PlayerRating[]         @relation("rater")
-  receivedPlayerRatings  PlayerRating[]         @relation("player")
+  playerRatings          PlayerRating[]      @relation("rater")
+  receivedPlayerRatings  PlayerRating[]      @relation("player")
   gamesFollowed          FollowsGame[]
   games                  Game[]
 }
@@ -85,7 +85,7 @@ model Game {
   isBooked          Boolean
   type              GameType            @default(Basketball)
   adminTeam         TeamType            @default(HOME)
-  status            GameStatus          @default(PENDING)
+  status            GameStatus          @default(UPCOMING)
   isRecording       Boolean             @default(false)
   videoPath         String?
   highlights        String[]
@@ -230,12 +230,13 @@ enum InvitationApproval {
 }
 
 enum GameStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  ACTIVE
+  PAYMENTPENDING
+  PAYMENTREJECTED
+  UPCOMING
+  COMPLETE
   CANCELLED
-  FINISHED
+  RESULTSPENDING
+  RESULTSPROCESSED
 }
 
 enum GameType {

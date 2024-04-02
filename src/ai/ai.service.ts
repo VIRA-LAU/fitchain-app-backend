@@ -36,6 +36,7 @@ export class AIService {
         // awayPossession: dto.team_2.possession,
         highlights,
         // videoPath: videoPath.length > 0 ? videoPath[0] : undefined,
+        status: 'RESULTSPROCESSED',
       },
     });
 

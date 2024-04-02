@@ -76,7 +76,7 @@ async function main() {
       data: {
         admin: { connect: { id: gameData.adminId } },
         court: { connect: { id: gameData.courtId } },
-        status: 'APPROVED',
+        status: gameData.status,
         startTime: gameData.startTime,
         endTime: gameData.endTime,
         isBooked: gameData.isBooked,

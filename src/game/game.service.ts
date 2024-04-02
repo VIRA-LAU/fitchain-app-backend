@@ -3,7 +3,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { GameType, InvitationApproval } from '@prisma/client';
+import { GameStatus, GameType, InvitationApproval } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { createBookingDto, editBookingDto } from './dto';
 import { HttpService } from '@nestjs/axios';
@@ -60,7 +60,7 @@ export class GameService {
           type === 'upcoming'
             ? {
                 endTime: { gt: new Date() },
-                status: { in: ['PENDING', 'APPROVED', 'ACTIVE'] },
+                status: GameStatus.UPCOMING,
               }
             : type === 'previous'
             ? {
@@ -69,7 +69,14 @@ export class GameService {
                     endTime: { lt: new Date() },
                   },
                   {
-                    status: { in: ['CANCELLED', 'FINISHED'] },
+                    status: {
+                      in: [
+                        'CANCELLED',
+                        'COMPLETE',
+                        'RESULTSPENDING',
+                        'RESULTSPROCESSED',
+                      ],
+                    },
                   },
                 ],
               }
@@ -416,7 +423,7 @@ export class GameService {
         type === 'upcoming'
           ? {
               endTime: { gt: new Date() },
-              status: { in: ['PENDING', 'APPROVED', 'ACTIVE'] },
+              status: GameStatus.UPCOMING,
             }
           : type === 'previous'
           ? {
@@ -425,7 +432,14 @@ export class GameService {
                   endTime: { lt: new Date() },
                 },
                 {
-                  status: { in: ['CANCELLED', 'FINISHED'] },
+                  status: {
+                    in: [
+                      'CANCELLED',
+                      'COMPLETE',
+                      'RESULTSPENDING',
+                      'RESULTSPROCESSED',
+                    ],
+                  },
                 },
               ],
             }
@@ -533,7 +547,7 @@ export class GameService {
       const booking = await this.prisma.game.create({
         data: {
           adminId: userId,
-          status: 'APPROVED',
+          status: GameStatus.UPCOMING,
           ...dto,
           startTime,
           endTime,
@@ -598,7 +612,7 @@ export class GameService {
             ? {
                 game: {
                   endTime: { gt: new Date() },
-                  status: { in: ['PENDING', 'APPROVED', 'ACTIVE'] },
+                  status: GameStatus.UPCOMING,
                 },
               }
             : type === 'previous'
@@ -609,7 +623,14 @@ export class GameService {
                       endTime: { lt: new Date() },
                     },
                     {
-                      status: { in: ['CANCELLED', 'FINISHED'] },
+                      status: {
+                        in: [
+                          'CANCELLED',
+                          'COMPLETE',
+                          'RESULTSPENDING',
+                          'RESULTSPROCESSED',
+                        ],
+                      },
                     },
                   ],
                 },
@@ -1218,6 +1239,18 @@ export class GameService {
   async uploadVideo(gameId: number, video: Express.Multer.File) {
     await this.s3.uploadAIVideo(video, 'videos_input', video.originalname);
 
+    await this.prisma.game.update({
+      where: {
+        id: gameId,
+      },
+      data: {
+        videoPath: `https://${this.config.get(
+          'S3_AI_BUCKET',
+        )}.s3.eu-north-1.amazonaws.com/videos_input/${video.originalname}`,
+        status: 'RESULTSPENDING',
+      },
+    });
+
     const res = await firstValueFrom(
       this.httpService.post(
         `${this.config.get(
@@ -1225,7 +1258,5 @@ export class GameService {
         )}/Inference/Run_Inference_In_Background/${gameId}`,
       ),
     );
-
-    console.log(res);
   }
 }
