@@ -18,6 +18,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123
       POSTGRES_DB: nest
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
   test-db:
     image: postgres:13
     ports:
@@ -26,3 +28,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123
       POSTGRES_DB: nest
+    volumes:
+      - postgres_data_test:/var/lib/postgresql/data
+volumes:
+  postgres_data_dev:
+  postgres_data_test:
