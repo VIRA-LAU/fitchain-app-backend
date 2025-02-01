@@ -3,6 +3,8 @@ services:
   nestjs-backend:
     image: fitchain-nestjs-backend
     build: .
+    volumes:
+      - ./src:/app/src
     ports:
       - 3000:3000
     depends_on:
@@ -11,7 +13,7 @@ services:
   dev-db:
     image: postgres:13
     ports:
-      - 5434:5432
+      - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123

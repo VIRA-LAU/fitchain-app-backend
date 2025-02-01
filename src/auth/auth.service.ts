@@ -37,7 +37,7 @@ export class AuthService {
         lastName: dto.lastName,
         hash,
         notificationsToken: dto.notificationsToken || undefined,
-        emailVerified: false,
+        emailVerified: true, // TODO: Change to false
       },
     });
 
