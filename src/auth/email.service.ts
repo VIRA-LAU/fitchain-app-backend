@@ -7,13 +7,13 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor(private config: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      service: 'hotmail',
-      auth: {
-        user: this.config.get('NODEMAILER_EMAIL'),
-        pass: this.config.get('NODEMAILER_PASSWORD'),
-      },
-    });
+    // this.transporter = nodemailer.createTransport({
+    //   service: 'hotmail',
+    //   auth: {
+    //     user: this.config.get('NODEMAILER_EMAIL'),
+    //     pass: this.config.get('NODEMAILER_PASSWORD'),
+    //   },
+    // });
   }
 
   async sendVerificationEmail(to: string, link: string): Promise<void> {
@@ -84,7 +84,7 @@ export class EmailService {
       `,
     };
 
-    await this.transporter.sendMail(mailOptions);
+    // await this.transporter.sendMail(mailOptions);
   }
 
   async sendPasswordResetEmail(to: string, link: string): Promise<void> {
@@ -153,6 +153,6 @@ export class EmailService {
     </table>`,
     };
 
-    await this.transporter.sendMail(mailOptions);
+    // await this.transporter.sendMail(mailOptions);
   }
 }
