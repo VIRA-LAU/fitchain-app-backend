@@ -3,10 +3,12 @@ FROM node:20-alpine
 # Open SSL is required for Prisma to work
 RUN apk add --no-cache openssl
 
-COPY . /app
 WORKDIR /app
 
+COPY package.json .
 RUN npm install
+
+COPY . .
 
 RUN sed -i 's/localhost/dev-db/g' .env
 RUN sed -i 's/localhost/test-db/g' .env.test
