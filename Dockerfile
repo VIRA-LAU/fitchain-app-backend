@@ -5,13 +5,12 @@ RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-COPY package.json .
-RUN npm install
-
 COPY . .
 
 RUN sed -i 's/localhost/dev-db/g' .env
 RUN sed -i 's/localhost/test-db/g' .env.test
+
+RUN npm install
 
 CMD [ "/bin/sh", "-c", " \
     npm run prisma:dev:deploy && \
