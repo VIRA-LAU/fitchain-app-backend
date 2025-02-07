@@ -1251,11 +1251,15 @@ export class GameService {
       },
     });
 
+    const ai_url = `${this.config.get(
+      'AI_SERVER_URL',
+    )}/Inference/Run_Inference_In_Background/${gameId}`
+
+    console.log("ai_url", ai_url);
+
     const res = await firstValueFrom(
       this.httpService.post(
-        `${this.config.get(
-          'AI_SERVER_URL',
-        )}/Inference/Run_Inference_In_Background/${gameId}`,
+        ai_url
       ),
     );
   }
