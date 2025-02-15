@@ -1253,9 +1253,7 @@ export class GameService {
 
     const ai_url = `${this.config.get(
       'AI_SERVER_URL',
-    )}/Inference/Pose_Estimation?path=https://${this.config.get(
-      'S3_AI_BUCKET',
-    )}.s3.eu-north-1.amazonaws.com/videos_input/${video.originalname}`;
+    )}/Inference/Pose_Estimation/${gameId}`;
 
     console.log('ai_url', ai_url);
     const res = await firstValueFrom(this.httpService.post(ai_url));
