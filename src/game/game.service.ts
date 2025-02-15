@@ -1253,14 +1253,11 @@ export class GameService {
 
     const ai_url = `${this.config.get(
       'AI_SERVER_URL',
-    )}/Inference/Run_Inference_In_Background/${gameId}`
+    )}/Inference/Pose_Estimation?path=https://${this.config.get(
+      'S3_AI_BUCKET',
+    )}.s3.eu-north-1.amazonaws.com/videos_input/${video.originalname}`;
 
-    console.log("ai_url", ai_url);
-
-    const res = await firstValueFrom(
-      this.httpService.post(
-        ai_url
-      ),
-    );
+    console.log('ai_url', ai_url);
+    const res = await firstValueFrom(this.httpService.post(ai_url));
   }
 }

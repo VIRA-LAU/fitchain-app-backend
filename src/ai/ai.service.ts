@@ -23,6 +23,7 @@ export class AIService {
     //   'detection_output/concatenated',
     //   gameId,
     // );
+    console.log('Updating game statistics', gameId, dto);
     await this.prisma.game.update({
       where: {
         id: gameId,
