@@ -1253,7 +1253,7 @@ export class GameService {
 
     const ai_url = `${this.config.get(
       'AI_SERVER_URL',
-    )}/Inference/Pose_Estimation/${gameId}`;
+    )}/Inference/Run_Inference_In_Background/${gameId}`;
 
     console.log('ai_url', ai_url);
     const res = await firstValueFrom(this.httpService.post(ai_url));
