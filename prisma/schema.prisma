@@ -91,10 +91,12 @@ model Game {
   highlights        String[]
   homePoints        Int                 @default(0)
   updatedHomePoints Int                 @default(0)
-  homePossession    String              @default("0%")
+  homePossession    Int                 @default(0)
   awayPoints        Int                 @default(0)
   updatedAwayPoints Int                 @default(0)
-  awayPossession    String              @default("0%")
+  awayPossession    Int                 @default(0)
+  totalPasses       Int                 @default(0)
+  totalAssists      Int                 @default(0)
   gameRequests      RequestToJoinGame[]
   gameInvitation    InviteToGame[]
   followers         FollowsGame[]
@@ -165,6 +167,7 @@ model PlayerStatistics {
   team              TeamType @default(HOME)
   scored            Int      @default(0)
   missed            Int      @default(0)
+  accuracy          Float    @default(0.0)
   gameNumber        Int      @default(1)
   name              String   @default("")
   twoPointsMade     Int      @default(0)

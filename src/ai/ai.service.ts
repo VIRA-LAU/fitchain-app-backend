@@ -19,11 +19,10 @@ export class AIService {
       'detection_output/highlights',
       gameId,
     );
-    // const videoPath = await this.s3.checkAIVideos(
-    //   'detection_output/concatenated',
-    //   gameId,
-    // );
-    console.log('Updating game statistics', gameId, dto);
+    const videoPath = await this.s3.checkAIVideos(
+      'detection_output/concatenated',
+      gameId,
+    );
     await this.prisma.game.update({
       where: {
         id: gameId,
@@ -33,32 +32,48 @@ export class AIService {
         awayPoints: dto.team_2.points,
         updatedHomePoints: dto.team_1.points,
         updatedAwayPoints: dto.team_2.points,
-        // homePossession: dto.team_1.possession,
-        // awayPossession: dto.team_2.possession,
+        homePossession: dto.team_1.possession,
+        awayPossession: dto.team_2.possession,
+        totalPasses: dto.total_passes,
+        totalAssists: dto.total_assists,
         highlights,
-        // videoPath: videoPath.length > 0 ? videoPath[0] : undefined,
+        videoPath: videoPath.length > 0 ? videoPath[0] : undefined,
         status: 'RESULTSPROCESSED',
       },
     });
 
     if (dto.team_1.players)
       await this.prisma.playerStatistics.createMany({
-        data: Object.keys(dto.team_1.players).map((playerKey, index) => ({
-          ...dto.team_1.players[playerKey],
-          processedId: index + 1,
-          team: 'HOME',
-          gameId,
-        })),
+        data: Object.keys(dto.team_1.players).map((playerKey) => {
+          const player = dto.team_1.players[playerKey];
+          return {
+            gameId,
+            team: 'HOME',
+            processedId: parseInt(playerKey),
+            twoPointsMade: player['2points'],
+            threePointsMade: player['3points'],
+            scored: player['shotsmade'],
+            missed: player['shotsmissed'],
+            accuracy: player['shots_accuracy'],
+          };
+        }),
       });
 
     if (dto.team_2.players)
       await this.prisma.playerStatistics.createMany({
-        data: Object.keys(dto.team_2.players).map((playerKey, index) => ({
-          ...dto.team_2.players[playerKey],
-          processedId: index + 12,
-          team: 'AWAY',
-          gameId,
-        })),
+        data: Object.keys(dto.team_2.players).map((playerKey) => {
+          const player = dto.team_2.players[playerKey];
+          return {
+            gameId,
+            team: 'AWAY',
+            processedId: parseInt(playerKey),
+            twoPointsMade: player['2points'],
+            threePointsMade: player['3points'],
+            scored: player['shotsmade'],
+            missed: player['shotsmissed'],
+            accuracy: player['shots_accuracy'],
+          };
+        }),
       });
 
     const players = await this.gameService.getPlayers(gameId);

@@ -409,6 +409,7 @@ export class GameService {
         awayPossession: true,
         updatedAwayPoints: true,
         highlights: true,
+        videoPath: true,
         status: true,
         playerStatistics: true,
       },
@@ -1255,7 +1256,6 @@ export class GameService {
       'AI_SERVER_URL',
     )}/Inference/Run_Inference_In_Background/${gameId}`;
 
-    console.log('ai_url', ai_url);
     const res = await firstValueFrom(this.httpService.post(ai_url));
   }
 }
