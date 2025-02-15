@@ -36,8 +36,9 @@ export class NotificationsService {
         try {
           let ticketChunk = await this.expo.sendPushNotificationsAsync(chunk);
           tickets.push(...ticketChunk);
+          console.log('sent notifications', ticketChunk);
         } catch (error) {
-          console.error(error);
+          console.error('error sending notification', error);
         }
       }
     })();

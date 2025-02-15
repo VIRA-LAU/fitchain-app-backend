@@ -165,6 +165,7 @@ export class InvitetogameService {
         },
       },
     });
+    console.log('sending invitation to', invitation.friend.notificationsToken);
     this.notificationsService.sendNotification(
       [invitation.friend.notificationsToken],
       'Game Invitation',
@@ -215,13 +216,18 @@ export class InvitetogameService {
         },
       },
     });
-    if (dto.status && dto.status === 'APPROVED')
+    if (dto.status && dto.status === 'APPROVED') {
+      console.log(
+        'sending notification to',
+        invitationResponse.user.notificationsToken,
+      );
       this.notificationsService.sendNotification(
         [invitationResponse.user.notificationsToken],
         'Invitation Accepted',
         `${invitationResponse.friend.firstName} ${invitationResponse.friend.lastName} accepted your game invitation.`,
         `game/${invitationResponse.game.id}`,
       );
+    }
     return { result: 'success' };
   }
 
