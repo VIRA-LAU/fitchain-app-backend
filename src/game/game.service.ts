@@ -324,6 +324,8 @@ export class GameService {
         updatedHomePoints: true,
         awayPoints: true,
         updatedAwayPoints: true,
+        totalPasses: true,
+        totalAssists: true,
         status: true,
         court: {
           include: {
@@ -412,6 +414,8 @@ export class GameService {
         videoPath: true,
         status: true,
         playerStatistics: true,
+        totalPasses: true,
+        totalAssists: true,
       },
     });
 
