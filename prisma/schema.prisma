@@ -168,6 +168,7 @@ model PlayerStatistics {
   scored            Int      @default(0)
   missed            Int      @default(0)
   accuracy          Float    @default(0.0)
+  scorePerFrame     String[] @default([])
   gameNumber        Int      @default(1)
   name              String   @default("")
   twoPointsMade     Int      @default(0)

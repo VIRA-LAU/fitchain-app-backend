@@ -15,5 +15,5 @@ RUN npm install
 CMD [ "/bin/sh", "-c", " \
     npm run prisma:dev:deploy && \
     npm run prisma:dev:load && \
-    npx prisma migrate dev && \
+    npx prisma migrate deploy && \
     npm start" ]

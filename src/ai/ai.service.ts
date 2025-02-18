@@ -46,6 +46,9 @@ export class AIService {
       await this.prisma.playerStatistics.createMany({
         data: Object.keys(dto.team_1.players).map((playerKey) => {
           const player = dto.team_1.players[playerKey];
+          const scorePerFrame = Object.keys(player.scorePerFrame).map(
+            (frameKey) => `${frameKey}: ${player.scorePerFrame[frameKey]}`,
+          );
           return {
             gameId,
             team: 'HOME',
@@ -55,6 +58,7 @@ export class AIService {
             scored: player['shotsmade'],
             missed: player['shotsmissed'],
             accuracy: player['shots_accuracy'],
+            scorePerFrame,
           };
         }),
       });
